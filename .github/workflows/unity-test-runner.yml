@@ -1,12 +1,7 @@
 name: 📊 Unity Test Runner
 
 on:
-  workflow_call:
-    inputs:
-      testMode:
-        description: "Unity test mode to run (EditMode or PlayMode)"
-        required: true
-        type: string
+  workflow_dispatch:
 
 jobs:
   run-tests:
