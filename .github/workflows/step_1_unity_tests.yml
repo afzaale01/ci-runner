@@ -44,14 +44,14 @@ jobs:
   upload-license:
     name: ♻️ Upload Unity License
     needs: detect-tests
-    if: ${{ needs.detect-tests.outputs.has_editmode == 'true' || needs.detect-tests.outputs.has_playmode == 'true' }}
+    if: needs.detect-tests.outputs.has_editmode == 'true' || needs.detect-tests.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-license-upload.yml
     secrets: inherit
 
   run-editmode:
     name: 🧪 EditMode Tests
     needs: [upload-license, detect-tests]
-    if: ${{ needs.detect-tests.outputs.has_editmode == 'true' }}
+    if: needs.detect-tests.outputs.has_editmode == 'true'
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: EditMode
@@ -60,7 +60,7 @@ jobs:
   run-playmode:
     name: 🎮 PlayMode Tests
     needs: [upload-license, detect-tests]
-    if: ${{ needs.detect-tests.outputs.has_playmode == 'true' }}
+    if: needs.detect-tests.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: PlayMode
