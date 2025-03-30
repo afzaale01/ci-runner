@@ -10,7 +10,7 @@ on:
 
 jobs:
   run-tests:
-    name: Run ${{ inputs.testMode }} Tests
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
