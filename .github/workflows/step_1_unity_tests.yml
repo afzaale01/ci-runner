@@ -18,17 +18,18 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
-      - name: Upload Unity License File
-        run: |
-          LICENSE_PATH="$HOME/.local/share/unity3d/Unity/Unity_lic.ulf"
-          if [ -f "$LICENSE_PATH" ]; then
-            echo "✅ License file found, uploading..."
-            mkdir -p license
-            cp "$LICENSE_PATH" license/
-          else
-            echo "❌ License file not found"
-            exit 1
-          fi
+    - name: Upload Unity License File
+      run: |
+        echo "🔍 Searching for license file..."
+        FOUND=$(find $HOME -type f -name 'Unity_lic.ulf' | head -n 1)
+        if [ -z "$FOUND" ]; then
+          echo "❌ License file not found"
+          exit 1
+        else
+          echo "✅ Found at $FOUND"
+          mkdir -p license
+          cp "$FOUND" license/
+        fi
 
       - name: Upload License Artifact
         uses: actions/upload-artifact@v4
