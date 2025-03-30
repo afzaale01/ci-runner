@@ -16,42 +16,15 @@ on:
       - 'Tests/**'
 
 jobs:
-  detect-tests:
-    name: 🔍 Detect Test Types
-    runs-on: ubuntu-latest
-    outputs:
-      has_editmode: ${{ steps.editmode-check.outputs.found }}
-      has_playmode: ${{ steps.playmode-check.outputs.found }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - id: editmode-check
-        run: |
-          if [ -d "Assets/Tests/Editor" ] && find Assets/Tests/Editor -name '*.cs' | grep -q .; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
-      - id: playmode-check
-        run: |
-          if [ -d "Assets/Tests/PlayMode" ] && find Assets/Tests/PlayMode -name '*.cs' | grep -q .; then
-            echo "found=true" >> $GITHUB_OUTPUT
-          else
-            echo "found=false" >> $GITHUB_OUTPUT
-          fi
-
   upload-license:
     name: ♻️ Upload Unity License
-    needs: detect-tests
-    if: needs.detect-tests.outputs.has_editmode == 'true' || needs.detect-tests.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-license-upload.yml
     secrets: inherit
 
   run-editmode:
     name: 🧪 EditMode Tests
-    needs: [upload-license, detect-tests]
-    if: needs.detect-tests.outputs.has_editmode == 'true'
+    needs: upload-license
+    if: needs.upload-license.result == 'success' && <your other condition>
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: EditMode
@@ -59,9 +32,10 @@ jobs:
 
   run-playmode:
     name: 🎮 PlayMode Tests
-    needs: [upload-license, detect-tests]
-    if: needs.detect-tests.outputs.has_playmode == 'true'
+    needs: upload-license
+    if: needs.upload-license.result == 'success' && <your other condition>
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: PlayMode
     secrets: inherit
+
