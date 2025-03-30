@@ -57,7 +57,7 @@ jobs:
 
       - name: Upload ${{ inputs.testMode }} Test Results
         uses: actions/upload-artifact@v4
-        if: failure() && steps.run-tests.outputs.artifactsPath != ''
+        if: steps.run-tests.outputs.artifactsPath != ''
         with:
           name: ${{ inputs.testMode }} Test Results
           path: ${{ steps.run-tests.outputs.artifactsPath }}
