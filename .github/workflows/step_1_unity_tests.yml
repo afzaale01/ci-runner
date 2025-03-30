@@ -12,12 +12,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Cache Unity Activation
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/unity3d/Unity
+          key: UnityActivation-${{ runner.os }}
+
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
 
   run-editmode:
     needs: activate-unity
