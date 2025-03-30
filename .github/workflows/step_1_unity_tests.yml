@@ -53,10 +53,12 @@ jobs:
           fi
 
       - name: Upload License Artifact
+        if: steps.check-edit.outputs.found == 'true' || steps.check-play.outputs.found == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: unity-license
           path: license/Unity_lic.ulf
+          retention-days: 1
 
   run-editmode:
     name: Run EditMode Tests
