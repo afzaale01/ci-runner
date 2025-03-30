@@ -61,6 +61,14 @@ jobs:
           path: ${{ steps.run-tests.outputs.artifactsPath }}
           retention-days: 3
 
+      - name: Upload Code Coverage Report
+        uses: actions/upload-artifact@v4
+        if: success() && steps.run-tests.outputs.artifactsPath != ''
+        with:
+          name: Code Coverage
+          path: ${{ steps.run-tests.outputs.artifactsPath }}/**/CoverageResults
+          retention-days: 3
+
       - name: Check for Test Results
         if: failure()
         run: |
