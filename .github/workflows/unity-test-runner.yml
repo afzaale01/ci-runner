@@ -30,11 +30,11 @@ jobs:
       - name: Git LFS Pull
         run: git lfs pull
 
-      - name: Restore Unity License Cache
-        uses: actions/cache@v4
+      - name: Download Unity License Artifact
+        uses: actions/download-artifact@v4
         with:
+          name: unity-license
           path: ~/.local/share/unity3d/Unity
-          key: unity-activation-${{ github.run_id }}
 
       - name: Cache Unity Library
         uses: actions/cache@v4

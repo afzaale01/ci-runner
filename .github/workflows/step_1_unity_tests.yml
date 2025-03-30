@@ -1,4 +1,3 @@
-# .github/workflows/test-unity-tests.yml
 name: 🧪 Test Reusable Unity Test Runner
 
 on:
@@ -12,12 +11,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache Unity Activation
-        uses: actions/cache@v4
-        with:
-          path: ~/.local/share/unity3d/Unity
-          key: UnityActivation-${{ runner.os }}
-
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
         env:
@@ -25,14 +18,34 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
+      - name: Upload Unity License File
+        run: |
+          LICENSE_PATH="$HOME/.local/share/unity3d/Unity/Unity_lic.ulf"
+          if [ -f "$LICENSE_PATH" ]; then
+            echo "✅ License file found, uploading..."
+            mkdir -p license
+            cp "$LICENSE_PATH" license/
+          else
+            echo "❌ License file not found"
+            exit 1
+          fi
+
+      - name: Upload License Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-license
+          path: license/Unity_lic.ulf
+
   run-editmode:
     needs: activate-unity
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: EditMode
+    secrets: inherit
 
   run-playmode:
     needs: activate-unity
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: PlayMode
+    secrets: inherit
