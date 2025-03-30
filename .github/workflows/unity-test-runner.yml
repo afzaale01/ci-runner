@@ -55,7 +55,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           testMode: ${{ inputs.testMode }}
 
-      - name: Upload ${{ inputs.testMode }} Test Results (on failure)
+      - name: Upload ${{ inputs.testMode }} Test Results (if tests failed)
         if: failure() && steps.run-tests.outputs.artifactsPath != ''
         continue-on-error: true
         uses: actions/upload-artifact@v4
@@ -64,7 +64,7 @@ jobs:
           path: ${{ steps.run-tests.outputs.artifactsPath }}
           retention-days: 7
 
-      - name: Confirm ${{ inputs.testMode }} Test Result Upload
+      - name: Log Result Path (if tests failed)
         if: failure()
         run: |
           if [ -z "${{ steps.run-tests.outputs.artifactsPath }}" ]; then
