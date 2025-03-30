@@ -64,7 +64,7 @@ jobs:
           retention-days: 3
 
       - name: Check for Test Results
-        if: always()
+        if: failure()
         run: |
           if [ -z "${{ steps.run-tests.outputs.artifactsPath }}" ]; then
             echo "⚠️ No test results found. Maybe test step was skipped or failed early."
