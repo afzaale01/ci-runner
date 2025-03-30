@@ -25,7 +25,6 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
-
   run-editmode:
     needs: activate-unity
     uses: ./.github/workflows/unity-test-runner.yml
