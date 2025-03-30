@@ -70,10 +70,10 @@ jobs:
         with:
           name: unity-license
           path: license/Unity_lic.ulf
-          retention-days: 1
+          retention-days: 3
 
   run-editmode:
-    name: Run EditMode Tests
+    name: 🧪 EditMode Tests
     needs: activate-unity
     if: needs.activate-unity.outputs.has_editmode == 'true'
     uses: ./.github/workflows/unity-test-runner.yml
@@ -82,7 +82,7 @@ jobs:
     secrets: inherit
 
   run-playmode:
-    name: Run PlayMode Tests
+    name: 🎮 PlayMode Tests
     needs: activate-unity
     if: needs.activate-unity.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-test-runner.yml
