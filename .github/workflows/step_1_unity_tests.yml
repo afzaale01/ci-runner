@@ -2,6 +2,18 @@ name: 📊 Step 1 - Tests
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
+  pull_request:
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
 
 jobs:
   activate-unity:
