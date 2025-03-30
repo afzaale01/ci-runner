@@ -14,9 +14,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Tests
+  tests:
+    name: Test - ${{ matrix.testMode }}
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        testMode: [EditMode, PlayMode]
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -39,26 +44,26 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-${{ matrix.testMode }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-
+            Library-${{ matrix.testMode }}-
 
-      - name: Run Tests
+      - name: Run ${{ matrix.testMode }} Tests
         id: run-tests
         uses: game-ci/unity-test-runner@v4
         env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}          
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          customParameters: -enableCodeCoverage -coverageOptions 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport'
+          testMode: ${{ matrix.testMode }}
 
-      - name: Upload Test Results & Code Coverage Report
+      - name: Upload ${{ matrix.testMode }} Test Results
         uses: actions/upload-artifact@v4
         if: steps.run-tests.outputs.artifactsPath != ''
         with:
-          name: Test Results
+          name: ${{ matrix.testMode }} Test Results
           path: ${{ steps.run-tests.outputs.artifactsPath }}
           retention-days: 3
 
