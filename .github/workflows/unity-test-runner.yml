@@ -65,7 +65,7 @@ jobs:
           retention-days: 3
 
 
-      - name: Check for Test Results
+      - name: Check for ${{ inputs.testMode }} Test Results
         if: failure()
         run: |
           if [ -z "${{ steps.run-tests.outputs.artifactsPath }}" ]; then
@@ -73,8 +73,3 @@ jobs:
           else
             echo "✅ Test results located at: ${{ steps.run-tests.outputs.artifactsPath }}"
           fi
-
-      - name: Print Test Summary
-        if: success()
-        run: |
-          echo "✅ Ran ${{ steps.run-tests.outputs.testCount }} tests for ${{ inputs.testMode }}"
