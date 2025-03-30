@@ -54,20 +54,12 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           customParameters: -enableCodeCoverage -coverageOptions 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport'
 
-      - name: Upload Test Results
+      - name: Upload Test Results & Code Coverage Report
         uses: actions/upload-artifact@v4
-        if: failure() && steps.run-tests.outputs.artifactsPath != ''
+        if: steps.run-tests.outputs.artifactsPath != ''
         with:
           name: Test Results
           path: ${{ steps.run-tests.outputs.artifactsPath }}
-          retention-days: 3
-
-      - name: Upload Code Coverage Report
-        uses: actions/upload-artifact@v4
-        if: success() && steps.run-tests.outputs.artifactsPath != ''
-        with:
-          name: Code Coverage
-          path: ${{ steps.run-tests.outputs.artifactsPath }}/**/CoverageResults
           retention-days: 3
 
       - name: Check for Test Results
