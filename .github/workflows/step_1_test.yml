@@ -1,10 +1,15 @@
 name: ✨ Step 1 - Tests
 
 on:
-  workflow_dispatch: {}
   push:
     branches-ignore:
       - main
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
+  workflow_dispatch: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,7 +37,7 @@ jobs:
       - name: Git LFS Pull
         run: git lfs pull
 
-      - name: Save Unity Library Cache
+      - name: Cache Unity Library
         uses: actions/cache@v4
         with:
           path: Library
@@ -56,3 +61,13 @@ jobs:
         with:
           name: Test Results
           path: ${{ steps.run-tests.outputs.artifactsPath }}
+          retention-days: 3
+
+      - name: Check for Test Results
+        if: always()
+        run: |
+          if [ -z "${{ steps.run-tests.outputs.artifactsPath }}" ]; then
+            echo "⚠️ No test results found. Maybe test step was skipped or failed early."
+          else
+            echo "✅ Test results located at: ${{ steps.run-tests.outputs.artifactsPath }}"
+          fi
