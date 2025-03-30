@@ -62,8 +62,7 @@ jobs:
         with:
           name: ${{ inputs.testMode }} Test Results
           path: ${{ steps.run-tests.outputs.artifactsPath }}
-          retention-days: 3
-
+          retention-days: 7
 
       - name: Check for ${{ inputs.testMode }} Test Results
         if: failure()
@@ -72,15 +71,4 @@ jobs:
             echo "⚠️ No test results found. Maybe test step was skipped or failed early."
           else
             echo "✅ Test results located at: ${{ steps.run-tests.outputs.artifactsPath }}"
-          fi
-
-      - name: Print Test Summary
-        if: success() && steps.run-tests.outputs.artifactsPath != ''
-        run: |
-          RESULTS="${{ steps.run-tests.outputs.artifactsPath }}/TestResults.xml"
-          if [ -f "$RESULTS" ]; then
-              COUNT=$(grep -o "<test-case " "$RESULTS" | wc -l)
-              echo "✅ Ran $COUNT tests for ${{ inputs.testMode }}"
-          else
-              echo "⚠️ TestResults.xml not found, skipping count summary."
           fi
