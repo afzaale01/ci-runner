@@ -6,7 +6,7 @@ on:
 
 jobs:
   run-editmode:
-    uses: ./.github/workflows/unity-test-runner.yml  # local path!
+    uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: EditMode
 
