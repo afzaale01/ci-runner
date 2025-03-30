@@ -38,7 +38,7 @@ jobs:
           path: license/Unity_lic.ulf
 
   run-editmode:
-    name: Run EditMode Tests
+    name: Run Tests
     needs: activate-unity
     uses: ./.github/workflows/unity-test-runner.yml
     with:
@@ -46,7 +46,7 @@ jobs:
     secrets: inherit
 
   run-playmode:
-    name: Run PlayMode Tests
+    name: Run Tests
     needs: activate-unity
     uses: ./.github/workflows/unity-test-runner.yml
     with:

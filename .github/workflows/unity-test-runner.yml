@@ -9,7 +9,8 @@ on:
         type: string
 
 jobs:
-  test:
+  run-tests:
+    name: Run ${{ inputs.testMode }} Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
