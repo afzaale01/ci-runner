@@ -17,7 +17,7 @@ jobs:
       - name: Check for EditMode Tests
         id: check-edit
         run: |
-          if find Assets/Tests/EditMode -name '*.cs' | grep -q .; then
+          if find Assets/Tests/Editor -name '*.cs' | grep -q .; then
             echo "found=true" >> $GITHUB_OUTPUT
           else
             echo "found=false" >> $GITHUB_OUTPUT
