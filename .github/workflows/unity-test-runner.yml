@@ -73,3 +73,14 @@ jobs:
           else
             echo "✅ Test results located at: ${{ steps.run-tests.outputs.artifactsPath }}"
           fi
+
+      - name: Print Test Summary
+        if: success() && steps.run-tests.outputs.artifactsPath != ''
+        run: |
+          RESULTS="${{ steps.run-tests.outputs.artifactsPath }}/TestResults.xml"
+          if [ -f "$RESULTS" ]; then
+              COUNT=$(grep -o "<test-case " "$RESULTS" | wc -l)
+              echo "✅ Ran $COUNT tests for ${{ inputs.testMode }}"
+          else
+              echo "⚠️ TestResults.xml not found, skipping count summary."
+          fi
