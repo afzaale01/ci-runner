@@ -1,4 +1,4 @@
-name: 🧪 Test Reusable Unity Test Runner
+name: 📊 Step 1 - Tests
 
 on:
   workflow_dispatch:
