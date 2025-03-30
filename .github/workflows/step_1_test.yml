@@ -1,21 +1,16 @@
-name: 📊 Step 1 - Tests
+name: 📊 Unity Test Runner
 
 on:
-  push:
-    paths:
-      - 'Assets/**'
-      - 'Packages/**'
-      - 'ProjectSettings/**'
-      - 'Tests/**'
-  workflow_dispatch: {}
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
+    inputs:
+      testMode:
+        description: "Unity test mode to run (EditMode or PlayMode)"
+        required: true
+        type: string
 
 jobs:
-  test:
-    name: Tests
+  run-tests:
+    name: Run ${{ inputs.testMode }} Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -39,25 +34,26 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-${{ inputs.testMode }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-
+            Library-${{ inputs.testMode }}-
 
-      - name: Run Tests
+      - name: Run ${{ inputs.testMode }} Tests
         id: run-tests
         uses: game-ci/unity-test-runner@v4
         env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}          
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          testMode: ${{ inputs.testMode }}
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         if: failure() && steps.run-tests.outputs.artifactsPath != ''
         with:
-          name: Test Results
+          name: ${{ inputs.testMode }} Test Results
           path: ${{ steps.run-tests.outputs.artifactsPath }}
           retention-days: 3
 
