@@ -1,0 +1,16 @@
+# .github/workflows/test-unity-tests.yml
+name: 🧪 Test Reusable Unity Test Runner
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-editmode:
+    uses: ./.github/workflows/unity-test-runner.yml  # local path!
+    with:
+      testMode: EditMode
+
+  run-playmode:
+    uses: ./.github/workflows/unity-test-runner.yml
+    with:
+      testMode: PlayMode
