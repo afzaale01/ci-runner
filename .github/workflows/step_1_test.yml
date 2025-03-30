@@ -38,12 +38,17 @@ jobs:
         run: git lfs pull
 
       - name: Cache Unity Library
+        id: library-cache
         uses: actions/cache@v4
         with:
           path: Library
           key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
             Library-
+
+      - name: Check Cache Result
+        run: |
+          echo "Cache hit: ${{ steps.library-cache.outputs.cache-hit }}"
 
       - name: Run Tests
         id: run-tests
