@@ -2,40 +2,78 @@ name: 📊 Step 1 - Tests
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'Assets/**'
-      - 'Packages/**'
-      - 'ProjectSettings/**'
-      - 'Tests/**'
-  pull_request:
-    paths:
-      - 'Assets/**'
-      - 'Packages/**'
-      - 'ProjectSettings/**'
-      - 'Tests/**'
 
 jobs:
-  upload-license:
-    name: ♻️ Upload Unity License
-    uses: ./.github/workflows/unity-license-upload.yml
-    secrets: inherit
+  activate-unity:
+    name: 🔐 Activate Unity
+    runs-on: ubuntu-latest
+    outputs:
+      has_editmode: ${{ steps.check-edit.outputs.found }}
+      has_playmode: ${{ steps.check-play.outputs.found }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for EditMode Tests
+        id: check-edit
+        run: |
+          if find Assets/Tests/Editor -name '*.cs' | grep -q .; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for PlayMode Tests
+        id: check-play
+        run: |
+          if find Assets/Tests/PlayMode -name '*.cs' | grep -q .; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v2
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+      - name: Upload Unity License File
+        run: |
+          echo "🔍 Searching for license file..."
+          FOUND=$(find $HOME -type f -name 'Unity_lic.ulf' | head -n 1)
+          if [ -z "$FOUND" ]; then
+            echo "❌ License file not found"
+            exit 1
+          else
+            echo "✅ Found at $FOUND"
+            mkdir -p license
+            cp "$FOUND" license/
+          fi
+
+      - name: Upload License Artifact
+        if: steps.check-edit.outputs.found == 'true' || steps.check-play.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-license
+          path: license/Unity_lic.ulf
+          retention-days: 1
 
   run-editmode:
-    name: 🧪 EditMode Tests
-    needs: upload-license
-    if: needs.upload-license.result == 'success' && <your other condition>
+    name: Run EditMode Tests
+    needs: activate-unity
+    if: needs.activate-unity.outputs.has_editmode == 'true'
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: EditMode
     secrets: inherit
 
   run-playmode:
-    name: 🎮 PlayMode Tests
-    needs: upload-license
-    if: needs.upload-license.result == 'success' && <your other condition>
+    name: Run PlayMode Tests
+    needs: activate-unity
+    if: needs.activate-unity.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: PlayMode
     secrets: inherit
-
