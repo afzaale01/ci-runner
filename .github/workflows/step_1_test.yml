@@ -1,4 +1,4 @@
-name: ✨ Step 1 - Tests
+name: ✅ Step 1 - Tests
 
 on:
   push:
