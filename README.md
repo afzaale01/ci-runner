@@ -25,3 +25,5 @@ Set the following secrets in your repository:
 | `UNITY_LICENSE`   | Contents of your `.ulf` license file (e.g., located at `C:/ProgramData/Unity` on Windows) |
 
 ---
+
+![Unity Tests](https://github.com/Avalin/CI-CD-Unity-Test-Project/actions/workflows/step_1_unity_tests.yml/badge.svg)
