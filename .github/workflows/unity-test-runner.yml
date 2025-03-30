@@ -56,12 +56,14 @@ jobs:
           testMode: ${{ inputs.testMode }}
 
       - name: Upload ${{ inputs.testMode }} Test Results
-        uses: actions/upload-artifact@v4
         if: failure() && steps.run-tests.outputs.artifactsPath != ''
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.testMode }} Test Results
           path: ${{ steps.run-tests.outputs.artifactsPath }}
           retention-days: 3
+
 
       - name: Check for Test Results
         if: failure()
@@ -71,3 +73,8 @@ jobs:
           else
             echo "✅ Test results located at: ${{ steps.run-tests.outputs.artifactsPath }}"
           fi
+
+      - name: Print Test Summary
+        if: success()
+        run: |
+          echo "✅ Ran ${{ steps.run-tests.outputs.testCount }} tests for ${{ inputs.testMode }}"
