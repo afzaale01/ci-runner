@@ -1,0 +1,14 @@
+name: ♻️ MOCK - Job Fail
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Fail Message
+        run: |
+          echo "MOCK - Job finished: Failed!"
+          exit 1

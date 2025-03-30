@@ -1,0 +1,14 @@
+name: ♻️ MOCK - Job Skip
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    name: Tests
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Skip Message
+        run: |
+          echo "MOCK - Job skipped!"

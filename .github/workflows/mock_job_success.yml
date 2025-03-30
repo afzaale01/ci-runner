@@ -1,0 +1,14 @@
+name: ♻️ MOCK - Job Success
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Success Message
+        run: |
+          echo "MOCK - Job finished: Success!"
+          exit 0
