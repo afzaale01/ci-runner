@@ -7,9 +7,30 @@ jobs:
   activate-unity:
     name: 🔐 Activate Unity
     runs-on: ubuntu-latest
+    outputs:
+      has_editmode: ${{ steps.check-edit.outputs.found }}
+      has_playmode: ${{ steps.check-play.outputs.found }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Check for EditMode Tests
+        id: check-edit
+        run: |
+          if find Assets/Tests/EditMode -name '*.cs' | grep -q .; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for PlayMode Tests
+        id: check-play
+        run: |
+          if find Assets/Tests/PlayMode -name '*.cs' | grep -q .; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
@@ -38,16 +59,18 @@ jobs:
           path: license/Unity_lic.ulf
 
   run-editmode:
-    name: Run Tests
+    name: Run EditMode Tests
     needs: activate-unity
+    if: needs.activate-unity.outputs.has_editmode == 'true'
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: EditMode
     secrets: inherit
 
   run-playmode:
-    name: Run Tests
+    name: Run PlayMode Tests
     needs: activate-unity
+    if: needs.activate-unity.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: PlayMode
