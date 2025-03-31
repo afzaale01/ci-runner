@@ -31,26 +31,23 @@ jobs:
     outputs:
       macPlatforms: ${{ steps.filter.outputs.macPlatforms }}
       ubuntuPlatforms: ${{ steps.filter.outputs.ubuntuPlatforms }}
+
     steps:
       - name: Separate Selected Platforms Into Outputs
         id: filter
         run: |
-          # Capture the targetPlatforms input; if it's empty (as in tag builds), use the default.
-          TARGET_PLATFORMS="${{ inputs.targetPlatforms }}"
-          if [ -z "$TARGET_PLATFORMS" ]; then
-            TARGET_PLATFORMS='["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
-          fi
-          echo "Using target platforms: $TARGET_PLATFORMS"
+          echo "Original input: ${{ inputs.targetPlatforms }}"
 
-          MAC_PLATFORMS=$(echo "$TARGET_PLATFORMS" | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
-          UBUNTU_PLATFORMS=$(echo "$TARGET_PLATFORMS" | jq -c '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
+          MAC_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
+            | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
+          UBUNTU_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
+            | jq -c '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
 
           echo "Mac platforms: $MAC_PLATFORMS"
           echo "Ubuntu platforms: $UBUNTU_PLATFORMS"
 
           echo "macPlatforms=$MAC_PLATFORMS" >> $GITHUB_OUTPUT
           echo "ubuntuPlatforms=$UBUNTU_PLATFORMS" >> $GITHUB_OUTPUT
-
 
   determine_version:
     name: Determine Version
