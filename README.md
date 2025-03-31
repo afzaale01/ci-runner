@@ -44,4 +44,4 @@ Set the following secrets in your repository:
 
 ---
 
-![Unity Tests](https://github.com/Avalin/CI-CD-Unity-Test-Project/actions/workflows/step_1_unity_tests.yml/badge.svg)
+![Unity Tests](https://github.com/Avalin/CI-CD-Unity-Test-Project/actions/workflows/full-ci-cd.yml/badge.svg)
