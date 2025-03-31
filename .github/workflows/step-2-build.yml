@@ -57,15 +57,18 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+
       - name: Determine Version
         id: get_version
+        shell: bash
         run: |
           if [ "${{ inputs.buildType }}" = "release" ]; then
             VERSION=$(echo "${GITHUB_REF}" | sed 's/refs\/tags\///')
           else
             VERSION=$(date +%Y%m%d%H%M%S)-${GITHUB_SHA:0:7}
           fi
-          echo "::set-output name=version::${VERSION}"
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Determined version: ${VERSION}"
 
   build_on_macos:
