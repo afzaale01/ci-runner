@@ -7,6 +7,11 @@ on:
         description: "Unity test mode to run (EditMode or PlayMode)"
         required: true
         type: string
+      unityVersion:
+        description: "Unity version to use"
+        required: false
+        default: 'auto'
+        type: string
       useGitLfs:
         description: "Whether to use Git LFS (true/false)"
         required: false
@@ -67,6 +72,7 @@ jobs:
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           testMode: ${{ inputs.testMode }}
+          unityVersion: ${{ inputs.unityVersion }}
 
       - name: Upload ${{ inputs.testMode }} Test Results (if tests failed)
         if: failure() && steps.run-tests.outputs.artifactsPath != ''
