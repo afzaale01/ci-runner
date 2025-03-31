@@ -2,6 +2,12 @@ name: ✨ Step 2 - Build
 
 on:
   workflow_call:
+    inputs:
+      targetPlatforms:
+        description: "JSON array of platforms to build"
+        type: string
+        default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+        required: false
     secrets:
       UNITY_EMAIL:
         required: true
@@ -15,6 +21,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  filter_platforms:
+    name: Filter Platforms
+    runs-on: ubuntu-latest
+    outputs:
+      macPlatforms: ${{ steps.filter.outputs.macPlatforms }}
+      ubuntuPlatforms: ${{ steps.filter.outputs.ubuntuPlatforms }}
+    steps:
+      - name: Filter the input platforms
+        id: filter
+        run: |
+          echo "Original input: ${{ inputs.targetPlatforms }}"
+          
+          # We'll rely on `jq` to parse JSON and filter out the two sets.
+          # Mac: iOS or StandaloneOSX
+          MAC_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
+            | jq '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
+          
+          # Ubuntu: all others
+          UBUNTU_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
+            | jq '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
+          
+          echo "Mac platforms: $MAC_PLATFORMS"
+          echo "Ubuntu platforms: $UBUNTU_PLATFORMS"
+          
+          # Expose these arrays as outputs so later jobs can use them.
+          echo "::set-output name=macPlatforms::$MAC_PLATFORMS"
+          echo "::set-output name=ubuntuPlatforms::$UBUNTU_PLATFORMS"
+
   build_on_macos:
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: ${{ matrix.os }}
