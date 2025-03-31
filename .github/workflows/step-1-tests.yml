@@ -1,4 +1,4 @@
-name: 📋 Tests
+name: 📋 Step 1: Tests
 
 on:
   workflow_dispatch:
