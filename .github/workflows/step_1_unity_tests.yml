@@ -34,6 +34,7 @@ jobs:
 
   run-editmode:
     name: 🥪 EditMode Tests
+    continue-on-error: false
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_editmode == 'true'
     uses: ./.github/workflows/unity-test-runner.yml
@@ -43,6 +44,7 @@ jobs:
 
   run-playmode:
     name: 🎮 PlayMode Tests
+    continue-on-error: false
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-test-runner.yml
