@@ -7,6 +7,11 @@ on:
         description: "Unity test mode to run (EditMode or PlayMode)"
         required: true
         type: string
+      unityVersion:
+        description: "Unity version to use"
+        required: false
+        default: 'auto'
+        type: string
       useGitLfs:
         description: "Whether to use Git LFS (true/false)"
         required: false
@@ -56,6 +61,9 @@ jobs:
           key: Library-${{ inputs.testMode }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
             Library-${{ inputs.testMode }}-
+
+      - name: 🧾 Print selected Unity version
+        run: echo "🛠 Using Unity version: ${{ inputs.unityVersion }}"
 
       - name: Run ${{ inputs.testMode }} Tests
         id: run-tests
