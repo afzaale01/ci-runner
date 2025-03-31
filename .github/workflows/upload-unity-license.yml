@@ -23,6 +23,11 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
+      - name: Log License Activation Process
+        run: |
+          echo "Activating Unity License..."
+          echo "Checking if license file exists..."
+
       - name: Upload Unity License File
         run: |
           echo "🔍 Searching for license file..."
