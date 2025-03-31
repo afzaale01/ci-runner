@@ -18,22 +18,6 @@ on:
         default: '["Android","iOS"]'
         required: false
 
-  # Automatically run tests & builds on certain branches or PR changes
-  push:
-    tags:
-      - 'v*.*.*'
-    paths:
-      - 'Assets/**'
-      - 'Packages/**'
-      - 'ProjectSettings/**'
-      - 'Tests/**'
-  pull_request:
-    paths:
-      - 'Assets/**'
-      - 'Packages/**'
-      - 'ProjectSettings/**'
-      - 'Tests/**'
-
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # 2. Build
