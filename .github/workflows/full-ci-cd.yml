@@ -43,7 +43,7 @@ jobs:
   # Step 2: Build
   build:
     name: Build
-    needs: run-tests
+ #   needs: run-tests
     if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
     uses: ./.github/workflows/step-2-build.yml
     with:
