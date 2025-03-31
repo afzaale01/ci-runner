@@ -6,7 +6,7 @@ on:
       targetPlatforms:
         description: "JSON array of platforms to build"
         type: string
-        default: '["Android","WebGL","iOS"]'
+        default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
         required: false
     secrets:
       UNITY_EMAIL:
@@ -34,7 +34,6 @@ jobs:
         run: |
           echo "Original input: ${{ inputs.targetPlatforms }}"
 
-          # Parse JSON, produce single-line arrays:
           MAC_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
             | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
           UBUNTU_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
@@ -43,7 +42,6 @@ jobs:
           echo "Mac platforms: $MAC_PLATFORMS"
           echo "Ubuntu platforms: $UBUNTU_PLATFORMS"
 
-          # Write single-line JSON directly to GITHUB_OUTPUT
           echo "macPlatforms=$MAC_PLATFORMS" >> $GITHUB_OUTPUT
           echo "ubuntuPlatforms=$UBUNTU_PLATFORMS" >> $GITHUB_OUTPUT
 
@@ -55,9 +53,7 @@ jobs:
       matrix:
         os: 
           - macOS-latest
-        targetPlatform:
-          - StandaloneOSX
-          - iOS
+        targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.macPlatforms) }}
     
     steps:
       - name: Checkout Repository
@@ -93,12 +89,7 @@ jobs:
       matrix:
         os: 
           - ubuntu-latest
-        targetPlatform:
-          - Android
-          - WebGL
-          - StandaloneWindows
-          - StandaloneWindows64
-          - StandaloneLinux64
+        targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.ubuntuPlatforms) }}
     
     steps:
       - name: Checkout Repository
