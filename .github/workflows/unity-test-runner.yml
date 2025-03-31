@@ -71,6 +71,7 @@ jobs:
             Library-${{ inputs.testMode }}-
 
       - name: 🧾 Print selected Unity version
+        shell: bash
         run: |
           echo "🛠 Using Unity version: ${{ inputs.unityVersion }}"
 
