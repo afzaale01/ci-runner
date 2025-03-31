@@ -5,8 +5,9 @@ on:
     inputs:
       targetPlatforms:
         type: string
+        # The full superset of all possible platforms:
         default: '["Android", "WebGL", "StandaloneLinux64", "StandaloneWindows", "StandaloneWindows64", "StandaloneOSX", "iOS"]'
-        required: false  
+        required: false
     secrets:
       UNITY_EMAIL:
         required: true
@@ -20,15 +21,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
   build_on_macos:
     name: Build for ${{ matrix.targetPlatform }}
-    runs-on: ${{ matrix.os }}
+    runs-on: macOS-latest
+    # Only include the Mac-only platforms in this job:
     strategy:
       matrix:
-        os: 
-          - macOS-latest
-        targetPlatform: ${{ fromJson(inputs.targetPlatforms) }}
-    
+        targetPlatform: [ "StandaloneOSX", "iOS" ]
+    # For each platform in the matrix, only run if that platform is in the caller's input array.
+    if: contains(fromJson(inputs.targetPlatforms), matrix.targetPlatform)
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -57,18 +59,13 @@ jobs:
     
   build_on_ubuntu:
     name: Build for ${{ matrix.targetPlatform }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    # List only the non-macOS platforms here:
     strategy:
       matrix:
-        os: 
-          - ubuntu-latest
-        targetPlatform:
-          - Android
-          - WebGL
-          - StandaloneWindows
-          - StandaloneWindows64
-          - StandaloneLinux64
-    
+        targetPlatform: [ "Android", "WebGL", "StandaloneLinux64", "StandaloneWindows", "StandaloneWindows64" ]
+    # Again, only run if the matrix.platform is in the caller’s input array.
+    if: contains(fromJson(inputs.targetPlatforms), matrix.targetPlatform)
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -79,7 +76,7 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: Library-${{ matrix.targetPlatform }}-
-
+      
       - name: Check Free Disk Space (Android only)
         if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.1
