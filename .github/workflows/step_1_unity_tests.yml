@@ -50,7 +50,6 @@ jobs:
     name: 🥪 EditMode Tests
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_editmode == 'true'
-    timeout-minutes: 30
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: EditMode
@@ -63,7 +62,6 @@ jobs:
     name: 🎮 PlayMode Tests
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_playmode == 'true'
-    timeout-minutes: 30
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: PlayMode
