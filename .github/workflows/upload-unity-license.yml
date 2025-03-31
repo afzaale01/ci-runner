@@ -4,7 +4,10 @@ on:
   workflow_call:
     inputs:
       artifactName:
+        description: "Name of the uploaded license artifact"
+        required: false
         default: 'unity-license'
+        type: string
 
 jobs:
   activate-license:
