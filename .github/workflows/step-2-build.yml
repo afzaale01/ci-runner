@@ -3,6 +3,11 @@ name: ✨ Step 2 - Build
 on:
   workflow_call:
     inputs:
+      projectName:
+        description: "The name of the built project i.e. 'My_Project' (avoid spaces)"
+        default: "My_Project"
+        type: string
+        required: true
       buildType:
         description: "Build type, e.g. 'preview' or 'release'"
         type: string
@@ -111,7 +116,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.buildType }}-Build-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
+          name: ${{ inputs.buildType }}-Build-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
           path: build/${{ matrix.targetPlatform }}
     
   build_on_ubuntu:
@@ -151,7 +156,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.buildType }}-Build-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
+          name: ${{ inputs.buildType }}-Build-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
           path: build/${{ matrix.targetPlatform }}
   
   confirm_builds:
