@@ -15,6 +15,11 @@ on:
       - 'ProjectSettings/**'
       - 'Tests/**'
 
+env:
+  UNITY_VERSION: '2022.3.60f1'
+  LICENSE_ARTIFACT_NAME: 'unity-license'
+  USE_GIT_LFS: 'false'
+
 jobs:
   detect-tests:
     name: 🔍 Detect Tests
@@ -39,9 +44,9 @@ jobs:
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: EditMode
-      licenseArtifactName: 'unity-license'
-      unityVersion: '2022.3.60f1'
-      useGitLfs: 'false'
+      licenseArtifactName: ${{ env.LICENSE_ARTIFACT_NAME }}
+      unityVersion: ${{ env.UNITY_VERSION }}
+      useGitLfs: ${{ env.USE_GIT_LFS }}
     secrets: inherit
 
   run-playmode:
@@ -51,7 +56,7 @@ jobs:
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: PlayMode
-      licenseArtifactName: 'unity-license'
-      unityVersion: '2022.3.60f1'
-      useGitLfs: 'false'
+      licenseArtifactName: ${{ env.LICENSE_ARTIFACT_NAME }}
+      unityVersion: ${{ env.UNITY_VERSION }}
+      useGitLfs: ${{ env.USE_GIT_LFS }}
     secrets: inherit
