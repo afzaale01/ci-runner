@@ -67,6 +67,13 @@ jobs:
           else
             VERSION=$(date +%Y%m%d%H%M%S)-${GITHUB_SHA:0:7}
           fi
+          
+          # Check if the version contains a forward slash
+          if [[ "$VERSION" == *"/"* ]]; then
+            echo "Error: VERSION '$VERSION' contains invalid characters (e.g., '/'). Aborting build." >&2
+            exit 1
+          fi
+          
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Determined version: ${VERSION}"
