@@ -6,7 +6,7 @@ on:
       unityVersion:
         description: "Unity version to use"
         required: true
-        default: '2022.3.60f1'
+        default: 'auto'
       licenseArtifactName:
         description: "Name of the uploaded license artifact"
         required: false
