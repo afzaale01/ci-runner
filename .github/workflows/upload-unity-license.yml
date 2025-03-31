@@ -1,4 +1,4 @@
-name: ♻️ Upload Unity License
+name: 📥️ Upload Unity License
 
 on:
   workflow_call:
