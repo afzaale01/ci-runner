@@ -1,0 +1,36 @@
+name: 🚀 Stripped CI/CD Pipeline (No Tests)
+
+on:
+  workflow_dispatch:
+    inputs:
+      buildType:
+        description: "Choose build type"
+        required: true
+        default: "preview"
+        type: choice
+        options:
+          - preview
+          - release
+  push:
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
+  pull_request:
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
+
+jobs:
+  # Step 1: Build
+  build:
+    name: Build
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
+    uses: ./.github/workflows/step-2-build.yml
+    secrets:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
