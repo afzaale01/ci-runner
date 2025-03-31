@@ -2,6 +2,32 @@ name: ✨ Step 2 - Tests
 
 on:
   workflow_call:
+    inputs:
+      build_osx:
+        type: boolean
+        default: true
+        description: "Build for OS X?"
+      build_ios:
+        type: boolean
+        default: true
+        description: "Build for iOS?"
+      build_android:
+        type: boolean
+        default: true
+        description: "Build for Android?"
+      build_windows:
+        type: boolean
+        default: true
+        description: "Build for Windows?"
+      build_linux:
+        type: boolean
+        default: true
+        description: "Build for Linux?"
+      build_webgl:
+        type: boolean
+        default: true
+        description: "Build for WebGL?"
+  
     secrets:
       UNITY_EMAIL:
         required: true
