@@ -40,7 +40,6 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   build:
     name: Build
-    needs: [ run-tests ]
     # Build if ANY of these conditions are met:
     # - The event is a pull_request.
     # - The event is a workflow_dispatch (manual trigger).
