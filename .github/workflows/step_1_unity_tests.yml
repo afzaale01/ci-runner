@@ -40,6 +40,8 @@ jobs:
     with:
       testMode: EditMode
       licenseArtifactName: 'unity-license'
+      unityVersion: '2022.3.60f1'
+      useGitLfs: 'false'
     secrets: inherit
 
   run-playmode:
@@ -50,4 +52,6 @@ jobs:
     with:
       testMode: PlayMode
       licenseArtifactName: 'unity-license'
+      unityVersion: '2022.3.60f1'
+      useGitLfs: 'false'
     secrets: inherit
