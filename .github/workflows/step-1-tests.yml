@@ -28,6 +28,13 @@ on:
         required: false
         default: 'Assets/Tests/PlayMode'
         type: string
+    secrets:
+      UNITY_EMAIL:
+        required: true
+      UNITY_PASSWORD:
+        required: true
+      UNITY_LICENSE:
+        required: true
 
 jobs:
   detect-tests:
