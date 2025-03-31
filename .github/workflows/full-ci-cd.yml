@@ -1,0 +1,27 @@
+name: 🚀 Full CI/CD Pipeline
+
+on:  
+  push:
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
+  pull_request:
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
+
+jobs:
+  # Step 1: Run Tests
+  run-tests:
+    name: Run Tests
+    uses: ./.github/workflows/step-1-tests.yml
+    with:
+      unityVersion: '2022.3.60f1'
+      licenseArtifactName: 'unity-license'
+      useGitLfs: 'true'
+      editModePath: 'Assets/Tests/Editor'
+      playModePath: 'Assets/Tests/PlayMode'

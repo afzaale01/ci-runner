@@ -1,7 +1,7 @@
 name: 📋 Step 1 - Tests
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       unityVersion:
         description: "Unity version to use"
