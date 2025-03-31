@@ -1,6 +1,7 @@
 name: 🚀 Stripped CI/CD Pipeline (No Tests)
 
 on:
+  # Allow manual dispatch with a buildType input
   workflow_dispatch:
     inputs:
       buildType:
@@ -11,6 +12,11 @@ on:
         options:
           - preview
           - release
+      targetPlatforms:
+        description: "JSON array of platforms to build"
+        type: string
+        default: '["Android","iOS"]'
+        required: false
 
 jobs:
   # Step 2: Build (Tests Skipped)
@@ -26,7 +32,8 @@ jobs:
       github.ref == 'refs/heads/main'
     uses: ./.github/workflows/step-2-build.yml
     with:
-      targetPlatforms: '["Android","iOS"]'
+      buildType: ${{ github.event.inputs.buildType }}
+      targetPlatforms: ${{ github.event.inputs.targetPlatforms }}
     secrets:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}

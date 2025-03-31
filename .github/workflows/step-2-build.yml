@@ -3,6 +3,10 @@ name: ✨ Step 2 - Build
 on:
   workflow_call:
     inputs:
+      buildType:
+        description: "Build type, e.g. 'preview' or 'release'"
+        type: string
+        required: true
       targetPlatforms:
         description: "JSON array of platforms to build"
         type: string
