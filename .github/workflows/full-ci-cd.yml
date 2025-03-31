@@ -1,0 +1,88 @@
+# .github/workflows/full-ci-cd.yml (Full CI/CD Pipeline)
+
+name: 🚀 Full CI/CD Pipeline
+
+on:  
+  workflow_dispatch:
+    inputs:
+      strategy:
+        description: 'Select the strategy for the build'
+        required: true
+        default: 'preview'
+        options:
+          - preview
+          - release
+      unityVersion:
+        description: 'Unity version to use'
+        required: true
+        default: '2022.3.60f1'
+      licenseArtifactName:
+        description: 'Name of the Unity license artifact'
+        required: true
+        default: 'unity-license'
+      useGitLfs:
+        description: 'Whether to use Git LFS (true/false)'
+        required: true
+        default: 'true'
+      editModePath:
+        description: 'Path to the EditMode tests folder'
+        required: true
+        default: 'Assets/Tests/Editor'
+      playModePath:
+        description: 'Path to the PlayMode tests folder'
+        required: true
+        default: 'Assets/Tests/PlayMode'
+
+  push:
+    branches:
+      - 'dev'   # feature branches or any branch where you'd want to test changes
+      - 'feature/*'  # other branches if needed
+  pull_request:
+    branches:
+      - 'main'  # PRs to the main branch
+
+jobs:
+  # Step 1: Run Tests (on every push and PR)
+  run-tests:
+    name: Run Tests
+    uses: avalin/unity-ci-templates/.github/workflows/step-1-tests.yml@main # Reusable test workflow
+    with:
+      unityVersion: ${{ github.event.inputs.unityVersion }}  # Using input unityVersion
+      licenseArtifactName: ${{ github.event.inputs.licenseArtifactName }}  # Using input licenseArtifactName
+      useGitLfs: ${{ github.event.inputs.useGitLfs }}  # Using input useGitLfs
+      editModePath: ${{ github.event.inputs.editModePath }}  # Using input editModePath
+      playModePath: ${{ github.event.inputs.playModePath }}  # Using input playModePath
+
+  # Step 2: Build Before Merging to Main (Preview Build on PR)
+  build-preview:
+    name: Build Before Merging (Preview)
+    if: github.event_name == 'pull_request' && success() && github.event.inputs.strategy == 'preview'  # Run on PRs only if tests pass and strategy is preview
+    needs: run-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Unity
+        uses: game-ci/unity-action@v2
+        with:
+          version: ${{ github.event.inputs.unityVersion }}  # Referencing input unityVersion
+      - name: Build Preview
+        run: |
+          echo "Building project for preview..."  # Mocking the build for now
+
+  # Step 3: Build After Merging to Main (Final Build)
+  build-release:
+    name: Build After Merging to Main
+    if: github.ref == 'refs/heads/main' && success() && github.event.inputs.strategy == 'release'  # Trigger only on main branch after merge and strategy is release
+    needs: run-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Unity
+        uses: game-ci/unity-action@v2
+        with:
+          version: ${{ github.event.inputs.unityVersion }}  # Referencing input unityVersion
+      - name: Build Release
+        run: |
+          echo "Building project after merge..."  # Mocking the build for now
