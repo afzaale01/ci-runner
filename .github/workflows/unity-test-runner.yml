@@ -70,11 +70,11 @@ jobs:
           restore-keys: |
             Library-${{ inputs.testMode }}-
 
-      - name: 🧾 Print Selected Test Mode and Unity Version
+      - name: Print Unity Version & Selected Test Mode
         shell: bash
         run: |
           echo "🛠 Using Unity version: ${{ inputs.unityVersion }}"
-          echo "🧪 Running ${{ inputs.testMode }} tests..."
+          echo "🧪 Running tests: ${{ inputs.testMode }}"
 
       - name: Run ${{ inputs.testMode }} Tests
         id: run-tests
