@@ -2,12 +2,6 @@ name: ✨ Step 2 - Build
 
 on:
   workflow_call:
-    inputs:
-      buildTargets:
-        description: "Comma-separated build targets, or 'all' to build everything (StandaloneOSX,iOS,Android,WebGL,StandaloneWindows,StandaloneWindows64,StandaloneLinux64)"
-        required: false
-        default: "WebGL"
-        type: string
     secrets:
       UNITY_EMAIL:
         required: true
@@ -22,18 +16,16 @@ concurrency:
 
 jobs:
   build_on_macos:
-    # Only run if buildTargets == 'all', or it contains 'StandaloneOSX' or 'iOS'
-    if: ${{ inputs.buildTargets == 'all' || contains(inputs.buildTargets, 'StandaloneOSX') || contains(inputs.buildTargets, 'iOS') }}
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:
+        os: 
           - macOS-latest
         targetPlatform:
           - StandaloneOSX
           - iOS
-
+    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -46,8 +38,6 @@ jobs:
           restore-keys: Library-${{ matrix.targetPlatform }}-
         
       - name: Build Unity Project
-        # Only build if target is 'all' or if it’s in the comma-separated buildTargets
-        if: ${{ inputs.buildTargets == 'all' || contains(inputs.buildTargets, matrix.targetPlatform) }}
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -57,21 +47,12 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
 
       - name: Upload Build Artifact
-        # Only upload if we actually built
-        if: ${{ inputs.buildTargets == 'all' || contains(inputs.buildTargets, matrix.targetPlatform) }}
         uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ env.VERSION }}
           path: build/${{ matrix.targetPlatform }}
     
   build_on_ubuntu:
-    # Only run if buildTargets == 'all', or it contains at least one of these
-    if: ${{ inputs.buildTargets == 'all' ||
-           contains(inputs.buildTargets, 'Android') ||
-           contains(inputs.buildTargets, 'WebGL') ||
-           contains(inputs.buildTargets, 'StandaloneWindows') ||
-           contains(inputs.buildTargets, 'StandaloneWindows64') ||
-           contains(inputs.buildTargets, 'StandaloneLinux64') }}
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -84,7 +65,7 @@ jobs:
           - StandaloneWindows
           - StandaloneWindows64
           - StandaloneLinux64
-
+    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -101,8 +82,6 @@ jobs:
         uses: jlumbroso/free-disk-space@v1.3.1
         
       - name: Build Unity Project
-        # Only build if target is 'all' or if it’s in the comma-separated buildTargets
-        if: ${{ inputs.buildTargets == 'all' || contains(inputs.buildTargets, matrix.targetPlatform) }}
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -112,8 +91,6 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
 
       - name: Upload Build Artifact
-        # Only upload if we actually built
-        if: ${{ inputs.buildTargets == 'all' || contains(inputs.buildTargets, matrix.targetPlatform) }}
         uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}-${{ env.VERSION }}
