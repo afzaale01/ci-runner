@@ -58,16 +58,14 @@ jobs:
   build:
     name: Build
     needs: [ run-tests ]
-    # Build if ANY of these conditions are met:
-    # - The event is a pull_request.
-    # - The event is a manual workflow_dispatch.
-    # - The branch is 'main' (pushes to main).
-    # - The event is a push and the ref starts with 'refs/tags/' (i.e. a tag push, for release builds).
+    # Only build if:
+    # - We have a pull request
+    # - We have manual dispatch (either preview or release)
+    # - We are pushing to "main"
     if: >
       github.event_name == 'pull_request' ||
       (github.event_name == 'workflow_dispatch') ||
-      github.ref == 'refs/heads/main' ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+      github.ref == 'refs/heads/main'
     uses: ./.github/workflows/step-2-build.yml
     with:
       buildType: ${{ github.event.inputs.buildType }}
