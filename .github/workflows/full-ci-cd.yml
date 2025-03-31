@@ -66,7 +66,8 @@ jobs:
       github.ref == 'refs/heads/main'
     uses: ./.github/workflows/step-2-build.yml
     with:
-      targetPlatforms: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+      buildType: ${{ github.event.inputs.buildType }}
+      targetPlatforms: ${{ github.event.inputs.targetPlatforms }}
     secrets:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
