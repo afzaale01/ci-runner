@@ -45,7 +45,7 @@ jobs:
     name: Build
     needs: run-tests
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
     steps:
       - name: Display Build Info (Mock)
         run: |
