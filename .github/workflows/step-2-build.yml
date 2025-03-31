@@ -24,29 +24,29 @@ jobs:
   filter_platforms:
     name: Filter Platforms
     runs-on: ubuntu-latest
+    # We'll produce two outputs for subsequent jobs
     outputs:
-      macPlatforms: ${{ steps.set_outputs.outputs.macPlatforms }}
-      ubuntuPlatforms: ${{ steps.set_outputs.outputs.ubuntuPlatforms }}
+      macPlatforms: ${{ steps.filter.outputs.macPlatforms }}
+      ubuntuPlatforms: ${{ steps.filter.outputs.ubuntuPlatforms }}
 
     steps:
-      - name: Filter the input platforms
+      - name: Filter & set outputs
         id: filter
         run: |
           echo "Original input: ${{ inputs.targetPlatforms }}"
 
-          # We'll rely on `jq` to parse JSON and filter out the two sets.
+          # Parse JSON & pick out Mac vs. everything else
           MAC_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
             | jq '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
-
           UBUNTU_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
             | jq '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
 
           echo "Mac platforms: $MAC_PLATFORMS"
           echo "Ubuntu platforms: $UBUNTU_PLATFORMS"
 
-          # Store them in outputs using environment files (GITHUB_OUTPUT)
-          echo "MAC_PLATFORMS=$MAC_PLATFORMS" >> $GITHUB_ENV
-          echo "UBUNTU_PLATFORMS=$UBUNTU_PLATFORMS" >> $GITHUB_ENV
+          # Write them directly to GITHUB_OUTPUT as job-level outputs
+          echo "macPlatforms=$MAC_PLATFORMS" >> $GITHUB_OUTPUT
+          echo "ubuntuPlatforms=$UBUNTU_PLATFORMS" >> $GITHUB_OUTPUT
 
       - name: Set job outputs
         id: set_outputs
