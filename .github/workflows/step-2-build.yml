@@ -70,7 +70,7 @@ jobs:
           if [ "${{ inputs.buildType }}" = "release" ]; then
             VERSION=$(echo "${GITHUB_REF}" | sed 's/refs\/tags\///')
           else
-            VERSION=$(date +%Y%m%d%H%M%S)-${GITHUB_SHA:0:7}
+            VERSION=T$(date +%Y%m%d%H%M%S)_CH${GITHUB_SHA:0:7}
           fi
           
           # Check if the version contains a forward slash
