@@ -6,7 +6,7 @@ on:
       buildTargets:
         description: "Comma-separated build targets, or 'all' to build everything"
         required: false
-        default: "StandaloneOSX,iOS"
+        default: "iOS"
         type: string
     secrets:
       UNITY_EMAIL:
