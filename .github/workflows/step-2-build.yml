@@ -49,6 +49,25 @@ jobs:
           echo "macPlatforms=$MAC_PLATFORMS" >> $GITHUB_OUTPUT
           echo "ubuntuPlatforms=$UBUNTU_PLATFORMS" >> $GITHUB_OUTPUT
 
+  determine_version:
+    name: Determine Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Determine Version
+        id: get_version
+        run: |
+          if [ "${{ inputs.buildType }}" = "release" ]; then
+            VERSION=$(echo "${GITHUB_REF}" | sed 's/refs\/tags\///')
+          else
+            VERSION=$(date +%Y%m%d%H%M%S)-${GITHUB_SHA:0:7}
+          fi
+          echo "::set-output name=version::${VERSION}"
+          echo "Determined version: ${VERSION}"
+
   build_on_macos:
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: ${{ matrix.os }}
