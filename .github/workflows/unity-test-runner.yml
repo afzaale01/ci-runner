@@ -83,7 +83,7 @@ jobs:
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.testMode }} Test Results
+          name: ${{ inputs.testMode }} Test Results - ${{ github.ref_name }}
           path: ${{ steps.run-tests.outputs.artifactsPath }}
           retention-days: 7
 
