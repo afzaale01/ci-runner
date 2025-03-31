@@ -74,7 +74,7 @@ jobs:
   build_on_macos:
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: ${{ matrix.os }}
-    needs: filter_platforms
+    needs: [filter_platforms, determine_version]
     strategy:
       matrix:
         os: 
@@ -110,7 +110,7 @@ jobs:
   build_on_ubuntu:
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: ${{ matrix.os }}
-    needs: filter_platforms
+    needs: [filter_platforms, determine_version]
     strategy:
       matrix:
         os: 
