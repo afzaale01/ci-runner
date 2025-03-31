@@ -1,5 +1,26 @@
 ### 🔧 CI/CD Setup Instructions
 
+# ✅ Unity CI/CD Test Workflow (Modular + Reusable)
+
+This project uses **modular GitHub Actions** to automatically run Unity EditMode and PlayMode tests on push/PRs. It includes:
+
+- 🧪 Test detection
+- ♻️ License activation
+- 📊 Test runner (with Git LFS & Unity cache support)
+
+---
+
+## 📁 File Structure
+
+```text
+.github/
+└── workflows/
+    ├── detect-unity-tests.yml
+    ├── upload-unity-license.yml
+    ├── unity-test-runner.yml
+    └── step-1-unity-tests.yml
+```
+
 #### 1. Enable GitHub Token Write Permissions
 
 To allow GitHub Actions to push changes or access workflows with write access:
