@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       buildTargets:
-        description: "Comma-separated build targets, or 'all' to build everything"
+        description: "Comma-separated build targets, or 'all' to build everything (StandaloneOSX,iOS,Android,WebGL,StandaloneWindows,StandaloneWindows64,StandaloneLinux64)"
         required: false
         default: "iOS"
         type: string
