@@ -29,7 +29,6 @@ jobs:
   # Step 2: Build (Tests Skipped)
   build:
     name: Build
-    needs: [ run-tests ]
     # Only build if:
     # - We have a pull request
     # - We have manual dispatch (either preview or release)
