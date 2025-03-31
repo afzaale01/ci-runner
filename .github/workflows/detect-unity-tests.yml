@@ -45,3 +45,8 @@ jobs:
           else
             echo "found=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Log Detected Tests
+        run: |
+          echo "🧪 EditMode tests found: ${{ steps.edit.outputs.found }}"
+          echo "🎮 PlayMode tests found: ${{ steps.play.outputs.found }}"
