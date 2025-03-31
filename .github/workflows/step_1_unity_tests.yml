@@ -18,10 +18,31 @@ on:
 jobs:
   detect-tests:
     name: 🔍 Detect Tests
-    uses: ./.github/workflows/detect-unity-tests.yml
-    with:
-      editModePath: Assets/Tests/Editor
-      playModePath: Assets/Tests/PlayMode
+    runs-on: ubuntu-latest
+    outputs:
+      has_editmode: ${{ steps.check-edit.outputs.found }}
+      has_playmode: ${{ steps.check-play.outputs.found }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for EditMode Tests
+        id: check-edit
+        run: |
+          if find Assets/Tests/Editor -name '*.cs' | grep -q .; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for PlayMode Tests
+        id: check-play
+        run: |
+          if find Assets/Tests/PlayMode -name '*.cs' | grep -q .; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
 
   upload-license:
     name: ♻️ Upload Unity License
