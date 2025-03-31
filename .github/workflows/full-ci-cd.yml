@@ -4,6 +4,11 @@ on:
   # Allow manual dispatch with a buildType input
   workflow_dispatch:
     inputs:
+      targetPlatforms:
+        description: "JSON array of platforms to build"
+        type: string
+        default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+        required: false
       buildType:
         description: "Choose build type"
         required: true
