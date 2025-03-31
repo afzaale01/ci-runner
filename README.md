@@ -1,25 +1,22 @@
 ### 🔧 CI/CD Setup Instructions
 
-# ✅ Unity CI/CD Test Workflow (Modular + Reusable)
+This repo includes:
+- Modular GitHub workflows for Unity test automation.
+- Automatic detection of EditMode and PlayMode tests.
+- Smart Unity license activation via shared artifact.
+- Optional Git LFS + cache optimizations.
+- Customizable Unity version support.
 
-This project uses **modular GitHub Actions** to automatically run Unity EditMode and PlayMode tests on push/PRs. It includes:
+### 📂 Workflow Files
 
-- 🧪 Test detection
-- ♻️ License activation
-- 📊 Test runner (with Git LFS & Unity cache support)
+- `.github/workflows/step_1_unity_tests.yml` – Entry point
+- `.github/workflows/detect-unity-tests.yml` – Detects test files
+- `.github/workflows/upload-unity-license.yml` – Activates and uploads license
+- `.github/workflows/unity-test-runner.yml` – Runs Unity tests
 
----
+### 🧩 Reusability Notes
 
-## 📁 File Structure
-
-```text
-.github/
-└── workflows/
-    ├── detect-unity-tests.yml
-    ├── upload-unity-license.yml
-    ├── unity-test-runner.yml
-    └── step-1-unity-tests.yml
-```
+All workflows are reusable and configurable using `workflow_call` inputs.
 
 #### 1. Enable GitHub Token Write Permissions
 
