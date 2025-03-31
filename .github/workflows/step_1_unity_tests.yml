@@ -8,6 +8,9 @@ on:
       - 'Packages/**'
       - 'ProjectSettings/**'
       - 'Tests/**'
+    paths-ignore:
+      - '**.md'
+      - '.github/README.md'
   pull_request:
     paths:
       - 'Assets/**'
