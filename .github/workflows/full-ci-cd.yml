@@ -17,6 +17,7 @@ on:
         options:
           - preview
           - release
+  
   # Automatically run tests & builds on certain branches or PR changes
   push:
     paths:
