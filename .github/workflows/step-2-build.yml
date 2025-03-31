@@ -7,7 +7,7 @@ on:
         description: "The name of the built project i.e. 'My_Project' (avoid spaces)"
         default: "My_Project"
         type: string
-        required: true
+        required: false
       buildType:
         description: "Build type, e.g. 'preview' or 'release'"
         type: string
