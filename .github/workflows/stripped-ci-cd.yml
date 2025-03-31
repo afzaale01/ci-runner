@@ -39,8 +39,6 @@ jobs:
   # 2. Build
   # ─────────────────────────────────────────────────────────────────────────────
   build:
-    env:
-      DEFAULT_TARGET_PLATFORMS: '["Android","iOS"]'
     name: Build
     # Build if ANY of these conditions are met:
     # - The event is a pull_request.
