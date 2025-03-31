@@ -32,7 +32,7 @@ on:
 jobs:
   detect-tests:
     name: 🔍 Detect Tests
-    uses: Avalin/unity-ci-templates/.github/workflows/detect-unity-tests.yml
+    uses: ./.github/workflows/detect-unity-tests.yml
     with:
       editModePath: Assets/Tests/Editor
       playModePath: Assets/Tests/PlayMode
