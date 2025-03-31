@@ -26,3 +26,7 @@ jobs:
       useGitLfs: 'true'
       editModePath: 'Assets/Tests/Editor'
       playModePath: 'Assets/Tests/PlayMode'
+    secrets:
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
