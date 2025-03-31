@@ -11,22 +11,12 @@ on:
         options:
           - preview
           - release
-      skipTests:
-        description: "Skip tests and go straight to build? (true/false)"
-        required: false
-        default: "false"
-        type: choice
-        options:
-          - true
-          - false
-
   push:
     paths:
       - 'Assets/**'
       - 'Packages/**'
       - 'ProjectSettings/**'
       - 'Tests/**'
-
   pull_request:
     paths:
       - 'Assets/**'
@@ -38,7 +28,6 @@ jobs:
   # Step 1: Run Tests
   run-tests:
     name: Run Tests
-    if: ${{ github.event.inputs.skipTests == 'false' }}
     uses: ./.github/workflows/step-1-tests.yml
     with:
       unityVersion: '2022.3.60f1'
@@ -54,7 +43,7 @@ jobs:
   # Step 2: Build
   build:
     name: Build
-    needs: ${{ github.event.inputs.skipTests == 'false' && 'run-tests' || cancel() }}
+    needs: run-tests
     if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
     uses: ./.github/workflows/step-2-build.yml
     with:
