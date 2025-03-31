@@ -1,7 +1,7 @@
 name: ✨ DEV - Build
 
 on:
-  workflow_call: {}
+  workflow_call:
     secrets:
       UNITY_EMAIL:
         required: true
@@ -9,7 +9,7 @@ on:
         required: true
       UNITY_LICENSE:
         required: true
-        
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
