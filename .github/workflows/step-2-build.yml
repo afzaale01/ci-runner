@@ -2,6 +2,11 @@ name: ✨ Step 2 - Build
 
 on:
   workflow_call:
+    inputs:
+      targetPlatforms:
+        type: string
+        default: '["StandaloneOSX", "iOS"]'
+        required: false  
     secrets:
       UNITY_EMAIL:
         required: true
@@ -22,9 +27,7 @@ jobs:
       matrix:
         os: 
           - macOS-latest
-        targetPlatform:
-          - StandaloneOSX
-          - iOS
+        targetPlatform: ${{ fromJson(inputs.targetPlatforms) }}
     
     steps:
       - name: Checkout Repository
