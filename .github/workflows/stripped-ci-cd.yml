@@ -1,37 +1,18 @@
-name: 🚀 CI/CD with Selectable Platforms
+name: 🚀 Stripped CI/CD Pipeline (No Tests)
 
 on:
-  # Manual dispatch, offering a dropdown to pick which platform to build
   workflow_dispatch:
     inputs:
       buildType:
-        description: "Choose the build type"
+        description: "Choose build type"
         required: true
         default: "preview"
         type: choice
         options:
           - preview
           - release
-      targetPlatform:
-        description: "Choose the target platform"
-        required: true
-        default: "All"
-        type: choice
-        options:
-          - All
-          - Android
-          - iOS
-          - WebGL
-          - StandaloneOSX
-          - StandaloneWindows
-          - StandaloneWindows64
-          - StandaloneLinux64
   
-  # Typical event triggers
   push:
-    branches:
-      - main
-      - develop
     paths:
       - 'Assets/**'
       - 'Packages/**'
@@ -44,90 +25,13 @@ on:
       - 'ProjectSettings/**'
       - 'Tests/**'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  build_job:
-    name: Build for ${{ matrix.platform }}
-    # Use both Linux and macOS in the matrix if you want to cover iOS (macOS) or Windows (done via a cross-compile on Windows-latest),
-    # or split these into separate jobs. The example below splits them by OS family.
-    runs-on: ${{ matrix.os }}
-
-    # Strategy: define all platforms you *potentially* want to build
-    strategy:
-      matrix:
-        include:
-          # macOS for iOS and StandaloneOSX
-          - os: macOS-latest
-            platform: iOS
-          - os: macOS-latest
-            platform: StandaloneOSX
-          # Ubuntu for Android, WebGL, Windows, Linux
-          - os: ubuntu-latest
-            platform: Android
-          - os: ubuntu-latest
-            platform: WebGL
-          - os: ubuntu-latest
-            platform: StandaloneWindows
-          - os: ubuntu-latest
-            platform: StandaloneWindows64
-          - os: ubuntu-latest
-            platform: StandaloneLinux64
-
-      max-parallel: 1
-      fail-fast: false
-    
-    # Only build a matrix entry if it matches the workflow_dispatch input OR we selected "All"
-    if: >
-      (
-        github.event_name != 'workflow_dispatch'
-      )
-      OR
-      (
-        github.event_name == 'workflow_dispatch' &&
-        (
-          github.event.inputs.targetPlatform == 'All' ||
-          matrix.platform == github.event.inputs.targetPlatform
-        )
-      )
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Restore Unity Library Cache
-        uses: actions/cache@v4
-        with:
-          path: Library
-          key: Library-${{ matrix.platform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: Library-${{ matrix.platform }}-
-
-      # Optional step for extra checks, e.g. free disk space on Android
-      - name: Check Free Disk Space (Android only)
-        if: matrix.platform == 'Android'
-        uses: jlumbroso/free-disk-space@v1.3.1
-
-      - name: Build Unity Project
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          targetPlatform: ${{ matrix.platform }}
-
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Build-${{ matrix.platform }}-${{ github.run_id }}
-          path: build/${{ matrix.platform }}
-
-  confirm_builds:
-    name: Confirm Builds
-    runs-on: ubuntu-latest
-    needs: [ build_job ]
-    steps:
-      - name: Confirm Builds
-        run: echo "All selected builds finished successfully!"
+  # Step 2: Build (Tests Skipped)
+  build:
+    name: Build
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
+    uses: ./.github/workflows/step-2-build.yml
+    secrets:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
