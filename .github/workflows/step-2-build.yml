@@ -5,7 +5,7 @@ on:
     inputs:
       targetPlatforms:
         type: string
-        default: '["StandaloneOSX", "iOS"]'
+        default: '["iOS"]'
         required: false  
     secrets:
       UNITY_EMAIL:
