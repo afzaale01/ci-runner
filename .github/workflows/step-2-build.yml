@@ -27,7 +27,6 @@ on:
         type: boolean
         default: true
         description: "Build for WebGL?"
-  
     secrets:
       UNITY_EMAIL:
         required: true
