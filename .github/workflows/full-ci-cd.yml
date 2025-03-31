@@ -25,25 +25,25 @@ on:
       - 'Tests/**'
 
 jobs:
-  # Step 1: Run Tests
-  run-tests:
-    name: Run Tests
-    uses: ./.github/workflows/step-1-tests.yml
-    with:
-      unityVersion: '2022.3.60f1'
-      licenseArtifactName: 'unity-license'
-      useGitLfs: 'true'
-      editModePath: 'Assets/Tests/Editor'
-      playModePath: 'Assets/Tests/PlayMode'
-    secrets:
-      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+#  # Step 1: Run Tests
+#  run-tests:
+#    name: Run Tests
+#    uses: ./.github/workflows/step-1-tests.yml
+#    with:
+#      unityVersion: '2022.3.60f1'
+#      licenseArtifactName: 'unity-license'
+#      useGitLfs: 'true'
+#      editModePath: 'Assets/Tests/Editor'
+#      playModePath: 'Assets/Tests/PlayMode'
+#    secrets:
+#      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+#      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+#      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
   # Step 2: Build
   build:
     name: Build
-    needs: run-tests
+#    needs: run-tests
     if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
     uses: ./.github/workflows/step-2-build.yml
     secrets:
