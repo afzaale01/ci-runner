@@ -2,6 +2,20 @@ name: 📋 Step 1 - Tests
 
 on:
   workflow_dispatch:
+    inputs:
+      unityVersion:
+        description: "Unity version to use"
+        required: true
+        default: '2022.3.60f1'
+      licenseArtifactName:
+        description: "Name of the uploaded license artifact"
+        required: false
+        default: 'unity-license'
+      useGitLfs:
+        description: "Whether to use Git LFS (true/false)"
+        required: false
+        default: 'true'
+
   push:
     paths:
       - 'Assets/**'
@@ -29,7 +43,7 @@ jobs:
     if: needs.detect-tests.outputs.has_editmode == 'true' || needs.detect-tests.outputs.has_playmode == 'true'
     uses: ./.github/workflows/upload-unity-license.yml  
     with:
-      artifactName: unity-license
+      artifactName: ${{ inputs.licenseArtifactName }}
     secrets: inherit
 
   run-editmode:
@@ -39,9 +53,9 @@ jobs:
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: EditMode
-      licenseArtifactName: 'unity-license'
-      unityVersion: '2022.3.60f1'
-      useGitLfs: 'true'
+      licenseArtifactName: ${{ inputs.licenseArtifactName }}
+      unityVersion: ${{ inputs.unityVersion }}
+      useGitLfs: ${{ inputs.useGitLfs }}
     secrets: inherit
 
   run-playmode:
@@ -51,7 +65,7 @@ jobs:
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: PlayMode
-      licenseArtifactName: 'unity-license'
-      unityVersion: '2022.3.60f1'
-      useGitLfs: 'true'
+      licenseArtifactName: ${{ inputs.licenseArtifactName }}
+      unityVersion: ${{ inputs.unityVersion }}
+      useGitLfs: ${{ inputs.useGitLfs }}
     secrets: inherit
