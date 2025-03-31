@@ -1,4 +1,4 @@
-name: ✨ DEV - Build
+name: ✨ Step 2 - Tests
 
 on:
   workflow_call:
