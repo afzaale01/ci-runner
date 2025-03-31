@@ -2,6 +2,12 @@ name: ✨ Step 2 - Build
 
 on:
   workflow_call:
+    inputs:
+      buildTargets:
+        description: "Comma-separated build targets, or 'all' to build everything"
+        required: false
+        default: "all"
+        type: string
     secrets:
       UNITY_EMAIL:
         required: true
@@ -16,16 +22,18 @@ concurrency:
 
 jobs:
   build_on_macos:
+    # Only run if buildTargets == 'all', or it contains 'StandaloneOSX' or 'iOS'
+    if: ${{ inputs.buildTargets == 'all' || contains(inputs.buildTargets, 'StandaloneOSX') || contains(inputs.buildTargets, 'iOS') }}
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: 
+        os:
           - macOS-latest
         targetPlatform:
           - StandaloneOSX
           - iOS
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -53,11 +61,18 @@ jobs:
           path: build/${{ matrix.targetPlatform }}
     
   build_on_ubuntu:
+    # Only run if buildTargets == 'all', or it contains at least one relevant target
+    if: ${{ inputs.buildTargets == 'all' ||
+           contains(inputs.buildTargets, 'Android') ||
+           contains(inputs.buildTargets, 'WebGL') ||
+           contains(inputs.buildTargets, 'StandaloneWindows') ||
+           contains(inputs.buildTargets, 'StandaloneWindows64') ||
+           contains(inputs.buildTargets, 'StandaloneLinux64') }}
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: 
+        os:
           - ubuntu-latest
         targetPlatform:
           - Android
@@ -65,7 +80,7 @@ jobs:
           - StandaloneWindows
           - StandaloneWindows64
           - StandaloneLinux64
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
