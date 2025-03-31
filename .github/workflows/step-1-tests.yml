@@ -40,7 +40,7 @@ on:
 jobs:
   detect-tests:
     name: 🔍 Detect Tests
-    uses: avalin/unity-ci-templates/.github/workflows/detect-unity-tests.yml@main
+    uses: ./.github/workflows/detect-unity-tests.yml
     with:
       editModePath: ${{ inputs.editModePath }}
       playModePath: ${{ inputs.playModePath }}
@@ -49,7 +49,7 @@ jobs:
     name: 📥️ Upload Unity License
     needs: detect-tests
     if: needs.detect-tests.outputs.has_editmode == 'true' || needs.detect-tests.outputs.has_playmode == 'true'
-    uses: avalin/unity-ci-templates/.github/workflows/upload-unity-license.yml@main
+    uses: ./.github/workflows/upload-unity-license.yml
     with:
       artifactName: ${{ inputs.licenseArtifactName }}
     secrets: inherit
@@ -58,7 +58,7 @@ jobs:
     name: 🥪 EditMode Tests
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_editmode == 'true'
-    uses: avalin/unity-ci-templates/.github/workflows/unity-test-runner.yml@main
+    uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: EditMode
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
@@ -70,7 +70,7 @@ jobs:
     name: 🎮 PlayMode Tests
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_playmode == 'true'
-    uses: avalin/unity-ci-templates/.github/workflows/unity-test-runner.yml@main
+    uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: PlayMode
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
