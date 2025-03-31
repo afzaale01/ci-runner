@@ -1,38 +1,46 @@
-name: 📋 Step 1 - Tests
+name: 📋 Tests
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       unityVersion:
         description: "Unity version to use"
         required: true
         default: 'auto'
-        type: string
       licenseArtifactName:
         description: "Name of the uploaded license artifact"
         required: false
         default: 'unity-license'
-        type: string
       useGitLfs:
         description: "Whether to use Git LFS (true/false)"
         required: false
         default: 'true'
-        type: string
       editModePath:
         description: "Path to the EditMode tests folder"
         required: false
         default: 'Assets/Tests/Editor'
-        type: string
       playModePath:
         description: "Path to the PlayMode tests folder"
         required: false
-        default: 'Assets/Tests/PlayMode'
-        type: string
+        default: 'Assets/Tests/PlayMode'     
+
+  push:
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
+  pull_request:
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
 
 jobs:
   detect-tests:
     name: 🔍 Detect Tests
-    uses: ./.github/workflows/detect-unity-tests.yml
+    uses: avalin/unity-ci-templates/.github/workflows/detect-unity-tests.yml@main
     with:
       editModePath: ${{ inputs.editModePath }}
       playModePath: ${{ inputs.playModePath }}
@@ -41,7 +49,7 @@ jobs:
     name: 📥️ Upload Unity License
     needs: detect-tests
     if: needs.detect-tests.outputs.has_editmode == 'true' || needs.detect-tests.outputs.has_playmode == 'true'
-    uses: ./.github/workflows/upload-unity-license.yml
+    uses: avalin/unity-ci-templates/.github/workflows/upload-unity-license.yml@main
     with:
       artifactName: ${{ inputs.licenseArtifactName }}
     secrets: inherit
@@ -50,7 +58,7 @@ jobs:
     name: 🥪 EditMode Tests
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_editmode == 'true'
-    uses: ./.github/workflows/unity-test-runner.yml
+    uses: avalin/unity-ci-templates/.github/workflows/unity-test-runner.yml@main
     with:
       testMode: EditMode
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
@@ -62,7 +70,7 @@ jobs:
     name: 🎮 PlayMode Tests
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_playmode == 'true'
-    uses: ./.github/workflows/unity-test-runner.yml
+    uses: avalin/unity-ci-templates/.github/workflows/unity-test-runner.yml@main
     with:
       testMode: PlayMode
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
