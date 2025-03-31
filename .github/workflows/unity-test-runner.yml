@@ -68,6 +68,7 @@ jobs:
 
       - name: Run ${{ inputs.testMode }} Tests
         id: run-tests
+        continue-on-error: false
         uses: game-ci/unity-test-runner@v4
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -79,6 +80,7 @@ jobs:
 
       - name: Upload ${{ inputs.testMode }} Test Results (if tests failed)
         if: failure() && steps.run-tests.outputs.artifactsPath != ''
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.testMode }} Test Results
