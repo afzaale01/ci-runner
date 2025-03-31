@@ -16,12 +16,12 @@ on:
       macPlatforms:
         description: 'List of target platforms for macOS (as a JSON array, e.g., ["StandaloneOSX", "iOS"])'
         required: false
-        default: '["StandaloneOSX", "iOS"]'
+        default: '["StandaloneOSX", "iOS"]'  # Keep as a valid JSON array string
         type: string
       ubuntuPlatforms:
         description: 'List of target platforms for Ubuntu (as a JSON array, e.g., ["Android", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64"])'
         required: false
-        default: '["Android", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64"]'
+        default: '["Android", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64"]'  # Same as above
         type: string
     secrets:
       UNITY_LICENSE:
@@ -37,7 +37,7 @@ jobs:
     runs-on: macOS-latest
     strategy:
       matrix:
-        targetPlatform: ${{ fromJson(inputs.macPlatforms) }}
+        targetPlatform: ${{ fromJson(inputs.macPlatforms) }}  # Correctly parse the JSON array
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        targetPlatform: ${{ fromJson(inputs.ubuntuPlatforms) }}
+        targetPlatform: ${{ fromJson(inputs.ubuntuPlatforms) }}  # Correctly parse the JSON array
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
