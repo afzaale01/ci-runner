@@ -48,7 +48,9 @@ jobs:
     name: ♻️ Upload Unity License
     needs: detect-tests
     if: needs.detect-tests.outputs.has_editmode == 'true' || needs.detect-tests.outputs.has_playmode == 'true'
-    uses: ./.github/workflows/upload-unity-license.yml
+    uses: ./.github/workflows/upload-unity-license.yml  
+    with:
+      artifactName: unity-license
     secrets: inherit
 
   run-editmode:
