@@ -38,9 +38,9 @@ jobs:
         run: |
           echo "Original input: ${{ inputs.targetPlatforms }}"
 
-          MAC_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
+          MAC_PLATFORMS=$(echo "${{ inputs.targetPlatforms }}" \
             | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
-          UBUNTU_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
+          UBUNTU_PLATFORMS=$(echo "${{ inputs.targetPlatforms }}" \
             | jq -c '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
 
           echo "Mac platforms: $MAC_PLATFORMS"
