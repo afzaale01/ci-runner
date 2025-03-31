@@ -7,35 +7,27 @@ on:
         description: "Unity version to use"
         required: true
         default: 'auto'
+        type: string
       licenseArtifactName:
         description: "Name of the uploaded license artifact"
         required: false
         default: 'unity-license'
+        type: string
       useGitLfs:
         description: "Whether to use Git LFS (true/false)"
         required: false
         default: 'true'
+        type: string
       editModePath:
         description: "Path to the EditMode tests folder"
         required: false
         default: 'Assets/Tests/Editor'
+        type: string
       playModePath:
         description: "Path to the PlayMode tests folder"
         required: false
-        default: 'Assets/Tests/PlayMode'     
-
-  push:
-    paths:
-      - 'Assets/**'
-      - 'Packages/**'
-      - 'ProjectSettings/**'
-      - 'Tests/**'
-  pull_request:
-    paths:
-      - 'Assets/**'
-      - 'Packages/**'
-      - 'ProjectSettings/**'
-      - 'Tests/**'
+        default: 'Assets/Tests/PlayMode'
+        type: string
 
 jobs:
   detect-tests:
