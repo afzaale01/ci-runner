@@ -35,20 +35,26 @@ on:
       - 'Tests/**'
 
 jobs:
-  # Step 2: Build (Tests Skipped)
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 2. Build
+  # ─────────────────────────────────────────────────────────────────────────────
   build:
     name: Build
-    # Only build if:
-    # - We have a pull request
-    # - We have manual dispatch (either preview or release)
-    # - We are pushing to "main"
+    needs: [ run-tests ]
+    # Build if ANY of these conditions are met:
+    # - The event is a pull_request.
+    # - The event is a workflow_dispatch (manual trigger).
+    # - The branch is 'main' (push to main).
+    # - The event is a push and the ref starts with 'refs/tags/' (a tag push for release).
     if: >
       github.event_name == 'pull_request' ||
-      (github.event_name == 'workflow_dispatch') ||
-      github.ref == 'refs/heads/main'
+      github.event_name == 'workflow_dispatch' ||
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
     uses: ./.github/workflows/step-2-build.yml
     with:
-      buildType: ${{ github.event.inputs.buildType }}
+      # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
+      buildType: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && 'release' || github.event.inputs.buildType }}
       targetPlatforms: ${{ github.event.inputs.targetPlatforms }}
     secrets:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
