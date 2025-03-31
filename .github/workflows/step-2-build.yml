@@ -6,7 +6,7 @@ on:
       targetPlatforms:
         description: "JSON array of platforms to build"
         type: string
-        default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+        default: '["Android","WebGL","iOS"]'
         required: false
     secrets:
       UNITY_EMAIL:
