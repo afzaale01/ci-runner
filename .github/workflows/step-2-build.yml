@@ -6,7 +6,7 @@ on:
       buildTargets:
         description: "Comma-separated build targets, or 'all' to build everything (StandaloneOSX,iOS,Android,WebGL,StandaloneWindows,StandaloneWindows64,StandaloneLinux64)"
         required: false
-        default: "iOS"
+        default: "WebGL"
         type: string
     secrets:
       UNITY_EMAIL:
