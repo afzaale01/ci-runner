@@ -6,11 +6,11 @@ on:
       buildType:
         description: "Choose build type"
         required: true
-        default: "release"
+        default: "preview"
         type: choice
         options:
-          - release
           - preview
+          - release
   push:
     paths:
       - 'Assets/**'
@@ -39,3 +39,16 @@ jobs:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+  # Step 2: Build
+  build:
+    name: Build
+    needs: run-tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Display Build Info (Mock)
+        run: |
+          echo "Build Type: ${{ github.event.inputs.buildType || 'N/A' }}"
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "This is a mock build step. Replace with actual build commands when ready."
