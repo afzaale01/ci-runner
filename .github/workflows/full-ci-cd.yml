@@ -20,8 +20,6 @@ on:
         
   # Automatically run tests & builds on certain branches or PR changes
   push:
-    tags:
-      - 'v*.*.*'
     paths:
       - 'Assets/**'
       - 'Packages/**'
