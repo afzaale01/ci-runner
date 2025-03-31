@@ -14,14 +14,14 @@ on:
         default: '2022.3.60f1'
         type: string
       macPlatforms:
-        description: 'Comma separated list of target platforms for macOS (e.g., StandaloneOSX,iOS)'
+        description: 'List of target platforms for macOS (as a JSON array, e.g., ["StandaloneOSX", "iOS"])'
         required: false
-        default: 'StandaloneOSX,iOS'
+        default: '["StandaloneOSX", "iOS"]'
         type: string
       ubuntuPlatforms:
-        description: 'Comma separated list of target platforms for Ubuntu (e.g., Android,WebGL,StandaloneWindows,StandaloneWindows64,StandaloneLinux64)'
+        description: 'List of target platforms for Ubuntu (as a JSON array, e.g., ["Android", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64"])'
         required: false
-        default: 'Android,WebGL,StandaloneWindows,StandaloneWindows64,StandaloneLinux64'
+        default: '["Android", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64"]'
         type: string
     secrets:
       UNITY_LICENSE:
@@ -37,7 +37,7 @@ jobs:
     runs-on: macOS-latest
     strategy:
       matrix:
-        targetPlatform: ${{ fromJson('["' + inputs.macPlatforms | replace(",", '","') + '"]') }}
+        targetPlatform: ${{ fromJson(inputs.macPlatforms) }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        targetPlatform: ${{ fromJson('["' + inputs.ubuntuPlatforms | replace(",", '","') + '"]') }}
+        targetPlatform: ${{ fromJson(inputs.ubuntuPlatforms) }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
