@@ -46,7 +46,7 @@ jobs:
       - name: Download Unity License Artifact
         uses: actions/download-artifact@v4
         with:
-          name: unity-license
+          name: ${{ inputs.licenseArtifactName }}
           path: ~/.local/share/unity3d/Unity
 
       - name: Cache Unity Library
