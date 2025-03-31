@@ -42,6 +42,7 @@ jobs:
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: EditMode
+      licenseArtifactName: 'unity-license'
     secrets: inherit
 
   run-playmode:
@@ -51,4 +52,5 @@ jobs:
     uses: ./.github/workflows/unity-test-runner.yml
     with:
       testMode: PlayMode
+      licenseArtifactName: 'unity-license'
     secrets: inherit
