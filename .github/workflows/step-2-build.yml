@@ -17,6 +17,11 @@ on:
         type: string
         default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
         required: false
+      timeoutMinutes:
+        description: "Timeout for each build job in minutes"
+        type: number
+        default: 30
+        required: false
     secrets:
       UNITY_EMAIL:
         required: true
@@ -38,18 +43,43 @@ jobs:
       ubuntuPlatforms: ${{ steps.filter.outputs.ubuntuPlatforms }}
 
     steps:
-      - name: Separate Selected Platforms Into Outputs
+      - name: Validate and Filter Platforms
+        id: validate
+        run: |
+          echo "🔍 Validating input: ${{ inputs.targetPlatforms }}"
+
+          KNOWN_PLATFORMS='["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+          INPUT_JSON='${{ inputs.targetPlatforms }}'
+
+          # Validate JSON syntax
+          echo "$INPUT_JSON" | jq empty || {
+            echo "❌ Input is not valid JSON."
+            exit 1
+          }
+
+          # Extract unknown platforms
+          UNKNOWN=$(echo "$INPUT_JSON" | jq -r --argjson known "$KNOWN_PLATFORMS" '.[] | select( . as $p | $known | index($p) | not )')
+          if [[ -n "$UNKNOWN" ]]; then
+            echo "⚠️ Warning: These platforms are not recognized and will be ignored:"
+            echo "$UNKNOWN" | sed 's/^/- /'
+          fi
+
+          # Filter valid platforms
+          VALID=$(echo "$INPUT_JSON" | jq -c --argjson known "$KNOWN_PLATFORMS" '[ .[] | select( . as $p | $known | index($p) ) ]')
+          echo "✅ Valid platforms: $VALID"
+
+          echo "validPlatforms=$VALID" >> $GITHUB_OUTPUT
+
+      - name: Split Platforms by OS
         id: filter
         run: |
-          echo "Original input: ${{ inputs.targetPlatforms }}"
+          VALID_PLATFORMS='${{ steps.validate.outputs.validPlatforms }}'
 
-          MAC_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
-            | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
-          UBUNTU_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
-            | jq -c '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
+          MAC_PLATFORMS=$(echo "$VALID_PLATFORMS" | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
+          UBUNTU_PLATFORMS=$(echo "$VALID_PLATFORMS" | jq -c '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
 
-          echo "Mac platforms: $MAC_PLATFORMS"
-          echo "Ubuntu platforms: $UBUNTU_PLATFORMS"
+          echo "💻 Mac platforms: $MAC_PLATFORMS"
+          echo "🐧 Ubuntu platforms: $UBUNTU_PLATFORMS"
 
           echo "macPlatforms=$MAC_PLATFORMS" >> $GITHUB_OUTPUT
           echo "ubuntuPlatforms=$UBUNTU_PLATFORMS" >> $GITHUB_OUTPUT
@@ -87,8 +117,10 @@ jobs:
     name: Build for ${{ matrix.targetPlatform }}
     if: needs.filter_platforms.outputs.macPlatforms != '[]'
     runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ inputs.timeoutMinutes }}
     needs: [filter_platforms, determine_version]
     strategy:
+      fail-fast: false
       matrix:
         os: 
           - macOS-latest
@@ -127,8 +159,10 @@ jobs:
     name: Build for ${{ matrix.targetPlatform }}
     if: needs.filter_platforms.outputs.ubuntuPlatforms != '[]'
     runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ inputs.timeoutMinutes }}
     needs: [filter_platforms, determine_version]
     strategy:
+      fail-fast: false
       matrix:
         os: 
           - ubuntu-latest

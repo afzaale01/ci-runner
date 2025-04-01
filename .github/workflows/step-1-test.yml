@@ -5,7 +5,7 @@ on:
     inputs:
       unityVersion:
         description: "Unity version to use"
-        required: true
+        required: false
         default: 'auto'
         type: string
       licenseArtifactName:
@@ -28,6 +28,11 @@ on:
         required: false
         default: 'Assets/Tests/PlayMode'
         type: string
+      timeoutMinutes:
+        description: "Timeout for each test job in minutes"
+        type: number
+        required: false
+        default: 15
     secrets:
       UNITY_EMAIL:
         required: true
@@ -63,6 +68,7 @@ jobs:
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
       unityVersion: ${{ inputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLfs }}
+      timeoutMinutes: ${{ inputs.timeoutMinutes }}
     secrets: inherit
 
   run-playmode:
@@ -75,4 +81,5 @@ jobs:
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
       unityVersion: ${{ inputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLfs }}
+      timeoutMinutes: ${{ inputs.timeoutMinutes }}
     secrets: inherit
