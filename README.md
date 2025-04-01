@@ -53,9 +53,9 @@
 |----------|-------------|
 | [`step-1-test.yml`](./.github/workflows/step-1-test.yml) | Runs EditMode and PlayMode tests |
 | [`step-2-build.yml`](./.github/workflows/step-2-build.yml) | Builds project artifacts across all target platforms |
-| [`unity-tests-detection.yml`](./.github/workflows/detect-unity-tests.yml) | Automatically detects presence of EditMode and PlayMode tests |
-| [`unity-tests-runner.yml`](./.github/workflows/unity-test-runner.yml) | Runs Unity tests in specified mode (EditMode/PlayMode) |
-| [`unity-license-uploader.yml`](./.github/workflows/upload-unity-license.yml) | Uploads and activates Unity license artifact |
+| [`unity-tests-detection.yml`](./.github/workflows/unity-tests-detection.yml) | Automatically detects presence of EditMode and PlayMode tests |
+| [`unity-tests-runner.yml`](./.github/workflows/unity-tests-runner.yml) | Runs Unity tests in specified mode (EditMode/PlayMode) |
+| [`unity-license-uploader.yml`](./.github/workflows/unity-license-uploader.yml) | Uploads and activates Unity license artifact |
 
 ---
 
