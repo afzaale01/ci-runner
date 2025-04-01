@@ -1,4 +1,4 @@
-name: 🧰 Target Platforms Filter
+name: 🧮 Target Platforms Filter
 
 on:
   workflow_call:
