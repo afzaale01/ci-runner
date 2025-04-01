@@ -57,7 +57,7 @@ jobs:
     name: 🥪 EditMode Tests
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_editmode == 'true'
-    uses: ./.github/workflows/unity-test-runner.yml
+    uses: ./.github/workflows/unity-tests-runner.yml
     with:
       testMode: EditMode
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
