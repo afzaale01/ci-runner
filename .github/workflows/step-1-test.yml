@@ -39,7 +39,7 @@ on:
 jobs:
   detect-tests:
     name: 🔍 Detect Tests
-    uses: ./.github/workflows/detect-unity-tests.yml
+    uses: ./.github/workflows/unity-tests-detection.yml
     with:
       editModePath: ${{ inputs.editModePath }}
       playModePath: ${{ inputs.playModePath }}
@@ -48,7 +48,7 @@ jobs:
     name: 📥️ Upload Unity License
     needs: detect-tests
     if: needs.detect-tests.outputs.has_editmode == 'true' || needs.detect-tests.outputs.has_playmode == 'true'
-    uses: ./.github/workflows/upload-unity-license.yml
+    uses: ./.github/workflows/unity-license-uploader.yml
     with:
       artifactName: ${{ inputs.licenseArtifactName }}
     secrets: inherit
@@ -69,7 +69,7 @@ jobs:
     name: 🎮 PlayMode Tests
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_playmode == 'true'
-    uses: ./.github/workflows/unity-test-runner.yml
+    uses: ./.github/workflows/unity-tests-runner.yml
     with:
       testMode: PlayMode
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
