@@ -35,7 +35,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  platform_filter:
+  filter_platforms:
     uses: ./.github/workflows/platform-filter.yml
     with:
       targetPlatforms: ${{ inputs.targetPlatforms }}
@@ -80,7 +80,7 @@ jobs:
       matrix:
         os: 
           - macOS-latest
-        targetPlatform: ${{ fromJson(needs.platform_filter.outputs.macPlatforms) }}
+        targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.macPlatforms) }}
     
     steps:
       - name: Checkout Repository
@@ -122,7 +122,7 @@ jobs:
       matrix:
         os: 
           - ubuntu-latest
-        targetPlatform: ${{ fromJson(needs.platform_filter.outputs.ubuntuPlatforms) }}
+        targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.ubuntuPlatforms) }}
 
     steps:
       - name: Checkout Repository
