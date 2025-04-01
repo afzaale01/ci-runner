@@ -45,8 +45,8 @@
 ### Main Workflows
 | Workflow                                  | Description                                     |
 |-------------------------------------------|-------------------------------------------------|
-| [`ci-cd-full.yml`](./.github/workflows/full-ci-cd.yml) | Complete CI/CD pipeline: detects tests, builds project for all platforms, uploads artifacts |
-| [`ci-cd-stripped.yml`](./.github/workflows/stripped-ci-cd.yml) *(Experimental)* | Builds project without running tests (useful for quick platform checks or debugging purposes) |
+| [`full-ci-cd.yml`](./.github/workflows/full-ci-cd.yml) | Complete CI/CD pipeline: detects tests, builds project for all platforms, uploads artifacts |
+| [`stripped-ci-cd.yml`](./.github/workflows/stripped-ci-cd.yml) *(Experimental)* | Builds project without running tests (useful for quick platform checks or debugging purposes) |
 
 ### Reusable Modular Workflows
 | Workflow | Description |
