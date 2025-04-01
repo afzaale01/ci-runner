@@ -99,7 +99,7 @@ Add the following repository secrets to secure your Unity license activation:
 
 ### Automatic Triggers:
 - ✅ Pushes to `main` branch
-- ✅ Tag pushes (`v*.*.*`)
+- ✅ Tag pushes (`v*.*.*`, `v*.*.*-*`)
 - ✅ Pull Requests modifying `Assets/`, `Packages/`, `ProjectSettings/`, or `Tests/`
 
 ### Manual Trigger:
