@@ -5,10 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       buildType:
-        description: |
-          Build type to run.
-          • 📦 preview = manual/dev build
-          • 🚫 release = only allowed via Git tag (v1.2.3)
+        description: "📦 preview = manual/dev build | 🚫 release = only via Git tag (v1.2.3)"
         options:
           - preview
       targetPlatforms:
