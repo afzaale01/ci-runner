@@ -1,4 +1,4 @@
-name: 🧰 Platform Filter
+name: 🧰 Build Platform Filter
 
 on:
   workflow_call:
