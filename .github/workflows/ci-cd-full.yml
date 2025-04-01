@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       buildType:
-        description: "preview = manual/dev build | release = only via Git tag (v1.2.3)"
+        description: "preview = manual/development build | release = only via Git tag (v1.2.3)"
         required: true
         default: "preview"
         type: choice
