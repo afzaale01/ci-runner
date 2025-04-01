@@ -56,6 +56,8 @@
 | [`unity-tests-detection.yml`](./.github/workflows/unity-tests-detection.yml) | Automatically detects presence of EditMode and PlayMode tests |
 | [`unity-tests-runner.yml`](./.github/workflows/unity-tests-runner.yml) | Runs Unity tests in specified mode (EditMode/PlayMode) |
 | [`unity-license-uploader.yml`](./.github/workflows/unity-license-uploader.yml) | Uploads and activates Unity license artifact |
+| [`target-platforms-filter.yml`](./.github/workflows/target-platforms-filter.yml) | Filters selected Unity build targets into macOS and Ubuntu groups |
+| [`build-version-generator.yml`](./.github/workflows/build-version-generator.yml) | Generates a version string for builds based on Git tags or timestamps |
 
 ---
 
