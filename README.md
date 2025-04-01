@@ -8,35 +8,42 @@
 
 ## 📌 Features:
 
-- ✅ **Automatic Unity Test Detection**:  
-  Automatically detects and runs EditMode and PlayMode tests.
+🧪 Automatic Test Detection & Execution
+Detects and runs EditMode and PlayMode tests with no manual setup.
 
-- ✅ **Full Multi-Platform Unity Builds**:  
-  Supports builds for:
-  - Android (`.apk`)
-  - WebGL
-  - Standalone Linux (x64)
-  - Standalone Windows (x86 & x64)
-  - Standalone macOS
-  - iOS
+🛠️ Cross-Platform Builds
+Supports Android, iOS, WebGL, macOS, Windows (x86 & x64), and Linux.
 
-- ✅ **Dynamic Versioning**:  
-  Automatically tags builds with semantic versions (from Git tags) or timestamp + commit hashes for previews.
+🧩 Modular & Reusable Workflows
+Clean separation of test/build logic using workflow_call.
 
-- ✅ **Parallelized Builds**:  
-  Efficiently parallelizes builds across Ubuntu and macOS for optimized CI performance.
+🚀 Dynamic Versioning & Tag-based Releases
+Builds are versioned using Git tags (for releases) or timestamps (for previews).
 
-- ✅ **Conditional & Flexible Triggers**:  
-  Runs tests/builds on:
-  - Commits to `main` or release tags (`v*.*.*`)
-  - Pull Requests modifying project files
-  - Manual workflow dispatches (`workflow_dispatch`) with custom inputs
+⚡ Efficient & Parallel Execution
+Matrix builds across macOS and Ubuntu, optimized for CI speed.
 
-- ✅ **Reusable & Modular Workflows**:  
-  Designed with reusable workflow calls (`workflow_call`) for maintainability and simplicity.
+🗃️ CI Optimizations
+Unity Library/ caching and Git LFS support built-in.
 
-- ✅ **Git LFS & Cache Optimizations**:  
-  Includes optional caching for Unity's `Library` folder and Git LFS support.
+| Feature                      | Status   | Description |
+|-----------------------------|----------|-------------|
+| 🧭 CI Workflow Dispatch      | ✅ Done   | Manual dispatch with custom `buildType` and `targetPlatforms`. |
+| 🧪 Test Detection            | ✅ Done   | Automatically detects and runs EditMode and PlayMode tests. |
+| 🛠️ Multi-Platform Build      | ✅ Done   | Supports Android, iOS, WebGL, Linux, macOS, and Windows. |
+| 🏷️ Versioning                | ✅ Done   | Git tag or timestamp + commit hash for builds. |
+| 🔐 Unity License Activation  | ✅ Done   | Activates Unity license securely in CI. |
+| 🧮 GitHub Actions Matrix     | ✅ Done   | Parallel build strategy by OS. |
+| 🧩 Workflow Reusability      | ✅ Done   | Modular steps with `workflow_call`. |
+| 🗃️ Git LFS & Caching         | ✅ Done   | Git LFS support and Library folder caching. |
+| 🧪 Test Summary Comments     | 📝 To do  | Add PR comments with test pass/fail summary using `actions/github-script`. |
+| 📦 GitHub Release Deployment | 📝 To do  | Auto-create GitHub Releases & attach artifacts on version tag push. |
+| 📣 Notifications             | 📝 To do  | Optional Slack/Discord notifications for CI events. |
+| 🧼 Code Formatting           | 📝 To do  | Run `dotnet format`, `csharpier`, or similar before test/build. |
+| 📊 Test Coverage Reporting   | 📝 To do  | Integrate with Codecov or similar tools. |
+| 🔍 Pre-merge Linting         | 📝 To do  | Run static analysis or linting in PRs. |
+| 🚀 Unity Performance Tests   | 📝 To do  | Add support for Unity Performance Testing API. |
+| 🤖 AI/Smoke Testing          | 📝 To do  | Optional gameplay sanity checks for CI stability. |
 
 ---
 
@@ -130,9 +137,3 @@ release-My_Project-StandaloneWindows64-v1.0.0
 ```
 
 ---
-
-## 📑 Roadmap to v1.0:
-
-- [ ] Automatic deployment to GitHub Releases
-- [ ] Slack/Discord notifications for CI status
-- [ ] Changelog automation with release notes
