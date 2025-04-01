@@ -27,6 +27,7 @@ on:
       - 'ProjectSettings/**'
       - 'Tests/**'
   pull_request:
+    types: [ready_for_review, synchronize, reopened]
     paths:
       - 'Assets/**'
       - 'Packages/**'
