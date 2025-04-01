@@ -2,7 +2,7 @@
 
 **Robust GitHub Actions workflows to automate tests, builds, and continuous integration for your Unity projects.**
 
-![Unity CI/CD](https://github.com/Avalin/CI-CD-Unity-Test-Project/actions/workflows/full-ci-cd.yml/badge.svg)
+![Unity CI/CD](https://github.com/Avalin/CI-CD-Unity-Test-Project/actions/workflows/ci-cd-full.yml/badge.svg)
 
 ---
 
