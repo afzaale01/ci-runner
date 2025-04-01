@@ -36,7 +36,7 @@ concurrency:
 
 jobs:
   filter_platforms:
-    uses: ./.github/workflows/build-platform-filter.yml
+    uses: ./.github/workflows/target-platforms-filter.yml
     with:
       targetPlatforms: ${{ inputs.targetPlatforms }}
 
