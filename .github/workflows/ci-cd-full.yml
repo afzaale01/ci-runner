@@ -80,9 +80,9 @@ jobs:
         }}
       targetPlatforms: >
         ${{ 
-          github.event.inputs.targetPlatforms == '' 
+          github.event.inputs.targetPlatforms == ''
             && '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
-            || github.event.inputs.targetPlatforms 
+            || github.event.inputs.targetPlatforms
         }}
       timeoutMinutes: 30
     secrets:
