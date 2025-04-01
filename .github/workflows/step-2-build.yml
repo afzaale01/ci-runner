@@ -57,7 +57,10 @@ jobs:
           first_two_parts=$(echo $sanitized_ref | cut -d'-' -f1-2)
 
           # Set the build name
-          echo "build_name=${first_two_parts}-${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}" >> $GITHUB_ENV
+          echo "BUILD_NAME=${first_two_parts}-${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}" >> $GITHUB_ENV
+          
+          # Print build name
+          echo "Build name is: $BUILD_NAME"
 
   filter_platforms:
     uses: ./.github/workflows/target-platforms-filter.yml
