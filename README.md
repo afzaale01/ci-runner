@@ -45,17 +45,17 @@
 ### Main Workflows
 | Workflow                                  | Description                                     |
 |-------------------------------------------|-------------------------------------------------|
-| [`full-ci-cd.yml`](./.github/workflows/full-ci-cd.yml) | Complete CI/CD pipeline: detects tests, builds project for all platforms, uploads artifacts |
-| [`stripped-ci-cd.yml`](./.github/workflows/stripped-ci-cd.yml) *(Experimental)* | Builds project without running tests (useful for quick platform checks or debugging purposes) |
+| [`ci-cd-full.yml`](./.github/workflows/full-ci-cd.yml) | Complete CI/CD pipeline: detects tests, builds project for all platforms, uploads artifacts |
+| [`ci-cd-stripped.yml`](./.github/workflows/stripped-ci-cd.yml) *(Experimental)* | Builds project without running tests (useful for quick platform checks or debugging purposes) |
 
 ### Reusable Modular Workflows
 | Workflow | Description |
 |----------|-------------|
 | [`step-1-test.yml`](./.github/workflows/step-1-test.yml) | Runs EditMode and PlayMode tests |
 | [`step-2-build.yml`](./.github/workflows/step-2-build.yml) | Builds project artifacts across all target platforms |
-| [`detect-unity-tests.yml`](./.github/workflows/detect-unity-tests.yml) | Automatically detects presence of EditMode and PlayMode tests |
-| [`upload-unity-license.yml`](./.github/workflows/upload-unity-license.yml) | Uploads and activates Unity license artifact |
-| [`unity-test-runner.yml`](./.github/workflows/unity-test-runner.yml) | Runs Unity tests in specified mode (EditMode/PlayMode) |
+| [`unity-tests-detection.yml`](./.github/workflows/detect-unity-tests.yml) | Automatically detects presence of EditMode and PlayMode tests |
+| [`unity-tests-runner.yml`](./.github/workflows/unity-test-runner.yml) | Runs Unity tests in specified mode (EditMode/PlayMode) |
+| [`unity-license-uploader.yml`](./.github/workflows/upload-unity-license.yml) | Uploads and activates Unity license artifact |
 
 ---
 
