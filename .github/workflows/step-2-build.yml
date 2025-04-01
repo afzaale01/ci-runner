@@ -80,7 +80,7 @@ jobs:
       matrix:
         os: 
           - macOS-latest
-        targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.macPlatforms) }}
+        targetPlatform: ${{ fromJson(needs.platform_filter.outputs.macPlatforms) }}
     
     steps:
       - name: Checkout Repository
@@ -122,7 +122,7 @@ jobs:
       matrix:
         os: 
           - ubuntu-latest
-        targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.ubuntuPlatforms) }}
+        targetPlatform: ${{ fromJson(needs.platform_filter.outputs.ubuntuPlatforms) }}
 
     steps:
       - name: Checkout Repository
