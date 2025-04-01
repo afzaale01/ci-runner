@@ -74,7 +74,8 @@ jobs:
         id: filter
         run: |
           VALID_PLATFORMS='${{ steps.validate.outputs.validPlatforms }}'
-
+          echo "📥 Using filtered valid platforms: $VALID_PLATFORMS"
+          
           MAC_PLATFORMS=$(echo "$VALID_PLATFORMS" | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
           UBUNTU_PLATFORMS=$(echo "$VALID_PLATFORMS" | jq -c '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
 
