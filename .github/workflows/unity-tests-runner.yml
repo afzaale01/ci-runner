@@ -1,4 +1,4 @@
-name: 📊 Run Unity Tests
+name: 📊 Unity Tests Runner
 
 on:
   workflow_call:
