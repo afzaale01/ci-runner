@@ -35,33 +35,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  generate_name:
-    name: Generate Build Name
-    runs-on: ubuntu-latest
-    outputs:
-      build_name: ${{ steps.generate_name.outputs.build_name }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Generate Dynamic Build Name
-        id: generate_name
-        run: |
-          # Extract the branch or PR name
-          ref_name="${GITHUB_REF##*/}"
-
-          # Split and sanitize the name
-          sanitized_ref=$(echo $ref_name | tr -cd '[:alnum:]-')
-
-          # Split by dashes and get the first two parts
-          first_two_parts=$(echo $sanitized_ref | cut -d'-' -f1-2)
-
-          # Set the build name
-          echo "BUILD_NAME=${first_two_parts}-${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}" >> $GITHUB_ENV
-          
-          # Print build name
-          echo "Build name is: $BUILD_NAME"
-
   filter_platforms:
     uses: ./.github/workflows/target-platforms-filter.yml
     with:
