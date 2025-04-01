@@ -5,13 +5,12 @@ on:
   workflow_dispatch:
     inputs:
       buildType:
-        description: "Choose build type"
-        required: true
-        default: "preview"
-        type: choice
+        description: |
+          Build type to run.
+          • 📦 preview = manual/dev build
+          • 🚫 release = only allowed via Git tag (v1.2.3)
         options:
           - preview
-          - release
       targetPlatforms:
         description: "JSON array of platforms to build"
         type: string

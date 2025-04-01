@@ -81,7 +81,7 @@ jobs:
           
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "Determined version: ${VERSION}"
+          echo "📦 Determined version: ${VERSION}"
 
   build_on_macos:
     name: Build for ${{ matrix.targetPlatform }}
