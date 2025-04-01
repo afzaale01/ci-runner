@@ -6,44 +6,37 @@
 
 ---
 
-## 📌 Features:
+## 📌 Features
 
-🧪 Automatic Test Detection & Execution
-Detects and runs EditMode and PlayMode tests with no manual setup.
+| Feature                        | Description |
+|-------------------------------|-------------|
+| 🧪 **Test Detection**          | Automatically runs EditMode & PlayMode tests. |
+| 🛠️ **Cross-Platform Builds**   | Android, iOS, WebGL, macOS, Windows, Linux. |
+| 🧩 **Modular Workflows**       | Reusable steps via `workflow_call`. |
+| 🏷️ **Dynamic Versioning**      | Git tag (release) or timestamp (preview). |
+| ⚡ **Parallel Execution**      | Matrix builds across macOS & Ubuntu. |
+| 🔐 **License Activation**      | Activates Unity license securely in CI. |
+| 🗃️ **LFS & Cache Support**     | Git LFS & Unity `Library` caching. |
+| 🧭 **Manual Workflow Dispatch**| Custom `buildType` and `targetPlatforms`. |
 
-🛠️ Cross-Platform Builds
-Supports Android, iOS, WebGL, macOS, Windows (x86 & x64), and Linux.
+<details>
+  <summary><strong>🧪 Roadmap / To-Do</strong></summary>
 
-🧩 Modular & Reusable Workflows
-Clean separation of test/build logic using workflow_call.
+<br>
 
-🚀 Dynamic Versioning & Tag-based Releases
-Builds are versioned using Git tags (for releases) or timestamps (for previews).
+| Feature                        | Description |
+|-------------------------------|-------------|
+| 🧪 Test Summary Comments       | PR comment with test results using `github-script`. |
+| 📦 GitHub Release Deployment   | Auto-attach builds on tag push. |
+| 📣 CI Notifications            | Optional Slack/Discord webhooks. |
+| 🧼 Code Formatting             | Run `dotnet format`, `csharpier`, etc. |
+| 📊 Test Coverage               | Coverage reporting via Codecov or others. |
+| 🔍 Pre-merge Linting           | Static analysis during PRs. |
+| 🚀 Performance Tests           | Support Unity Performance API. |
+| 🤖 Smoke Testing               | Basic gameplay/UI sanity checks. |
 
-⚡ Efficient & Parallel Execution
-Matrix builds across macOS and Ubuntu, optimized for CI speed.
+</details>
 
-🗃️ CI Optimizations
-Unity Library/ caching and Git LFS support built-in.
-
-| Feature                      | Status   | Description |
-|-----------------------------|----------|-------------|
-| 🧭 CI Workflow Dispatch      | ✅ Done   | Manual dispatch with custom `buildType` and `targetPlatforms`. |
-| 🧪 Test Detection            | ✅ Done   | Automatically detects and runs EditMode and PlayMode tests. |
-| 🛠️ Multi-Platform Build      | ✅ Done   | Supports Android, iOS, WebGL, Linux, macOS, and Windows. |
-| 🏷️ Versioning                | ✅ Done   | Git tag or timestamp + commit hash for builds. |
-| 🔐 Unity License Activation  | ✅ Done   | Activates Unity license securely in CI. |
-| 🧮 GitHub Actions Matrix     | ✅ Done   | Parallel build strategy by OS. |
-| 🧩 Workflow Reusability      | ✅ Done   | Modular steps with `workflow_call`. |
-| 🗃️ Git LFS & Caching         | ✅ Done   | Git LFS support and Library folder caching. |
-| 🧪 Test Summary Comments     | 📝 To do  | Add PR comments with test pass/fail summary using `actions/github-script`. |
-| 📦 GitHub Release Deployment | 📝 To do  | Auto-create GitHub Releases & attach artifacts on version tag push. |
-| 📣 Notifications             | 📝 To do  | Optional Slack/Discord notifications for CI events. |
-| 🧼 Code Formatting           | 📝 To do  | Run `dotnet format`, `csharpier`, or similar before test/build. |
-| 📊 Test Coverage Reporting   | 📝 To do  | Integrate with Codecov or similar tools. |
-| 🔍 Pre-merge Linting         | 📝 To do  | Run static analysis or linting in PRs. |
-| 🚀 Unity Performance Tests   | 📝 To do  | Add support for Unity Performance Testing API. |
-| 🤖 AI/Smoke Testing          | 📝 To do  | Optional gameplay sanity checks for CI stability. |
 
 ---
 
