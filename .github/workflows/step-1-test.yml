@@ -41,24 +41,13 @@ on:
       UNITY_LICENSE:
         required: true
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Environment variables
-# ─────────────────────────────────────────────────────────────────────────────
-env:
-  UNITY_VERSION: ${{ inputs.unityVersion }}
-  LICENSE_ARTIFACT_NAME: ${{ inputs.licenseArtifactName }}
-  USE_GIT_LFS: ${{ inputs.useGitLfs }}
-  EDIT_MODE_TEST_PATH: ${{ inputs.editModePath }}
-  PLAY_MODE_TEST_PATH: ${{ inputs.playModePath }}
-  TIMEOUT_MINUTES: ${{ inputs.timeoutMinutes }}
-
 jobs:
   detect-tests:
     name: 🔍 Detect Tests
     uses: ./.github/workflows/unity-tests-detection.yml
     with:
-      editModePath: ${{ env.EDIT_MODE_TEST_PATH }}
-      playModePath: ${{ env.PLAY_MODE_TEST_PATH }}
+      editModePath: ${{ inputs.editModePath }}
+      playModePath: ${{ inputs.playModePath }}
 
   upload-license:
     name: 📥️ Upload Unity License
@@ -66,7 +55,7 @@ jobs:
     if: needs.detect-tests.outputs.has_editmode == 'true' || needs.detect-tests.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-license-uploader.yml
     with:
-      artifactName: ${{ env.LICENSE_ARTIFACT_NAME }}
+      artifactName: ${{ inputs.licenseArtifactName }}
     secrets: inherit
 
   run-editmode:
@@ -76,10 +65,10 @@ jobs:
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
       testMode: EditMode
-      licenseArtifactName: ${{ env.LICENSE_ARTIFACT_NAME }}
-      unityVersion: ${{ env.UNITY_VERSION }}
-      useGitLfs: ${{ env.USE_GIT_LFS }}
-      timeoutMinutes: ${{ env.TIMEOUT_MINUTES }}
+      licenseArtifactName: ${{ inputs.licenseArtifactName }}
+      unityVersion: ${{ inputs.unityVersion }}
+      useGitLfs: ${{ inputs.useGitLfs }}
+      timeoutMinutes: ${{ inputs.timeoutMinutes }}
     secrets: inherit
 
   run-playmode:
@@ -89,8 +78,8 @@ jobs:
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
       testMode: PlayMode
-      licenseArtifactName: ${{ env.LICENSE_ARTIFACT_NAME }}
-      unityVersion: ${{ env.UNITY_VERSION }}
-      useGitLfs: ${{ env.USE_GIT_LFS }}
-      timeoutMinutes: ${{ env.TIMEOUT_MINUTES }}
+      licenseArtifactName: ${{ inputs.licenseArtifactName }}
+      unityVersion: ${{ inputs.unityVersion }}
+      useGitLfs: ${{ inputs.useGitLfs }}
+      timeoutMinutes: ${{ inputs.timeoutMinutes }}
     secrets: inherit
