@@ -3,11 +3,6 @@ name: 📋 Step 1 - Test
 on:
   workflow_call:
     inputs:
-      unityVersion:
-        description: "Unity version to use"
-        required: false
-        default: 'auto'
-        type: string
       licenseArtifactName:
         description: "Name of the uploaded license artifact"
         required: false
@@ -66,7 +61,7 @@ jobs:
     with:
       testMode: EditMode
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
-      unityVersion: ${{ inputs.unityVersion }}
+      unityVersion: ${{ vars.UNITY_VERSION }}
       useGitLfs: ${{ inputs.useGitLfs }}
       timeoutMinutes: ${{ inputs.timeoutMinutes }}
     secrets: inherit
@@ -79,7 +74,7 @@ jobs:
     with:
       testMode: PlayMode
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
-      unityVersion: ${{ inputs.unityVersion }}
+      unityVersion: ${{ vars.UNITY_VERSION }}
       useGitLfs: ${{ inputs.useGitLfs }}
       timeoutMinutes: ${{ inputs.timeoutMinutes }}
     secrets: inherit
