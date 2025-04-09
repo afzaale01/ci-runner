@@ -1,7 +1,6 @@
 name: 🚀 Full CI/CD Pipeline
 
 on:
-  # Allow manual dispatch with a buildType input
   workflow_dispatch:
     inputs:
       buildType:
@@ -34,6 +33,16 @@ on:
       - 'ProjectSettings/**'
       - 'Tests/**'
 
+env:
+  UNITY_VERSION: '2022.3.60f1'
+  PROJECT_NAME: 'Awesome_Game'
+  LICENSE_ARTIFACT_NAME: 'unity-license'
+  TARGET_PLATFORMS: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+  EDIT_MODE_TEST_PATH: 'Assets/Tests/Editor'
+  PLAY_MODE_TEST_PATH: 'Assets/Tests/PlayMode'
+  TEST_TIMEOUT_MINUTES: 15
+  BUILD_TIMEOUT_MINUTES: 30
+
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # 1. Run Tests
@@ -42,12 +51,12 @@ jobs:
     name: Run Tests
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
-      unityVersion: '2022.3.60f1'
-      licenseArtifactName: 'unity-license'
+      unityVersion: ${{ env.UNITY_VERSION }}
+      licenseArtifactName: ${{ env.LICENSE_ARTIFACT_NAME }}
       useGitLfs: 'true'
-      editModePath: 'Assets/Tests/Editor'
-      playModePath: 'Assets/Tests/PlayMode'
-      timeoutMinutes: 15
+      editModePath: ${{ env.EDIT_MODE_TEST_PATH }}
+      playModePath: ${{ env.PLAY_MODE_TEST_PATH }}
+      timeoutMinutes: ${{ env.TEST_TIMEOUT_MINUTES }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -69,15 +78,12 @@ jobs:
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
     uses: avalin/unity-ci-templates/.github/workflows/step-2-build.yml@main
     with:
-      # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
-      buildType: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && 'release' || github.event.inputs.buildType }}
+      projectName: ${{ env.PROJECT_NAME }}
+      buildType: >
+        ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && 'release' || github.event.inputs.buildType }}
       targetPlatforms: >
-        ${{ 
-          github.event.inputs.targetPlatforms == ''
-            && '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
-            || github.event.inputs.targetPlatforms
-        }}
-      timeoutMinutes: 30
+        ${{ github.event.inputs.targetPlatforms == '' && env.TARGET_PLATFORMS || github.event.inputs.targetPlatforms }}
+      timeoutMinutes: ${{ env.BUILD_TIMEOUT_MINUTES }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
