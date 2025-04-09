@@ -42,7 +42,7 @@ jobs:
     name: Run Tests
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
-      unityVersion: ${{ vars.UNITY_VERSION }}
+      unityVersion: '2022.3.60f1'
       licenseArtifactName: 'unity-license'
       useGitLfs: 'true'
       editModePath: 'Assets/Tests/Editor'
