@@ -43,11 +43,11 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
-      licenseArtifactName: 'unity-license'
-      useGitLfs: 'true'
+      licenseArtifactName: ${{ vars.LICENSE_ARTIFACT_NAME }}
+      useGitLfs: ${{ vars.USE_GIT_LFS }}
       editModePath: 'Assets/Tests/Editor'
       playModePath: 'Assets/Tests/PlayMode'
-      timeoutMinutes: 15
+      timeoutMinutes: ${{ vars.TESTS_TIMEOUT_IN_MINUTES }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -70,13 +70,9 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-2-build.yml@main
     with:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
+      projectName: ${{ vars.PROJECT_NAME }}
       buildType: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && 'release' || github.event.inputs.buildType }}
-      targetPlatforms: >
-        ${{ 
-          github.event.inputs.targetPlatforms == ''
-            && '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
-            || github.event.inputs.targetPlatforms
-        }}
+      targetPlatforms: ${{ vars.TARGET_PLATFORMS }}
       timeoutMinutes: 30
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
