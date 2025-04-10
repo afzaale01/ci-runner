@@ -39,7 +39,7 @@ jobs:
           API_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/$VERSION"
 
           RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Authorization: Bearer ${{ github.token }}" \
             -H "Accept: application/vnd.github+json" \
             "$API_URL")
 
@@ -67,7 +67,7 @@ jobs:
             '{ tag_name: $tag_name, name: $name, draft: false, prerelease: $prerelease }')
 
           RESPONSE=$(curl -s -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Authorization: Bearer ${{ github.token }}" \
             -H "Accept: application/vnd.github+json" \
             -d "$PAYLOAD" \
             "https://api.github.com/repos/${{ github.repository }}/releases")
@@ -75,9 +75,8 @@ jobs:
           RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id')
           echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
           echo "✅ Created release with ID: $RELEASE_ID"
-
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: 🧮 Upload Artifacts
         run: |
@@ -98,7 +97,7 @@ jobs:
 
               echo "📤 Uploading $ZIP_NAME to release ID $RELEASE_ID"
               curl -s -X POST \
-                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Authorization: Bearer ${{ github.token }}" \
                 -H "Content-Type: application/zip" \
                 --data-binary @"$ZIP_NAME" \
                 "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets?name=$ZIP_NAME"
@@ -106,6 +105,5 @@ jobs:
               echo "⚠️ Skipping: $ARTIFACT_PATH not found"
             fi
           done
-
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
