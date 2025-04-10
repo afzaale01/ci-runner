@@ -61,21 +61,7 @@
 
 ---
 
-## ⚙️ Initial Setup Instructions:
-
-### 1. ✅ Enable GitHub Token Permissions:
-
-To ensure workflows function properly, give workflows read/write permissions:
-
-- **Navigate to**:  
-  `Settings → Actions → General → Workflow permissions`
-
-- **Select**:  
-  ✅ **Read and write permissions**
-
----
-
-### 2. 🔐 Add Repository Secrets:
+### 1. 🔐 Add Repository Secrets:
 
 Add the following repository secrets to secure your Unity license activation:
 
@@ -90,7 +76,7 @@ Add the following repository secrets to secure your Unity license activation:
 
 ---
 
-### 3. ⚙️ Add Repository Variables:
+### 2. ⚙️ Add Repository Variables:
 
 Add the following repository variables to configure and control your Unity CI/CD pipeline:
 
