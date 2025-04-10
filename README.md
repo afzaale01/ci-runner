@@ -88,6 +88,27 @@ Add the following repository secrets to secure your Unity license activation:
 | `UNITY_PASSWORD` | Password for your Unity account                            |
 | `UNITY_LICENSE`  | Content of your `.ulf` Unity license file (e.g., at `C:/ProgramData/Unity` on Windows) |
 
+### 3. ⚙️ Add Repository Variables:
+
+Add the following repository variables to configure and control your Unity CI/CD pipeline:
+
+- **Navigate to**:  
+  `Settings → Secrets and variables → Actions → New repository variable`
+
+| Variable Name               | Description                                                                 |
+|-----------------------------|-----------------------------------------------------------------------------|
+| `PROJECT_NAME`              | Project name used in artifact naming and builds (e.g., `MyGame`)            |
+| `UNITY_VERSION`             | Unity version to use (e.g., `2022.3.13f1`)                                  |
+| `USE_GIT_LFS`               | Whether to use Git LFS (`true` or `false`)                                  |
+| `LICENSE_ARTIFACT_NAME`     | Name for storing the uploaded Unity license artifact (e.g., `unity-license`)|
+| `UNITY_TESTS_EDITMODE_PATH` | Path to your EditMode tests folder (e.g., `Assets/Tests/Editor`)            |
+| `UNITY_TESTS_PLAYMODE_PATH` | Path to your PlayMode tests folder (e.g., `Assets/Tests/PlayMode`)          |
+| `TIMEOUT_TESTS_IN_MINUTES` | Timeout for test jobs in minutes (e.g., `15`)                               |
+| `TIMEOUT_BUILD_IN_MINUTES` | Timeout for each build job in minutes (e.g., `30`)                          |
+| `TARGET_PLATFORMS`          | JSON array of platforms to build (e.g., `["Android","WebGL","StandaloneWindows64"]`) |
+| `RETENTION_DAYS_RELEASE`    | Days to retain build artifacts for release builds (e.g., `30`)             |
+| `RETENTION_DAYS_PREVIEW`    | Days to retain artifacts for preview/manual builds (e.g., `7`)             |
+
 ---
 
 ## 🚦 Triggering CI/CD Workflows:
