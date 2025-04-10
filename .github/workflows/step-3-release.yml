@@ -32,7 +32,19 @@ jobs:
         with:
           path: release-artifacts
 
+      - name: 📝 Check if Release Already Exists
+        id: check_release
+        run: |
+          if gh release view "${{ inputs.version }}" &>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: 📝 Create GitHub Release
+        if: steps.check_release.outputs.exists == 'false'
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -53,13 +65,16 @@ jobs:
             ARTIFACT_PATH="release-artifacts/${{ inputs.buildType }}-${PROJECT}-${PLATFORM}-${VERSION}"
             if [ -d "$ARTIFACT_PATH" ]; then
               zip -r "${PLATFORM}.zip" "$ARTIFACT_PATH"
+              RELEASE_ID=$(gh release view "$VERSION" --json id -q .id)
               curl \
                 -X POST \
                 -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                 -H "Content-Type: application/zip" \
                 --data-binary @"${PLATFORM}.zip" \
-                "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=${PROJECT}-${PLATFORM}-${VERSION}.zip"
+                "https://uploads.github.com/repos/${{ github.repository }}/releases/${RELEASE_ID}/assets?name=${PROJECT}-${PLATFORM}-${VERSION}.zip"
             else
               echo "⚠️ Skipping: $ARTIFACT_PATH not found"
             fi
           done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
