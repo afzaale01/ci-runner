@@ -10,14 +10,15 @@
 
 | Feature                        | Description |
 |-------------------------------|-------------|
-| 🧪 **Test Detection**          | Automatically runs EditMode & PlayMode tests. |
-| 🛠️ **Cross-Platform Builds**   | Android, iOS, WebGL, macOS, Windows, Linux. |
-| 🧩 **Modular Workflows**       | Reusable steps via `workflow_call`. |
-| 🏷️ **Dynamic Versioning**      | Git tag (release) or timestamp (preview). |
-| ⚡ **Parallel Execution**      | Matrix builds across macOS & Ubuntu. |
-| 🔐 **License Activation**      | Activates Unity license securely in CI. |
-| 🗃️ **LFS & Cache Support**     | Git LFS & Unity `Library` caching. |
-| 🧭 **Manual Workflow Dispatch**| Custom `buildType` and `targetPlatforms`. |
+| 🧪 **Test Detection**            | Automatically runs EditMode & PlayMode tests. |
+| 📦 **GitHub Release Deployment** | Auto-attach builds on tag push. |
+| 🛠️ **Cross-Platform Builds**     | Android, iOS, WebGL, macOS, Windows, Linux. |
+| 🧩 **Modular Workflows**         | Reusable steps via `workflow_call`. |
+| 🏷️ **Dynamic Versioning**        | Git tag (release) or timestamp (preview). |
+| ⚡ **Parallel Execution**        | Matrix builds across macOS & Ubuntu. |
+| 🔐 **License Activation**        | Activates Unity license securely in CI. |
+| 🗃️ **LFS & Cache Support**       | Git LFS & Unity `Library` caching. |
+| 🧭 **Manual Workflow Dispatch**  | Custom `buildType` and `targetPlatforms`. |
 
 <details>
   <summary><strong>🧪 Roadmap / To-Do</strong></summary>
@@ -27,7 +28,6 @@
 | Feature                        | Description |
 |-------------------------------|-------------|
 | 🧪 Test Summary Comments       | PR comment with test results using `github-script`. |
-| 📦 GitHub Release Deployment   | Auto-attach builds on tag push. |
 | 📣 CI Notifications            | Optional Slack/Discord webhooks. |
 | 🧼 Code Formatting             | Run `dotnet format`, `csharpier`, etc. |
 | 📊 Test Coverage               | Coverage reporting via Codecov or others. |
