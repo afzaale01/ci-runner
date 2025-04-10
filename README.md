@@ -88,6 +88,8 @@ Add the following repository secrets to secure your Unity license activation:
 | `UNITY_PASSWORD` | Password for your Unity account                            |
 | `UNITY_LICENSE`  | Content of your `.ulf` Unity license file (e.g., at `C:/ProgramData/Unity` on Windows) |
 
+---
+
 ### 3. ⚙️ Add Repository Variables:
 
 Add the following repository variables to configure and control your Unity CI/CD pipeline:
