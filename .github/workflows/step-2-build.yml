@@ -136,7 +136,7 @@ jobs:
         with:
           name: ${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
           path: build/${{ matrix.targetPlatform }}
-          retention-days: ${{ inputs.buildType == 'release' && 30 || 7 }}
+          retention-days: ${{ inputs.retentionDays }}
 
   confirm_builds:
     name: Confirm Builds
