@@ -91,9 +91,10 @@ Add the following repository variables to configure and control your Unity CI/CD
 | `LICENSE_ARTIFACT_NAME`     | Name for storing the uploaded Unity license artifact (e.g., `unity-license`)|
 | `UNITY_TESTS_EDITMODE_PATH` | Path to your EditMode tests folder (e.g., `Assets/Tests/Editor`)            |
 | `UNITY_TESTS_PLAYMODE_PATH` | Path to your PlayMode tests folder (e.g., `Assets/Tests/PlayMode`)          |
+| `TARGET_PLATFORMS_PREVIEW` | Platforms to build in preview builds (e.g., `["Android","WebGL"]`)       |
+| `TARGET_PLATFORMS_RELEASE` | Platforms to build in release builds (e.g., `["Android","WebGL","StandaloneWindows64"]`) |
 | `TIMEOUT_TESTS_IN_MINUTES` | Timeout for test jobs in minutes (e.g., `15`)                               |
 | `TIMEOUT_BUILD_IN_MINUTES` | Timeout for each build job in minutes (e.g., `30`)                          |
-| `TARGET_PLATFORMS`          | JSON array of platforms to build (e.g., `["Android","WebGL","StandaloneWindows64"]`) |
 | `RETENTION_DAYS_RELEASE`    | Days to retain build artifacts for release builds (e.g., `30`)             |
 | `RETENTION_DAYS_PREVIEW`    | Days to retain artifacts for preview/manual builds (e.g., `7`)             |
 
