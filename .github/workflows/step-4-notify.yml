@@ -3,58 +3,48 @@ name: 📣 Step 4 - Notify
 on:
   workflow_call:
     inputs:
-      buildType:
-        description: "Build type (preview or release)"
-        type: string
+      title:
+        description: "Notification title (e.g., Build Succeeded)"
         required: true
-      version:
-        description: "Version or tag name"
         type: string
+      message:
+        description: "Main content of the notification"
         required: true
-      projectName:
-        description: "Name of the project"
         type: string
-        required: true
-      targetPlatforms:
-        description: "JSON array of platforms built"
+      status:
+        description: "success | failure | neutral"
+        required: false
+        default: "neutral"
         type: string
-        required: true
 
 jobs:
   notify:
-    name: Send Notifications
     runs-on: ubuntu-latest
-
     steps:
-      - name: 🔧 Format platform list
-        id: format
-        run: |
-          echo "platforms=$(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]' | paste -sd ', ' -)" >> $GITHUB_OUTPUT
-
-      - name: 📣 Notify Discord
-        if: ${{ vars.ENABLE_DISCORD_NOTIFICATIONS == 'true' && secrets.DISCORD_WEBHOOK_URL != '' }}
-        run: |
-          curl -X POST -H "Content-Type: application/json" \
-            -d '{
-              "username": "CI Pipeline",
-              "avatar_url": "https://i.imgur.com/AfFp7pu.png",
-              "content": "**New ${{ inputs.buildType }} build released!**\n\n**Project**: `${{ inputs.projectName }}`\n**Version**: `${{ inputs.version }}`\n**Platforms**: `${{ steps.format.outputs.platforms }}`"
-            }' ${{ secrets.DISCORD_WEBHOOK_URL }}
-
-      - name: 📣 Notify Slack
-        if: ${{ vars.ENABLE_SLACK_NOTIFICATIONS == 'true' && secrets.SLACK_WEBHOOK_URL != '' }}
-        run: |
-          curl -X POST -H "Content-Type: application/json" \
-            -d '{
-              "text": ":rocket: *New ${{ inputs.buildType }} build released!*",
+      - name: 📢 Send Slack Notification (if configured)
+        if: ${{ env.SLACK_WEBHOOK != '' }}
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "*${{ inputs.title }}* - `${{ github.repository }}`",
               "attachments": [
                 {
-                  "color": "#36a64f",
-                  "fields": [
-                    { "title": "Project", "value": "${{ inputs.projectName }}", "short": true },
-                    { "title": "Version", "value": "${{ inputs.version }}", "short": true },
-                    { "title": "Platforms", "value": "${{ steps.format.outputs.platforms }}" }
-                  ]
+                  "text": "${{ inputs.message }}",
+                  "color": "${{ inputs.status == 'success' && 'good' || inputs.status == 'failure' && 'danger' || '#cccccc' }}"
                 }
               ]
-            }' ${{ secrets.SLACK_WEBHOOK_URL }}
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: 📢 Send Discord Notification (if configured)
+        if: ${{ env.DISCORD_WEBHOOK != '' }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"username\":\"GitHub CI\",\"embeds\":[{\"title\":\"${{ inputs.title }}\",\"description\":\"${{ inputs.message }}\",\"color\":${{ inputs.status == 'success' && 3066993 || inputs.status == 'failure' && 15158332 || 9807270 }} }]}" \
+               $DISCORD_WEBHOOK
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
