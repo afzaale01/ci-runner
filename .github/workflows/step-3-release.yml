@@ -35,13 +35,23 @@ jobs:
       - name: 📝 Check if Release Already Exists
         id: check_release
         run: |
-          if gh release view "${{ inputs.version }}" &>/dev/null; then
+          VERSION="${{ inputs.version }}"
+          API_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/$VERSION"
+
+          RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "$API_URL")
+
+          if [ "$RESPONSE" -eq 200 ]; then
+            echo "✅ Release exists."
+            RELEASE_ID=$(jq -r '.id' response.json)
             echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
           else
+            echo "❌ Release does not exist."
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📝 Create GitHub Release
         if: steps.check_release.outputs.exists != 'true'
