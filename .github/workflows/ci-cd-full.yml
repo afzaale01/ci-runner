@@ -34,6 +34,9 @@ on:
       - 'ProjectSettings/**'
       - 'Tests/**'
 
+permissions:
+  contents: write
+
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # 1. Run Tests
