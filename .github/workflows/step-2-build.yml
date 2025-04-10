@@ -22,6 +22,11 @@ on:
         type: number
         default: 30
         required: false
+      retentionDays:
+          description: "How many days to keep the uploaded build artifacts (e.g. 7 for preview, 30 for release)"
+          type: number
+          default: 7
+          required: false
     secrets:
       UNITY_EMAIL:
         required: true
@@ -85,7 +90,7 @@ jobs:
         with:
           name: ${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
           path: build/${{ matrix.targetPlatform }}
-          retention-days: ${{ inputs.buildType == 'release' && 30 || 7 }}          
+          retention-days: ${{ inputs.retentionDays }}          
 
   build_on_ubuntu:
     name: Build for ${{ matrix.targetPlatform }}

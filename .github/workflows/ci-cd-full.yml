@@ -74,6 +74,7 @@ jobs:
       buildType: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && 'release' || github.event.inputs.buildType }}
       targetPlatforms: ${{ vars.TARGET_PLATFORMS }}
       timeoutMinutes: ${{ fromJson(vars.TIMEOUT_BUILD_IN_MINUTES) }}
+      retentionDays: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && fromJson(vars.RETENTION_DAYS_RELEASE) || fromJson(vars.RETENTION_DAYS_PREVIEW) }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
