@@ -36,15 +36,15 @@ jobs:
         id: check_release
         run: |
           if gh release view "${{ inputs.version }}" &>/dev/null; then
-            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "exists=true" >> "$GITHUB_OUTPUT"
           else
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📝 Create GitHub Release
-        if: steps.check_release.outputs.exists == 'false'
+        if: steps.check_release.outputs.exists != 'true'
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -60,12 +60,14 @@ jobs:
           VERSION="${{ inputs.version }}"
           PROJECT="${{ inputs.projectName }}"
           PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]')
+          
+          # Fallback to get release ID
+          RELEASE_ID=$(gh release view "$VERSION" --json id -q .id)
 
           for PLATFORM in $PLATFORMS; do
             ARTIFACT_PATH="release-artifacts/${{ inputs.buildType }}-${PROJECT}-${PLATFORM}-${VERSION}"
             if [ -d "$ARTIFACT_PATH" ]; then
               zip -r "${PLATFORM}.zip" "$ARTIFACT_PATH"
-              RELEASE_ID=$(gh release view "$VERSION" --json id -q .id)
               curl \
                 -X POST \
                 -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
