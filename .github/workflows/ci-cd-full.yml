@@ -92,3 +92,17 @@ jobs:
       projectName: ${{ vars.PROJECT_NAME }}
       targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
     secrets: inherit
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 4. Notify
+  # ─────────────────────────────────────────────────────────────────────────────
+  notify:
+    name: Notify (Optional)
+    needs: [ release ]
+    if: always()  # Runs even if release failed
+    uses: avalin/unity-ci-templates/.github/workflows/step-4-notify.yml@main
+    with:
+      title: ${{ needs.release.result == 'success' && '✅ Release Succeeded' || '❌ Release Failed' }}
+      message: "CI run for `${{ github.repository }}` completed with status `${{ needs.release.result }}` on `${{ github.ref_name }}`"
+      status: ${{ needs.release.result }}
+    secrets: inherit
