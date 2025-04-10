@@ -1,0 +1,60 @@
+name: 📣 Step 4 - Notify
+
+on:
+  workflow_call:
+    inputs:
+      buildType:
+        description: "Build type (preview or release)"
+        type: string
+        required: true
+      version:
+        description: "Version or tag name"
+        type: string
+        required: true
+      projectName:
+        description: "Name of the project"
+        type: string
+        required: true
+      targetPlatforms:
+        description: "JSON array of platforms built"
+        type: string
+        required: true
+
+jobs:
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔧 Format platform list
+        id: format
+        run: |
+          echo "platforms=$(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]' | paste -sd ', ' -)" >> $GITHUB_OUTPUT
+
+      - name: 📣 Notify Discord
+        if: ${{ vars.ENABLE_DISCORD_NOTIFICATIONS == 'true' && secrets.DISCORD_WEBHOOK_URL != '' }}
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{
+              "username": "CI Pipeline",
+              "avatar_url": "https://i.imgur.com/AfFp7pu.png",
+              "content": "**New ${{ inputs.buildType }} build released!**\n\n**Project**: `${{ inputs.projectName }}`\n**Version**: `${{ inputs.version }}`\n**Platforms**: `${{ steps.format.outputs.platforms }}`"
+            }' ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: 📣 Notify Slack
+        if: ${{ vars.ENABLE_SLACK_NOTIFICATIONS == 'true' && secrets.SLACK_WEBHOOK_URL != '' }}
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{
+              "text": ":rocket: *New ${{ inputs.buildType }} build released!*",
+              "attachments": [
+                {
+                  "color": "#36a64f",
+                  "fields": [
+                    { "title": "Project", "value": "${{ inputs.projectName }}", "short": true },
+                    { "title": "Version", "value": "${{ inputs.version }}", "short": true },
+                    { "title": "Platforms", "value": "${{ steps.format.outputs.platforms }}" }
+                  ]
+                }
+              ]
+            }' ${{ secrets.SLACK_WEBHOOK_URL }}
