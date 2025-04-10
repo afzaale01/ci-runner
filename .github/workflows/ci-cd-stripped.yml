@@ -27,29 +27,25 @@ jobs:
   build:
     name: Build
     # Build if ANY of these conditions are met:
-    # - The event is a pull_request.
+    # - The event is a pull_request, ready for review.
     # - The event is a workflow_dispatch (manual trigger).
-    # - The branch is 'main' (push to main).
     # - The event is a push and the ref starts with 'refs/tags/' (a tag push for release).
     if: >
       github.event_name == 'pull_request' ||
       github.event_name == 'workflow_dispatch' ||
-      github.ref == 'refs/heads/main' ||
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
     uses: avalin/unity-ci-templates/.github/workflows/step-2-build.yml@main
     with:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
+      projectName: ${{ vars.PROJECT_NAME }}
       buildType: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && 'release' || github.event.inputs.buildType }}
-      targetPlatforms: >
-        ${{ 
-          github.event.inputs.targetPlatforms == '' 
-            && '["Android","iOS"]' 
-            || github.event.inputs.targetPlatforms 
-        }}
+      targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
+      timeoutMinutes: ${{ fromJson(vars.TIMEOUT_BUILD_IN_MINUTES) }}
+      retentionDays: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && fromJson(vars.RETENTION_DAYS_RELEASE) || fromJson(vars.RETENTION_DAYS_PREVIEW) }}
     secrets:
-      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
   # ─────────────────────────────────────────────────────────────────────────────
   # 3. Release
@@ -63,5 +59,6 @@ jobs:
       buildType: release
       version: ${{ github.ref_name }}
       projectName: ${{ vars.PROJECT_NAME }}
-      targetPlatforms: ${{ vars.TARGET_PLATFORMS }}
+      targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
     secrets: inherit
+
