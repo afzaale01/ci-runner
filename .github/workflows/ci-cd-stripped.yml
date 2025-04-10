@@ -11,11 +11,6 @@ on:
         type: choice
         options:
           - preview
-      targetPlatforms:
-        description: "JSON array of platforms to build"
-        type: string
-        default: '["Android","iOS"]'
-        required: false
 
 permissions:
   contents: write
