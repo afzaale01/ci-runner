@@ -17,6 +17,9 @@ on:
         default: '["Android","iOS"]'
         required: false
 
+permissions:
+  contents: write
+
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # 2. Build
