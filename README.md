@@ -15,14 +15,14 @@
 | 🧪 **Test Detection**            | Auto-detects and runs EditMode & PlayMode tests. |
 | 🛠️ **Cross-Platform Builds**     | Android, iOS, WebGL, macOS, Windows, and Linux supported. |
 | 📦 **Release Deployment**        | Automatically creates GitHub Releases on tag push. |
-| 🧩 **Modular Design**            | Fully split into reusable `workflow_call` templates. |
+| 🧹 **Modular Design**            | Fully split into reusable `workflow_call` templates. |
 | ⚡ **Parallel Matrix Builds**     | Parallel jobs across macOS and Ubuntu runners. |
 | 🔐 **Secure License Activation** | Unity `.ulf` license securely injected during CI. |
 | 🗃️ **LFS & Cache**               | Optional Git LFS + caching of Unity `Library` and `Packages/`. |
 | 🎛️ **Manual Dispatch**          | Manually trigger preview builds with JSON platform control. |
 
 <details>
-  <summary><strong>🛣️ Roadmap / To-Do</strong></summary>
+  <summary><strong>🚣️ Roadmap / To-Do</strong></summary>
 
 | Feature                  | Description |
 |--------------------------|-------------|
@@ -45,7 +45,7 @@
 | [`ci-cd-full.yml`](.github/workflows/ci-cd-full.yml) | Full pipeline: tests, builds, release |
 | [`ci-cd-stripped.yml`](.github/workflows/ci-cd-stripped.yml) | Quick pipeline (build-only) — optional |
 
-### 🧩 Modular Reusable Templates
+### 🤩 Modular Reusable Templates
 
 | File | Purpose |
 |------|---------|
@@ -116,3 +116,52 @@ Run a preview build with selected platforms:
   "buildType": "preview",
   "targetPlatforms": "[\"Android\", \"WebGL\"]"
 }
+```
+
+---
+
+## 📦 Artifact Naming Convention
+
+Artifacts are named using the following structure for easy traceability:
+
+```
+{buildType}-{projectName}-{targetPlatform}-{version}
+```
+
+### 📁 Examples
+
+```
+preview-MyGame-WebGL-T20250410_132300_CHabc1234
+release-MyGame-StandaloneWindows64-v1.2.3
+```
+
+---
+
+## ✅ Recommended Flow
+
+1. 🔀 **Open a Pull Request**  
+   Trigger unit tests (EditMode + PlayMode) for early validation.
+
+2. 🧪 **Tests Pass & PR Approved**  
+   Merge to your `main` or release branch.
+
+3. 🎼 **Create Git Tag (e.g. `v1.2.3`)**  
+   Triggers full CI: tests → builds → GitHub release.
+
+```bash
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+4. 🚀 **Artifacts uploaded to GitHub Releases**  
+   Your builds are now downloadable, versioned, and public (or private).
+
+---
+
+## 🙌 Credits
+
+Crafted with ❤️ by [Avalin](https://github.com/Avalin)  
+Powered by GitHub Actions + Unity + Tears.
+
+PRs welcome!
+
