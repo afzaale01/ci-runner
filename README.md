@@ -20,6 +20,7 @@
 | 🔐 **Secure License Activation** | Unity `.ulf` license securely injected during CI. |
 | 🗃️ **LFS & Cache**               | Optional Git LFS + caching of Unity `Library` and `Packages/`. |
 | 🎛️ **Manual Dispatch**          | Manually trigger preview builds with JSON platform control. |
+| 📣 **Notifications**         | Discord/Slack webhook support |
 
 <details>
   <summary><strong>🚣️ Roadmap / To-Do</strong></summary>
@@ -30,7 +31,6 @@
 | 📊 Test Coverage         | Codecov or coverlet integration |
 | 🔍 Static Analysis       | C# linters or Unity analyzers |
 | 🎮 Smoke Tests           | Boot test via Unity CLI |
-| 📣 Notifications         | Discord/Slack webhook support |
 
 </details>
 
