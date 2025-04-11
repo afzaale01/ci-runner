@@ -46,6 +46,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   run-tests:
     name: Run Tests
+    needs: [ analyze ]
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
