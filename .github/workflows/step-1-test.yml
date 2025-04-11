@@ -96,10 +96,11 @@ jobs:
           github-token: ${{ github.token }}
           script: |
             const { owner, repo, number } = context.issue;
+            const sha = context.sha.slice(0, 7);
 
-            let summary = '### 🧪 **Unity Test Results**\n';
             let editmodePassed = '${{ needs.run-editmode.result }}' === 'success';
             let playmodePassed = '${{ needs.run-playmode.result }}' === 'success';
+            let summary = `### 🧪 **Unity Test Results** 🕓 Checked during pull request #${number} at commit \`${sha}\`
 
             summary += `- 🥪 EditMode: ${editmodePassed ? '✅ Passed' : '❌ Failed'}\n`;
             summary += `- 🎮 PlayMode: ${playmodePassed ? '✅ Passed' : '❌ Failed'}\n`;
