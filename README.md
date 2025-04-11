@@ -21,6 +21,7 @@
 | 🔐 **Secure License Activation** | Unity `.ulf` license securely injected during CI. |
 | 🗃️ **LFS & Cache**               | Optional Git LFS + caching of Unity `Library` and `Packages/`. |
 | 🎛️ **Manual Dispatch**          | Manually trigger preview builds with JSON platform control. |
+| 🚀 **Deploy**                | Upload builds to external platforms like itch.io, TestFlight, or custom servers |
 | 📣 **Notifications**         | Discord/Slack webhook support |
 | 🔍 **Static Analysis**       | C# linters or Unity analyzers |
 
@@ -31,9 +32,14 @@
 |--------------------------|-------------|
 | 📊 Test Coverage         | Codecov or coverlet integration |
 | 🎮 Smoke Tests           | Boot test via Unity CLI |
-| 🚀 Deploy | Upload builds to external platforms like itch.io, TestFlight, or custom servers |
 
 </details>
+
+## Supported Targets
+
+- 🔗 [itch.io Setup Guide](https://itch.io/docs/butler/)
+- 🔗 [Steam Setup Guide](https://partner.steamgames.com/doc/sdk/uploading)
+- 🔗 [Firebase Setup Guide](https://firebase.google.com/docs/hosting)
 
 ---
 

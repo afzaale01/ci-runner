@@ -131,6 +131,11 @@ jobs:
       - name: 🎮 Deploy to Steam
         if: matrix.target == 'steam'
         run: |
+          VDF_PATH="${{ secrets.STEAM_DEPOT_VDF_PATH }}"
+          if [ -z "$VDF_PATH" ]; then
+            VDF_PATH="deployment-artifacts/steam/app_build.vdf"
+          fi
+
           if [ -z "${{ secrets.STEAM_USERNAME }}" ] || [ -z "${{ secrets.STEAM_PASSWORD }}" ] || [ -z "${{ secrets.STEAM_APP_ID }}" ]; then
             echo "⚠️ Missing Steam credentials or App ID. Skipping..."; exit 0;
           fi
@@ -140,10 +145,7 @@ jobs:
           curl -sSL https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz | tar -xz
 
           echo "🔑 Logging into Steam and triggering build..."
-          ./steamcmd.sh \
-            +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" \
-            +run_app_build "${{ secrets.STEAM_DEPOT_VDF || 'deployment-artifacts/steam/app_build.vdf' }}" \
-            +quit
+          ./steamcmd.sh +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" +run_app_build "$VDF_PATH" +quit
 
       # ───── Summary ─────
       - name: 🧾 Add to Summary
