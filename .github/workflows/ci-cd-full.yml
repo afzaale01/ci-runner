@@ -108,7 +108,9 @@ jobs:
   deploy:
     name: 🚀 Deploy (Optional)
     needs: [ release ]
-    if: needs.release.result == 'success'
+    if: >
+      needs.release.result == 'success' &&
+      fromJson(vars.DEPLOY_TARGETS) != '[]'
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
