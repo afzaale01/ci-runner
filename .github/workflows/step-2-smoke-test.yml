@@ -1,0 +1,68 @@
+name: 🚬 Step 2 - Smoke Test
+
+on:
+  workflow_call:
+    inputs:
+      unityVersion:
+        required: true
+        type: string
+      licenseArtifactName:
+        required: true
+        type: string
+      useGitLfs:
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      UNITY_EMAIL:
+        required: true
+      UNITY_PASSWORD:
+        required: true
+      UNITY_LICENSE:
+        required: true
+
+jobs:
+  smoke-test:
+    name: 🚬 Unity CLI Smoke Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: ${{ inputs.useGitLfs }}
+
+      - name: 🧪 Download License
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.licenseArtifactName }}
+
+      - name: 🛠️ Inject Unity License
+        run: |
+          mkdir -p ~/.local/share/unity3d/Unity
+          find . -name "Unity_lic.ulf" -exec cp {} ~/.local/share/unity3d/Unity/Unity_lic.ulf \;        
+
+      - name: 🚬 Run Headless CLI Launch
+        id: smoke
+        run: |
+          set -e
+          echo "Running Unity in headless mode to verify startup integrity..."
+
+          unity-editor -batchmode -nographics -projectPath . \
+            -executeMethod SmokeTest.EntryPoint \
+            -logFile smoke.log || {
+              echo "❌ Unity CLI failed. Dumping smoke.log..."
+              cat smoke.log || true
+              exit 1
+            }
+
+          echo "✅ Unity booted and ran smoke test without crashing."
+          tail -n 20 smoke.log || true
+
+      - name: 📎 Upload smoke.log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-log
+          path: smoke.log

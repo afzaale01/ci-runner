@@ -1,4 +1,4 @@
-name: ✨ Step 2 - Build
+name: ✨ Step 3 - Build
 
 on:
   workflow_call:
