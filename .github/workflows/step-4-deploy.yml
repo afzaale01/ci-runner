@@ -41,6 +41,15 @@ on:
         required: false
       STEAM_DEPOT_VDF_PATH:
         required: false
+      APPSTORE_API_KEY_ID:
+        required: false
+      APPSTORE_API_ISSUER_ID:
+        required: false
+      APPSTORE_API_PRIVATE_KEY:
+        required: false
+      DISCORD_WEBHOOK:
+        required: false
+
 jobs:
   deploy:
     if: ${{ inputs.deployTargets != '[]' }}
@@ -146,6 +155,45 @@ jobs:
 
           echo "🔑 Logging into Steam and triggering build..."
           ./steamcmd.sh +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" +run_app_build "$VDF_PATH" +quit
+
+      # ───── TestFlight ─────
+      - name: 🍏 Deploy to TestFlight
+        if: matrix.target == 'testflight'
+        run: |
+          if [ -z "${{ secrets.APPSTORE_API_KEY_ID }}" ] || [ -z "${{ secrets.APPSTORE_API_ISSUER_ID }}" ] || [ -z "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" ]; then
+            echo "⚠️ Missing App Store Connect API credentials. Skipping..."; exit 0;
+          fi
+
+          FILE=$(find deployment-artifacts -type f -name "*.ipa" | head -n 1)
+          if [ -z "$FILE" ]; then echo "❌ No .ipa found to upload."; exit 0; fi
+
+          echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" > private_key.p8
+
+          echo "🚀 Uploading $FILE to TestFlight..."
+          xcrun altool \
+            --upload-app \
+            --type ios \
+            --file "$FILE" \
+            --apiKey "${{ secrets.APPSTORE_API_KEY_ID }}" \
+            --apiIssuer "${{ secrets.APPSTORE_API_ISSUER_ID }}" \
+            --private-key-path private_key.p8
+
+        env:
+          FASTLANE_DISABLE_COLORS: 1
+
+      # ───── Discord ─────
+      - name: 🤖 Deploy to Discord
+        if: matrix.target == 'discord'
+        run: |
+          if [ -z "${{ secrets.DISCORD_WEBHOOK }}" ]; then
+            echo "⚠️ Missing Discord webhook. Skipping..."; exit 0;
+          fi
+
+          FILE=$(find deployment-artifacts -type f \( -name "*.apk" -o -name "*.ipa" -o -name "*.zip" \) | head -n 1)
+          if [ -z "$FILE" ]; then echo "❌ No artifact found to upload to Discord."; exit 0; fi
+
+          echo "📤 Uploading $FILE to Discord..."
+          curl -F "file=@$FILE" "${{ secrets.DISCORD_WEBHOOK }}"
 
       # ───── Summary ─────
       - name: 🧾 Add to Summary
