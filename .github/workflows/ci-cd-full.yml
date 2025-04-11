@@ -66,6 +66,7 @@ jobs:
   smoke-test:
     name: 🚬 Smoke Test
     needs: [ run-tests ]
+    if: ${{ vars.ENABLE_SMOKE_TEST == 'true' }}
     uses: avalin/unity-ci-templates/.github/workflows/step-2-smoke-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
@@ -81,15 +82,19 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   build:
     name: Build
-    needs: [ run-tests ]
-    # Build if ANY of these conditions are met:
-    # - The event is a pull_request, ready for review.
-    # - The event is a workflow_dispatch (manual trigger).
-    # - The event is a push and the ref starts with 'refs/tags/' (a tag push for release).
+    needs: [ run-tests, smoke-test ]
+    # Build if ALL of these are true:
+    # - Tests passed
+    # - Smoke test passed OR was skipped (it's optional, but must not fail)
+    # - The event is a pull_request, workflow_dispatch, or version tag push
     if: >
-      github.event_name == 'pull_request' ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+      (needs.smoke-test.result == 'success' || needs.smoke-test.result == 'skipped') &&
+      needs.run-tests.result == 'success' &&
+      (
+        github.event_name == 'pull_request' ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+      )
     uses: avalin/unity-ci-templates/.github/workflows/step-3-build.yml@main
     with:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
