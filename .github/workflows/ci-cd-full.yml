@@ -121,8 +121,10 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   notify:
     name: Notify (Optional)
-    needs: [ release ]
-    if: needs.release.result != 'skipped'
+    needs: [ release, deploy ]
+    if: >
+      needs.release.result != 'skipped' &&
+      (needs.deploy.result == 'success' || needs.deploy.result == 'skipped' || needs.deploy.result == 'failure')
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
       title: ${{ needs.release.result == 'success' && '✅ Release Succeeded' || '❌ Release Failed' }}
