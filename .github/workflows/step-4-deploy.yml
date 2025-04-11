@@ -33,7 +33,14 @@ on:
         required: false
       GH_PAGES_TOKEN:
         required: false
-
+      STEAM_USERNAME:
+        required: false
+      STEAM_PASSWORD:
+        required: false
+      STEAM_APP_ID:
+        required: false
+      STEAM_DEPOT_VDF_PATH:
+        required: false
 jobs:
   deploy:
     if: ${{ inputs.deployTargets != '[]' }}
@@ -119,6 +126,24 @@ jobs:
         with:
           github_token: ${{ secrets.GH_PAGES_TOKEN }}
           publish_dir: deployment-artifacts/${{ inputs.projectName }}/WebGL
+
+      # ───── Steam ─────
+      - name: 🎮 Deploy to Steam
+        if: matrix.target == 'steam'
+        run: |
+          if [ -z "${{ secrets.STEAM_USERNAME }}" ] || [ -z "${{ secrets.STEAM_PASSWORD }}" ] || [ -z "${{ secrets.STEAM_APP_ID }}" ]; then
+            echo "⚠️ Missing Steam credentials or App ID. Skipping..."; exit 0;
+          fi
+
+          echo "🛠️ Installing SteamCMD..."
+          mkdir -p ~/steamcmd && cd ~/steamcmd
+          curl -sSL https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz | tar -xz
+
+          echo "🔑 Logging into Steam and triggering build..."
+          ./steamcmd.sh \
+            +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" \
+            +run_app_build "${{ secrets.STEAM_DEPOT_VDF || 'deployment-artifacts/steam/app_build.vdf' }}" \
+            +quit
 
       # ───── Summary ─────
       - name: 🧾 Add to Summary
