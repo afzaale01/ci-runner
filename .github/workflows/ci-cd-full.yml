@@ -127,28 +127,7 @@ jobs:
       (needs.deploy.result == 'success' || needs.deploy.result == 'skipped' || needs.deploy.result == 'failure')
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
-      title: >
-        ${{
-          needs.release.result == 'success' &&
-          (needs.deploy.result == 'skipped' && '✅ Release Succeeded (No Deploy)' ||
-           needs.deploy.result == 'success' && '✅ Release & Deploy Succeeded' ||
-           '⚠️ Release Succeeded, Deploy Failed')
-          || '❌ Release Failed'
-        }}
-      message: >
-        ${{
-          needs.release.result == 'success' &&
-          (needs.deploy.result == 'skipped' && 'Release completed successfully.' ||
-           needs.deploy.result == 'success' && 'Release and deployment completed successfully.' ||
-           'Release completed, but deployment failed.')
-          || 'Release failed.'
-        }}
-      status: >
-        ${{
-          needs.release.result == 'success' &&
-          (needs.deploy.result == 'success' && 'success' ||
-           needs.deploy.result == 'failure' && 'failure' ||
-           'neutral')
-          || 'failure'
-        }}
+      releaseResult: ${{ needs.release.result }}
+      deployResult: ${{ needs.deploy.result }}
     secrets: inherit
+

@@ -3,35 +3,58 @@ name: 📣 Step 5 - Notify
 on:
   workflow_call:
     inputs:
-      title:
-        description: "Notification title (e.g., Build Succeeded)"
+      releaseResult:
         required: true
         type: string
-      message:
-        description: "Main content of the notification"
+      deployResult:
         required: true
-        type: string
-      status:
-        description: "success | failure | neutral"
-        required: false
-        default: "neutral"
         type: string
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: 🧠 Set Notification Variables
+        id: vars
+        run: |
+          RELEASE="${{ inputs.releaseResult }}"
+          DEPLOY="${{ inputs.deployResult }}"
+
+          if [[ "$RELEASE" == "success" ]]; then
+            if [[ "$DEPLOY" == "success" ]]; then
+              TITLE="✅ Release & Deploy Succeeded"
+              MESSAGE="Release and deployment completed successfully."
+              STATUS="success"
+            elif [[ "$DEPLOY" == "skipped" ]]; then
+              TITLE="✅ Release Succeeded (No Deploy)"
+              MESSAGE="Release completed successfully."
+              STATUS="neutral"
+            else
+              TITLE="⚠️ Release Succeeded, Deploy Failed"
+              MESSAGE="Release completed, but deployment failed."
+              STATUS="failure"
+            fi
+          else
+            TITLE="❌ Release Failed"
+            MESSAGE="Release failed."
+            STATUS="failure"
+          fi
+
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
       - name: 📢 Send Slack Notification (if configured)
         if: ${{ env.SLACK_WEBHOOK != '' }}
         uses: slackapi/slack-github-action@v1.24.0
         with:
           payload: |
             {
-              "text": "*${{ inputs.title }}* - `${{ github.repository }}`",
+              "text": "*${{ steps.vars.outputs.title }}* - `${{ github.repository }}`",
               "attachments": [
                 {
-                  "text": "${{ inputs.message }}",
-                  "color": "${{ inputs.status == 'success' && 'good' || inputs.status == 'failure' && 'danger' || '#cccccc' }}"
+                  "text": "${{ steps.vars.outputs.message }}",
+                  "color": "${{ steps.vars.outputs.status == 'success' && 'good' || steps.vars.outputs.status == 'failure' && 'danger' || '#cccccc' }}"
                 }
               ]
             }
@@ -44,7 +67,7 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d "{\"username\":\"GitHub CI\",\"embeds\":[{\"title\":\"${{ inputs.title }}\",\"description\":\"${{ inputs.message }}\",\"color\":${{ inputs.status == 'success' && 3066993 || inputs.status == 'failure' && 15158332 || 9807270 }} }]}" \
+               -d "{\"username\":\"GitHub CI\",\"embeds\":[{\"title\":\"${{ steps.vars.outputs.title }}\",\"description\":\"${{ steps.vars.outputs.message }}\",\"color\":${{ steps.vars.outputs.status == 'success' && 3066993 || steps.vars.outputs.status == 'failure' && 15158332 || 9807270 }} }]}" \
                $DISCORD_WEBHOOK
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
