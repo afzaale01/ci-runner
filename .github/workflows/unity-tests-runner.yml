@@ -94,7 +94,7 @@ jobs:
         if: failure() && steps.run-tests.outputs.artifactsPath != ''
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.testMode }} Test Results - ${{ github.ref_name }}
+          name: Unity-${{ inputs.testMode }}-${{ github.sha }}
           path: ${{ steps.run-tests.outputs.artifactsPath }}
           retention-days: 7
 

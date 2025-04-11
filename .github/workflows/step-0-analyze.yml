@@ -1,0 +1,35 @@
+name: 🔍 Step 0 - Static Analysis
+
+on:
+  workflow_call:
+
+jobs:
+  analyze:
+    name: Run dotnet format (if .sln exists)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: Check for .sln file
+        id: sln_check
+        run: |
+          if compgen -G "*.sln" > /dev/null; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run dotnet format
+        if: steps.sln_check.outputs.found == 'true'
+        run: dotnet format --verify-no-changes --verbosity minimal
+
+      - name: Skip dotnet format (no .sln found)
+        if: steps.sln_check.outputs.found == 'false'
+        run: echo "ℹ️ No .sln found — skipping static analysis"
