@@ -1,0 +1,48 @@
+name: 🚀 Step 4 - Deploy
+
+on:
+  workflow_call:
+    inputs:
+      projectName:
+        type: string
+        required: true
+      environment:
+        type: string
+        required: true
+      deployTarget:
+        type: string
+        required: false
+    secrets:
+      DEPLOY_API_KEY:
+        required: false
+      ITCH_USERNAME:
+        required: false
+      ITCH_PROJECT:
+        required: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: deployment-artifacts
+
+      - name: 🧠 Decide Deployment Strategy
+        run: |
+          echo "Deploying project: ${{ inputs.projectName }}"
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Target: ${{ inputs.deployTarget || 'default' }}"
+
+      - name: 🧾 List Artifacts
+        run: ls -R deployment-artifacts
+
+      # Example itch.io deploy block (delete/replace if not used)
+      - name: 🕹️ Deploy to itch.io (if configured)
+        if: ${{ inputs.deployTarget == 'itch.io' }}
+        run: |
+          butler push "deployment-artifacts/${{ inputs.projectName }}" \
+            "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.environment }}"
+        env:
+          BUTLER_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
