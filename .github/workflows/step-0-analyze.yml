@@ -7,8 +7,6 @@ jobs:
   analyze:
     name: Run dotnet format (if .sln exists)
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
 
     steps:
       - name: Checkout Repository
