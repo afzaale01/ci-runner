@@ -9,9 +9,11 @@ on:
       projectName:
         type: string
         required: true
-      deployTarget:
+      deployTargets:
+        description: "JSON array of deploy targets, e.g. ['itch.io','appcenter']"
         type: string
         required: false
+        default: '[]'
     secrets:
       DEPLOY_API_KEY:
         required: false
@@ -19,9 +21,17 @@ on:
         required: false
       ITCH_PROJECT:
         required: false
+      APPCENTER_OWNER_NAME:
+        required: false
 
 jobs:
   deploy:
+    if: ${{ inputs.deployTargets != '[]' }}
+    name: 🚀 Deploy Targets
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJson(inputs.deployTargets) }}
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Download Artifacts
@@ -29,44 +39,39 @@ jobs:
         with:
           path: deployment-artifacts
 
-      - name: 🧠 Decide Deployment Strategy
+      - name: 🧠 Show Deployment Info
         run: |
-          echo "Deploying project: ${{ inputs.projectName }}"
+          echo "Deploying to target: ${{ matrix.target }}"
+          echo "Project: ${{ inputs.projectName }}"
           echo "Build type: ${{ inputs.buildType }}"
-          echo "Target: ${{ inputs.deployTarget || 'default' }}"
 
       - name: 🧾 List Artifacts
         run: ls -R deployment-artifacts
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Itch.io
-# ─────────────────────────────────────────────────────────────────────────────
-      - name: 🕹️ Deploy to itch.io (if configured)
-        if: ${{ inputs.deployTarget == 'itch.io' }}
+      # Itch.io Deployment
+      - name: 🕹️ Deploy to itch.io (if selected)
+        if: ${{ matrix.target == 'itch.io' }}
         run: |
           butler push "deployment-artifacts/${{ inputs.projectName }}" \
             "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
         env:
           BUTLER_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
 
-# ─────────────────────────────────────────────────────────────────────────────
-# App Center (auto-detect and deploy .apk/.aab/.ipa if they exist)
-# ─────────────────────────────────────────────────────────────────────────────
-      - name: 📱 Deploy to App Center (if configured)
-        if: ${{ inputs.deployTarget == 'appcenter' }}
+      # App Center Deployment
+      - name: 📱 Deploy to App Center (if selected)
+        if: ${{ matrix.target == 'appcenter' }}
         run: |
-          echo "🔍 Looking for mobile artifacts to deploy..."
+          echo "🔍 Searching for .apk, .aab, or .ipa in artifacts..."
           DEPLOY_PATH="deployment-artifacts"
 
-          # Find any .apk, .aab, or .ipa files (recursive)
           FILES=$(find "$DEPLOY_PATH" -type f \( -name "*.apk" -o -name "*.aab" -o -name "*.ipa" \))
 
           if [ -z "$FILES" ]; then
-            echo "⚠️ No mobile build artifacts (.apk, .aab, .ipa) found. Skipping App Center deploy."
+            echo "⚠️ No mobile build artifacts found. Skipping."
             exit 0
           fi
 
-          echo "📦 Found artifacts:"
+          echo "📆 Found artifacts:"
           echo "$FILES"
 
           for file in $FILES; do
@@ -77,4 +82,3 @@ jobs:
               --group "Testers" \
               --token "${{ secrets.DEPLOY_API_KEY }}"
           done
-

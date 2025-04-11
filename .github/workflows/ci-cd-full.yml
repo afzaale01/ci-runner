@@ -113,7 +113,7 @@ jobs:
     with:
       buildType: release
       projectName: ${{ vars.PROJECT_NAME }}
-      deployTarget: ${{ vars.DEPLOY_TARGET }} # optional env like 'itch.io', 'aws', etc.
+      deployTargets: ${{ vars.DEPLOY_TARGETS }} # optional env like 'itch.io', 'aws', etc.
     secrets: inherit
 
   # ─────────────────────────────────────────────────────────────────────────────
