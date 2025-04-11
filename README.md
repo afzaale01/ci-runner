@@ -31,6 +31,7 @@
 |--------------------------|-------------|
 | 📊 Test Coverage         | Codecov or coverlet integration |
 | 🎮 Smoke Tests           | Boot test via Unity CLI |
+| 🚀 Deploy | Upload builds to external platforms like itch.io, TestFlight, or custom servers |
 
 </details>
 
