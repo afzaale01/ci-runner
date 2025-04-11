@@ -24,6 +24,7 @@
 | 🚀 **Deploy**                | Upload builds to external platforms like itch.io, TestFlight, or custom servers |
 | 📣 **Notifications**         | Discord/Slack webhook support |
 | 🔍 **Static Analysis**       | C# linters or Unity analyzers |
+| 🎮 **Smoke Tests**           | Boot test via Unity CLI |
 
 <details>
   <summary><strong>🚣️ Roadmap / To-Do</strong></summary>
@@ -31,7 +32,6 @@
 | Feature                  | Description |
 |--------------------------|-------------|
 | 📊 Test Coverage         | Codecov or coverlet integration |
-| 🎮 Smoke Tests           | Boot test via Unity CLI |
 
 </details>
 
