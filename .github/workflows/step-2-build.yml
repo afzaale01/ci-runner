@@ -1,4 +1,4 @@
-name: ✨ Step 3 - Build
+name: ✨ Step 2 - Build
 
 on:
   workflow_call:
@@ -62,7 +62,7 @@ jobs:
         os: 
           - macOS-latest
         targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.macPlatforms) }}
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -75,7 +75,7 @@ jobs:
           restore-keys: |
             Library-${{ matrix.targetPlatform }}-
             Library-
-        
+
       - name: Build Unity Project
         uses: game-ci/unity-builder@v4
         env:
@@ -90,7 +90,7 @@ jobs:
         with:
           name: ${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
           path: build/${{ matrix.targetPlatform }}
-          retention-days: ${{ inputs.retentionDays }}          
+          retention-days: ${{ inputs.retentionDays }}
 
   build_on_ubuntu:
     name: Build for ${{ matrix.targetPlatform }}
@@ -121,7 +121,7 @@ jobs:
       - name: Check Free Disk Space (Android only)
         if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.1
-        
+
       - name: Build Unity Project
         uses: game-ci/unity-builder@v4
         env:

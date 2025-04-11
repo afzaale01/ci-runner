@@ -15,20 +15,20 @@ on:
 permissions:
   contents: write
 
-jobs:
+jobs: 
   # ─────────────────────────────────────────────────────────────────────────────
-  # 2. Build
+  # 3. Build
   # ─────────────────────────────────────────────────────────────────────────────
   build:
     name: Build
-    # Build if ANY of these conditions are met:
-    # - The event is a pull_request, ready for review.
-    # - The event is a workflow_dispatch (manual trigger).
-    # - The event is a push and the ref starts with 'refs/tags/' (a tag push for release).
+    # Build if ALL of these are true:
+    # - The event is a pull_request, workflow_dispatch, or version tag push
     if: >
-      github.event_name == 'pull_request' ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+      (
+        github.event_name == 'pull_request' ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+      )
     uses: avalin/unity-ci-templates/.github/workflows/step-2-build.yml@main
     with:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
@@ -43,7 +43,7 @@ jobs:
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # 3. Release
+  # 4. Release
   # ─────────────────────────────────────────────────────────────────────────────
   release:
     name: Release

@@ -1,4 +1,4 @@
-name: 📣 Step 6 - Notify
+name: 📣 Step 5 - Notify
 
 on:
   workflow_call:
