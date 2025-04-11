@@ -108,7 +108,7 @@ jobs:
   notify:
     name: Notify (Optional)
     needs: [ release ]
-    if: always()  # Runs even if release failed
+    if: needs.release.result != 'skipped'
     uses: avalin/unity-ci-templates/.github/workflows/step-4-notify.yml@main
     with:
       title: ${{ needs.release.result == 'success' && '✅ Release Succeeded' || '❌ Release Failed' }}
