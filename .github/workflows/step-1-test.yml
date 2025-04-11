@@ -83,3 +83,30 @@ jobs:
       useGitLfs: ${{ inputs.useGitLfs }}
       timeoutMinutes: ${{ inputs.timeoutMinutes }}
     secrets: inherit
+
+  comment-pr-results:
+    name: 📝 Comment PR Test Results
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: [run-editmode, run-playmode]
+    steps:
+      - name: 🧪 Summarize Test Results
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const { owner, repo, number } = context.issue;
+
+            let summary = '### 🧪 **Unity Test Results**\n';
+            let editmodePassed = '${{ needs.run-editmode.result }}' === 'success';
+            let playmodePassed = '${{ needs.run-playmode.result }}' === 'success';
+
+            summary += `- 🥪 EditMode: ${editmodePassed ? '✅ Passed' : '❌ Failed'}\n`;
+            summary += `- 🎮 PlayMode: ${playmodePassed ? '✅ Passed' : '❌ Failed'}\n`;
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: summary
+            });
