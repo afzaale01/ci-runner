@@ -66,11 +66,13 @@ Can be found under:
 
 `Settings → Secrets and variables → Actions → Secrets`
 
-| Secret Name      | Description |
-|------------------|-------------|
-| `UNITY_EMAIL`    | Unity account email |
-| `UNITY_PASSWORD` | Unity account password |
-| `UNITY_LICENSE`  | Raw `.ulf` license contents |
+| Secret Name      | Required | Description |
+|------------------|-------------|-------------|
+| `UNITY_EMAIL`    | ✅ | Unity account email |
+| `UNITY_PASSWORD` | ✅ | Unity account password |
+| `UNITY_LICENSE`  | ✅ | Raw `.ulf` license contents |
+| `DISCORD_WEBHOOK` | ❌ | Discord Webhook URL for optional CI notifications |
+| `SLACK_WEBHOOK`  | ❌ | Slack Webhook URL for optional CI notifications |
 
 ---
 
