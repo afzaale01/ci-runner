@@ -3,10 +3,10 @@ name: 🚀 Step 4 - Deploy
 on:
   workflow_call:
     inputs:
-      projectName:
+      buildType:
         type: string
         required: true
-      environment:
+      projectName:
         type: string
         required: true
       deployTarget:
@@ -32,7 +32,7 @@ jobs:
       - name: 🧠 Decide Deployment Strategy
         run: |
           echo "Deploying project: ${{ inputs.projectName }}"
-          echo "Environment: ${{ inputs.environment }}"
+          echo "Build type: ${{ inputs.buildType }}"
           echo "Target: ${{ inputs.deployTarget || 'default' }}"
 
       - name: 🧾 List Artifacts
@@ -43,6 +43,6 @@ jobs:
         if: ${{ inputs.deployTarget == 'itch.io' }}
         run: |
           butler push "deployment-artifacts/${{ inputs.projectName }}" \
-            "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.environment }}"
+            "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
         env:
           BUTLER_API_KEY: ${{ secrets.DEPLOY_API_KEY }}

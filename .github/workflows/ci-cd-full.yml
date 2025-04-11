@@ -111,8 +111,8 @@ jobs:
     if: needs.release.result == 'success'
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
+      buildType: release
       projectName: ${{ vars.PROJECT_NAME }}
-      environment: production
       deployTarget: ${{ vars.DEPLOY_TARGET }} # optional env like 'itch.io', 'aws', etc.
     secrets: inherit
 
