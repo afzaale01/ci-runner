@@ -10,10 +10,10 @@ on:
         type: string
         required: true
       deployTargets:
-        description: "JSON array of deploy targets, e.g. ['itch.io','appcenter']"
+        description: "JSON array of deploy targets (e.g. ['itch.io','appcenter','firebase','s3','gh-pages'])"
         type: string
-        required: false
         default: '[]'
+        required: false
     secrets:
       DEPLOY_API_KEY:
         required: false
@@ -22,6 +22,16 @@ on:
       ITCH_PROJECT:
         required: false
       APPCENTER_OWNER_NAME:
+        required: false
+      FIREBASE_TOKEN:
+        required: false
+      AWS_ACCESS_KEY_ID:
+        required: false
+      AWS_SECRET_ACCESS_KEY:
+        required: false
+      S3_BUCKET:
+        required: false
+      GH_PAGES_TOKEN:
         required: false
 
 jobs:
@@ -33,6 +43,7 @@ jobs:
       matrix:
         target: ${{ fromJson(inputs.deployTargets) }}
     runs-on: ubuntu-latest
+
     steps:
       - name: 📥 Download Artifacts
         uses: actions/download-artifact@v4
@@ -41,44 +52,78 @@ jobs:
 
       - name: 🧠 Show Deployment Info
         run: |
-          echo "Deploying to target: ${{ matrix.target }}"
+          echo "Deploying to: ${{ matrix.target }}"
           echo "Project: ${{ inputs.projectName }}"
           echo "Build type: ${{ inputs.buildType }}"
 
       - name: 🧾 List Artifacts
-        run: ls -R deployment-artifacts
+        run: ls -R deployment-artifacts || echo "No artifacts found."
 
-      # Itch.io Deployment
-      - name: 🕹️ Deploy to itch.io (if selected)
-        if: ${{ matrix.target == 'itch.io' }}
+      # ───── itch.io ─────
+      - name: 🕹️ Deploy to itch.io
+        if: matrix.target == 'itch.io'
         run: |
+          if [ -z "${{ secrets.ITCH_USERNAME }}" ] || [ -z "${{ secrets.ITCH_PROJECT }}" ]; then
+            echo "⚠️ Missing itch.io credentials. Skipping..."; exit 0;
+          fi
           butler push "deployment-artifacts/${{ inputs.projectName }}" \
             "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
         env:
           BUTLER_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
 
-      # App Center Deployment
-      - name: 📱 Deploy to App Center (if selected)
-        if: ${{ matrix.target == 'appcenter' }}
+      # ───── App Center ─────
+      - name: 📱 Deploy to App Center
+        if: matrix.target == 'appcenter'
         run: |
-          echo "🔍 Searching for .apk, .aab, or .ipa in artifacts..."
-          DEPLOY_PATH="deployment-artifacts"
-
-          FILES=$(find "$DEPLOY_PATH" -type f \( -name "*.apk" -o -name "*.aab" -o -name "*.ipa" \))
-
-          if [ -z "$FILES" ]; then
-            echo "⚠️ No mobile build artifacts found. Skipping."
-            exit 0
+          if [ -z "${{ secrets.APPCENTER_OWNER_NAME }}" ] || [ -z "${{ secrets.DEPLOY_API_KEY }}" ]; then
+            echo "⚠️ Missing App Center credentials. Skipping..."; exit 0;
           fi
-
-          echo "📆 Found artifacts:"
-          echo "$FILES"
+          FILES=$(find deployment-artifacts -type f \( -name "*.apk" -o -name "*.aab" -o -name "*.ipa" \))
+          if [ -z "$FILES" ]; then echo "❌ No mobile artifacts found."; exit 0; fi
 
           for file in $FILES; do
-            echo "🚀 Deploying $file..."
+            echo "🚀 Deploying $file"
             npx appcenter distribute release \
               --app "${{ secrets.APPCENTER_OWNER_NAME }}/${{ inputs.projectName }}" \
               --file "$file" \
               --group "Testers" \
               --token "${{ secrets.DEPLOY_API_KEY }}"
           done
+
+      # ───── Firebase ─────
+      - name: 🔥 Deploy to Firebase Hosting
+        if: matrix.target == 'firebase'
+        run: |
+          if [ -z "${{ secrets.FIREBASE_TOKEN }}" ]; then
+            echo "⚠️ Missing Firebase token. Skipping..."; exit 0;
+          fi
+          cd "deployment-artifacts/${{ inputs.projectName }}/WebGL" || exit 0
+          npm install -g firebase-tools
+          firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}"
+
+      # ───── AWS S3 ─────
+      - name: ☁️ Deploy to AWS S3
+        if: matrix.target == 's3'
+        run: |
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ] || [ -z "${{ secrets.S3_BUCKET }}" ]; then
+            echo "⚠️ Missing AWS credentials or bucket. Skipping..."; exit 0;
+          fi
+          aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          aws s3 sync "deployment-artifacts/${{ inputs.projectName }}/WebGL" "s3://${{ secrets.S3_BUCKET }}" --delete
+
+      # ───── GitHub Pages ─────
+      - name: 🌍 Deploy to GitHub Pages
+        if: matrix.target == 'gh-pages'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GH_PAGES_TOKEN }}
+          publish_dir: deployment-artifacts/${{ inputs.projectName }}/WebGL
+
+      # ───── Summary ─────
+      - name: 🧾 Add to Summary
+        run: |
+          echo "### 📦 Deployment: ${{ matrix.target }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Project: \`${{ inputs.projectName }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Build type: \`${{ inputs.buildType }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ✅" >> $GITHUB_STEP_SUMMARY
