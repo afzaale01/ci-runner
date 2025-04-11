@@ -11,11 +11,6 @@ on:
         type: choice
         options:
           - preview
-      targetPlatforms:
-        description: "JSON array of platforms to build"
-        type: string
-        default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
-        required: false
   # Automatically run tests & builds on certain branches or PR changes
   push:
     tags:
@@ -34,6 +29,10 @@ on:
       - 'ProjectSettings/**'
       - 'Tests/**'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # 1. Run Tests
@@ -42,12 +41,12 @@ jobs:
     name: Run Tests
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
-      unityVersion: '2022.3.60f1'
-      licenseArtifactName: 'unity-license'
-      useGitLfs: 'true'
-      editModePath: 'Assets/Tests/Editor'
-      playModePath: 'Assets/Tests/PlayMode'
-      timeoutMinutes: 15
+      unityVersion: ${{ vars.UNITY_VERSION }}
+      licenseArtifactName: ${{ vars.LICENSE_ARTIFACT_NAME }}
+      useGitLfs: ${{ vars.USE_GIT_LFS }}
+      editModePath: ${{ vars.UNITY_TESTS_EDITMODE_PATH }}
+      playModePath: ${{ vars.UNITY_TESTS_PLAYMODE_PATH }}
+      timeoutMinutes: ${{ fromJson(vars.TIMEOUT_TESTS_IN_MINUTES) }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -70,15 +69,41 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-2-build.yml@main
     with:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
+      projectName: ${{ vars.PROJECT_NAME }}
       buildType: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && 'release' || github.event.inputs.buildType }}
-      targetPlatforms: >
-        ${{ 
-          github.event.inputs.targetPlatforms == ''
-            && '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
-            || github.event.inputs.targetPlatforms
-        }}
-      timeoutMinutes: 30
+      targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
+      timeoutMinutes: ${{ fromJson(vars.TIMEOUT_BUILD_IN_MINUTES) }}
+      retentionDays: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && fromJson(vars.RETENTION_DAYS_RELEASE) || fromJson(vars.RETENTION_DAYS_PREVIEW) }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 3. Release
+  # ─────────────────────────────────────────────────────────────────────────────
+  release:
+    name: Release
+    needs: [ build ]
+    if: startsWith(github.ref, 'refs/tags/')
+    uses: avalin/unity-ci-templates/.github/workflows/step-3-release.yml@main
+    with:
+      buildType: release
+      version: ${{ github.ref_name }}
+      projectName: ${{ vars.PROJECT_NAME }}
+      targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
+    secrets: inherit
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 4. Notify
+  # ─────────────────────────────────────────────────────────────────────────────
+  notify:
+    name: Notify (Optional)
+    needs: [ release ]
+    if: always()  # Runs even if release failed
+    uses: avalin/unity-ci-templates/.github/workflows/step-4-notify.yml@main
+    with:
+      title: ${{ needs.release.result == 'success' && '✅ Release Succeeded' || '❌ Release Failed' }}
+      message: "CI run for `${{ github.repository }}` completed with status `${{ needs.release.result }}` on `${{ github.ref_name }}`"
+      status: ${{ needs.release.result }}
+    secrets: inherit

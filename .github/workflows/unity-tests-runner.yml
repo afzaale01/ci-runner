@@ -86,8 +86,8 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          GITHUB_TOKEN: ${{ github.token }}
         with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
           testMode: ${{ inputs.testMode }}
 
       - name: Upload ${{ inputs.testMode }} Test Results (if tests failed)

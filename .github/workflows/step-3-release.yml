@@ -32,16 +32,51 @@ jobs:
         with:
           path: release-artifacts
 
+      - name: 📝 Check if Release Already Exists
+        id: check_release
+        run: |
+          VERSION="${{ inputs.version }}"
+          API_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/$VERSION"
+
+          RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Accept: application/vnd.github+json" \
+            "$API_URL")
+
+          if [ "$RESPONSE" -eq 200 ]; then
+            echo "✅ Release exists."
+            RELEASE_ID=$(jq -r '.id' response.json)
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
+          else
+            echo "❌ Release does not exist."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: 📝 Create GitHub Release
+        if: steps.check_release.outputs.exists != 'true'
         id: create_release
-        uses: actions/create-release@v1
+        run: |
+          VERSION="${{ inputs.version }}"
+          IS_PRERELEASE=$(echo "$VERSION" | grep -q '-' && echo true || echo false)
+
+          PAYLOAD=$(jq -n \
+            --arg tag_name "$VERSION" \
+            --arg name "Release $VERSION" \
+            --argjson prerelease "$IS_PRERELEASE" \
+            '{ tag_name: $tag_name, name: $name, draft: false, prerelease: $prerelease }')
+
+          RESPONSE=$(curl -s -X POST \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Accept: application/vnd.github+json" \
+            -d "$PAYLOAD" \
+            "https://api.github.com/repos/${{ github.repository }}/releases")
+
+          RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id')
+          echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
+          echo "✅ Created release with ID: $RELEASE_ID"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ inputs.version }}
-          release_name: Release ${{ inputs.version }}
-          draft: false
-          prerelease: ${{ contains(inputs.version, '-') }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: 🧮 Upload Artifacts
         run: |
@@ -49,17 +84,26 @@ jobs:
           PROJECT="${{ inputs.projectName }}"
           PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]')
 
+          # Use release ID from check or create step
+          RELEASE_ID="${{ steps.check_release.outputs.release_id || steps.create_release.outputs.release_id }}"
+
           for PLATFORM in $PLATFORMS; do
             ARTIFACT_PATH="release-artifacts/${{ inputs.buildType }}-${PROJECT}-${PLATFORM}-${VERSION}"
+            ZIP_NAME="${PROJECT}-${PLATFORM}-${VERSION}.zip"
+
             if [ -d "$ARTIFACT_PATH" ]; then
-              zip -r "${PLATFORM}.zip" "$ARTIFACT_PATH"
-              curl \
-                -X POST \
-                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              echo "📦 Zipping $ARTIFACT_PATH"
+              zip -r "$ZIP_NAME" "$ARTIFACT_PATH"
+
+              echo "📤 Uploading $ZIP_NAME to release ID $RELEASE_ID"
+              curl -s -X POST \
+                -H "Authorization: Bearer ${{ github.token }}" \
                 -H "Content-Type: application/zip" \
-                --data-binary @"${PLATFORM}.zip" \
-                "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=${PROJECT}-${PLATFORM}-${VERSION}.zip"
+                --data-binary @"$ZIP_NAME" \
+                "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets?name=$ZIP_NAME"
             else
               echo "⚠️ Skipping: $ARTIFACT_PATH not found"
             fi
           done
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
