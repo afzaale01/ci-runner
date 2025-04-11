@@ -13,6 +13,7 @@
 | Feature                        | Description |
 |-------------------------------|-------------|
 | 🧪 **Test Detection**            | Auto-detects and runs EditMode & PlayMode tests. |
+| 🧪 **Test Summary Comments**     | Auto-comment test results on PRs |
 | 🛠️ **Cross-Platform Builds**     | Android, iOS, WebGL, macOS, Windows, and Linux supported. |
 | 📦 **Release Deployment**        | Automatically creates GitHub Releases on tag push. |
 | 🧹 **Modular Design**            | Fully split into reusable `workflow_call` templates. |
@@ -27,7 +28,6 @@
 
 | Feature                  | Description |
 |--------------------------|-------------|
-| 🧪 Test Summary Comments | Auto-comment test results on PRs |
 | 📊 Test Coverage         | Codecov or coverlet integration |
 | 🔍 Static Analysis       | C# linters or Unity analyzers |
 | 🎮 Smoke Tests           | Boot test via Unity CLI |
