@@ -10,9 +10,10 @@ on:
         required: true
         type: string
       useGitLfs:
+        description: "Whether to use Git LFS (true/false)"
         required: false
-        type: boolean
-        default: false
+        default: 'true'
+        type: string
     secrets:
       UNITY_EMAIL:
         required: true
