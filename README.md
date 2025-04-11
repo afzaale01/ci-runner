@@ -22,6 +22,7 @@
 | 🗃️ **LFS & Cache**               | Optional Git LFS + caching of Unity `Library` and `Packages/`. |
 | 🎛️ **Manual Dispatch**          | Manually trigger preview builds with JSON platform control. |
 | 📣 **Notifications**         | Discord/Slack webhook support |
+| 🔍 **Static Analysis**       | C# linters or Unity analyzers |
 
 <details>
   <summary><strong>🚣️ Roadmap / To-Do</strong></summary>
@@ -29,7 +30,6 @@
 | Feature                  | Description |
 |--------------------------|-------------|
 | 📊 Test Coverage         | Codecov or coverlet integration |
-| 🔍 Static Analysis       | C# linters or Unity analyzers |
 | 🎮 Smoke Tests           | Boot test via Unity CLI |
 
 </details>
