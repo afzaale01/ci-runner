@@ -103,13 +103,13 @@ jobs:
     secrets: inherit
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # 4. Notify
+  # 5. Notify
   # ─────────────────────────────────────────────────────────────────────────────
   notify:
     name: Notify (Optional)
     needs: [ release ]
     if: needs.release.result != 'skipped'
-    uses: avalin/unity-ci-templates/.github/workflows/step-4-notify.yml@main
+    uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
       title: ${{ needs.release.result == 'success' && '✅ Release Succeeded' || '❌ Release Failed' }}
       message: "CI run for `${{ github.repository }}` completed with status `${{ needs.release.result }}` on `${{ github.ref_name }}`"
