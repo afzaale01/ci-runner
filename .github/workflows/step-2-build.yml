@@ -153,10 +153,9 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Ensure the outputs are valid JSON arrays before processing
-          ubuntu_list=$(echo "${{ needs.filter_platforms.outputs.ubuntuPlatforms }}" | jq -r 'fromJson | .[]?')
-          mac_list=$(echo "${{ needs.filter_platforms.outputs.macPlatforms }}" | jq -r 'fromJson | .[]?')
+          ubuntu_list=$(echo "${{ needs.filter_platforms.outputs.ubuntuPlatforms }}" | jq -r 'fromjson | .[]?')
+          mac_list=$(echo "${{ needs.filter_platforms.outputs.macPlatforms }}" | jq -r 'fromjson | .[]?')
 
-          # Writing Ubuntu platform status
           echo "### 🐧 Ubuntu Platforms Attempted" >> $GITHUB_STEP_SUMMARY
           if [[ -z "$ubuntu_list" || "$ubuntu_list" == "null" ]]; then
             echo "- ⏭️ None" >> $GITHUB_STEP_SUMMARY
@@ -165,7 +164,6 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Writing Ubuntu build status
           case "${{ needs.build_on_ubuntu.result }}" in
             success) echo "- Build Status: ✅ Success" >> $GITHUB_STEP_SUMMARY ;;
             skipped) echo "- Build Status: ⏭️ Skipped (No Ubuntu targets)" >> $GITHUB_STEP_SUMMARY ;;
@@ -173,7 +171,6 @@ jobs:
           esac
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Writing macOS platform status
           echo "### 🍏 macOS Platforms Attempted" >> $GITHUB_STEP_SUMMARY
           if [[ -z "$mac_list" || "$mac_list" == "null" ]]; then
             echo "- ⏭️ None" >> $GITHUB_STEP_SUMMARY
@@ -182,7 +179,6 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Writing macOS build status
           case "${{ needs.build_on_macos.result }}" in
             success) echo "- Build Status: ✅ Success" >> $GITHUB_STEP_SUMMARY ;;
             skipped) echo "- Build Status: ⏭️ Skipped (No macOS targets)" >> $GITHUB_STEP_SUMMARY ;;
