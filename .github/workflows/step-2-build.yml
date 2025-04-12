@@ -144,6 +144,7 @@ jobs:
     needs:
       - build_on_ubuntu
       - build_on_macos
+      - filter_platforms
     if: always()
     steps:
       - name: Write Build Summary
@@ -151,5 +152,11 @@ jobs:
           echo "### 📦 Unity Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          echo "- 🐧 Ubuntu Build: ${{ needs.build_on_ubuntu.result == 'success' && '✅ Success' || '❌ Failed or Skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 🍏 macOS Build: ${{ needs.build_on_macos.result == 'success' && '✅ Success' || '❌ Failed or Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "#### 🐧 Ubuntu Platforms Attempted:" >> $GITHUB_STEP_SUMMARY
+          echo "${{ join(fromJson(needs.filter_platforms.outputs.ubuntuPlatforms), ', ') }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Status: ${{ needs.build_on_ubuntu.result == 'success' && '✅ Success' || '❌ Failed or Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "#### 🍏 macOS Platforms Attempted:" >> $GITHUB_STEP_SUMMARY
+          echo "${{ join(fromJson(needs.filter_platforms.outputs.macPlatforms), ', ') }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Status: ${{ needs.build_on_macos.result == 'success' && '✅ Success' || '❌ Failed or Skipped' }}" >> $GITHUB_STEP_SUMMARY
