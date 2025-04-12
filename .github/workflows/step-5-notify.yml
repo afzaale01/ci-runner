@@ -71,3 +71,19 @@ jobs:
                $DISCORD_WEBHOOK
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
+      - name: 📢 Notify Microsoft Teams (if configured)
+        if: ${{ env.MSTEAMS_WEBHOOK != '' }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -d '{
+                     "@type": "MessageCard",
+                     "@context": "http://schema.org/extensions",
+                     "summary": "CI/CD Notification",
+                     "themeColor": "${{ steps.vars.outputs.status == 'success' && '00FF00' || steps.vars.outputs.status == 'failure' && 'FF0000' || '999999' }}",
+                     "title": "${{ steps.vars.outputs.title }}",
+                     "text": "${{ steps.vars.outputs.message }}"
+                   }' \
+               ${{ secrets.MSTEAMS_WEBHOOK }}
+        env:
+          MSTEAMS_WEBHOOK: ${{ secrets.MSTEAMS_WEBHOOK }}        
