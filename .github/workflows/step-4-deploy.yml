@@ -170,6 +170,27 @@ jobs:
           echo "📤 Uploading $FILE to Discord..."
           curl -F "file=@$FILE" "${{ secrets.DISCORD_WEBHOOK }}"
 
+      # ───── Custom Server ─────
+      - name: 🖥️ Deploy to Custom Server (via SCP or Rsync)
+        if: matrix.target == 'custom-server'
+        run: |
+          if [ -z "${{ secrets.CUSTOM_SERVER_HOST }}" ] || [ -z "${{ secrets.CUSTOM_SERVER_USER }}" ] || [ -z "${{ secrets.CUSTOM_SERVER_KEY }}" ]; then
+            echo "⚠️ Missing custom server credentials. Skipping..."; exit 0;
+          fi
+
+          echo "➡️ Deploying to custom server..."
+          mkdir -p ~/.ssh
+          echo "${{ secrets.CUSTOM_SERVER_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.CUSTOM_SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+          ARTIFACT_DIR="deployment-artifacts/${{ inputs.projectName }}"
+          rsync -avz "$ARTIFACT_DIR/" "${{ secrets.CUSTOM_SERVER_USER }}@${{ secrets.CUSTOM_SERVER_HOST }}:/var/www/mygame/"
+        env:
+          CUSTOM_SERVER_HOST: ${{ secrets.CUSTOM_SERVER_HOST }}
+          CUSTOM_SERVER_USER: ${{ secrets.CUSTOM_SERVER_USER }}
+          CUSTOM_SERVER_KEY: ${{ secrets.CUSTOM_SERVER_KEY }}
+
       # ───── Summary ─────
       - name: 🧾 Add to Summary
         run: |
