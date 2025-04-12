@@ -139,9 +139,9 @@ Artifacts are named using the following structure for easy traceability:
 ### 📁 Examples
 
 ```
-preview-MyGame-WebGL-manual-main
-preview-MyGame-WebGL-pr1
-release-MyGame-StandaloneWindows64-v1.2.3
+MyGame_WebGL-manual-main
+MyGame_WebGL-PR-0001
+MyGame_StandaloneWindows64-v1.2.3
 ```
 
 ---
