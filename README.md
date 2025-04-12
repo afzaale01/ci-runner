@@ -24,13 +24,6 @@
 | 📣 **Notifications**         | Discord/Slack webhook support |
 | 🔍 **Static Analysis**       | C# linters or Unity analyzers |
 
-<details>
-  <summary><strong>🚣️ Roadmap / To-Do</strong></summary>
-
-| Feature                  | Description |
-|--------------------------|-------------|
-| 📊 Test Coverage         | Codecov or coverlet integration |
-
 </details>
 
 ## Supported Targets
