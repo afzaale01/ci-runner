@@ -28,24 +28,24 @@ jobs:
         shell: bash
         run: |
           if [ "${{ inputs.buildType }}" = "release" ]; then
-            VERSION=$(echo "${GITHUB_REF}" | sed 's/refs\/tags\///')
-      
-            # 🔒 Validate tag format (v1.2.3 or v1.2.3-beta etc.)
+            VERSION=$(echo "${GITHUB_REF}" | sed 's#refs/tags/##')
+
+            # 🔒 Validate tag format (v1.2.3 or v1.2.3-beta)
             if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.-]+)?$ ]]; then
               echo "❌ Invalid tag format: $VERSION"
               exit 1
             fi
           else
-            # 🕵️ Detect PR number or mark as manual
-            if [[ "${GITHUB_REF}" == refs/pull/* ]]; then
-              PR_NUMBER=$(echo "${GITHUB_REF}" | sed -E 's#refs/pull/([0-9]+)/.*#\1#')
-              VERSION="pr${PR_NUMBER}"
+            # 🕵️ Detect PR number from GITHUB_REF
+            if [[ "$GITHUB_REF" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
+              VERSION="pr${BASH_REMATCH[1]}"
+            # 🕵️ Detect branch name as fallback
             else
-              VERSION="manual"
+              BRANCH_NAME=$(echo "${GITHUB_REF##refs/heads/}" | tr '/' '-')
+              VERSION="manual-${BRANCH_NAME}"
             fi
           fi
-      
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "📦 Determined version: ${VERSION}"
-      
+
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Determined version: $VERSION"
