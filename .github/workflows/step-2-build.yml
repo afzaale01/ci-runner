@@ -140,42 +140,27 @@ jobs:
 
   confirm_builds:
     name: 📄 Summarize Build Results
-    runs-on: ubuntu-latest
-    needs:
-      - build_on_ubuntu
-      - build_on_macos
-      - filter_platforms
     if: always()
+    runs-on: ubuntu-latest
+    needs: [build_on_ubuntu, build_on_macos, filter_platforms]
     steps:
-      - name: 📋 Write Build Summary
+      - name: Write Build Summary
         run: |
-          echo "📝 Build Summary" > build_summary.txt
-          
-          echo "Build Type: ${{ inputs.buildType }}" >> build_summary.txt
-          echo "Project Name: ${{ inputs.projectName }}" >> build_summary.txt
-          echo "Target Platforms: ${{ inputs.targetPlatforms }}" >> build_summary.txt
-          echo "Timeout Minutes: ${{ inputs.timeoutMinutes }}" >> build_summary.txt
-          echo "Retention Days: ${{ inputs.retentionDays }}" >> build_summary.txt
+          echo "### ✅ Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
-          echo "✅ Mac Platforms: ${{ needs.filter_platforms.outputs.macPlatforms }}" >> build_summary.txt
-          echo "✅ Ubuntu Platforms: ${{ needs.filter_platforms.outputs.ubuntuPlatforms }}" >> build_summary.txt
+          HAS_UBUNTU=${{ needs.build_on_ubuntu.result != 'skipped' }}
+          HAS_MACOS=${{ needs.build_on_macos.result != 'skipped' }}
 
-          echo "Builds completed for the following platforms:" >> build_summary.txt
-
-          # Check macOS and Ubuntu platforms
-          if [[ -n "${{ needs.filter_platforms.outputs.macPlatforms }}" ]]; then
-            echo "✅ macOS: ${{ needs.filter_platforms.outputs.macPlatforms }}" >> build_summary.txt
-          fi
-          if [[ -n "${{ needs.filter_platforms.outputs.ubuntuPlatforms }}" ]]; then
-            echo "✅ Ubuntu: ${{ needs.filter_platforms.outputs.ubuntuPlatforms }}" >> build_summary.txt
+          if [[ "$HAS_UBUNTU" == "false" && "$HAS_MACOS" == "false" ]]; then
+            echo "- ℹ️ No builds detected for Ubuntu or macOS." >> $GITHUB_STEP_SUMMARY
+            exit 0
           fi
 
-          echo "Build completed successfully at $(date)" >> build_summary.txt
+          if [[ "$HAS_UBUNTU" == "true" ]]; then
+            echo "- 🐧 Ubuntu Builds: ${{ needs.build_on_ubuntu.result == 'success' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          fi
 
-          cat build_summary.txt
-
-      - name: Upload Build Summary Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-summary
-          path: build_summary.txt
+          if [[ "$HAS_MACOS" == "true" ]]; then
+            echo "- 🍏 macOS Builds: ${{ needs.build_on_macos.result == 'success' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          fi
