@@ -13,7 +13,6 @@
 | Feature                        | Description |
 |-------------------------------|-------------|
 | 🧪 **Test Detection**            | Auto-detects and runs EditMode & PlayMode tests. |
-| 🧪 **Test Summary Comments**     | Auto-comment test results on PRs |
 | 🛠️ **Cross-Platform Builds**     | Android, iOS, WebGL, macOS, Windows, and Linux supported. |
 | 📦 **Release Deployment**        | Automatically creates GitHub Releases on tag push. |
 | 🧹 **Modular Design**            | Fully split into reusable `workflow_call` templates. |
