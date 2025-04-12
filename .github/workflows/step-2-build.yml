@@ -152,8 +152,14 @@ jobs:
           echo "### 📦 Unity Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          echo "#### 🐧 Ubuntu Platforms Attempted:" >> $GITHUB_STEP_SUMMARY
-          echo "${{ join(fromJson(needs.filter_platforms.outputs.ubuntuPlatforms), ', ') || '🚫 None' }}" >> $GITHUB_STEP_SUMMARY
+          echo "#### 🐧 Ubuntu Platforms Attempted" >> $GITHUB_STEP_SUMMARY
+          ubuntu_list="${{ needs.filter_platforms.outputs.ubuntuPlatforms }}"
+          if [[ "$ubuntu_list" == "[]" ]]; then
+            echo "- 🚫 None" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Platforms: \`$(echo "$ubuntu_list" | jq -r '.[]' | paste -sd ', ')`\n" >> $GITHUB_STEP_SUMMARY
+          fi
+
           case "${{ needs.build_on_ubuntu.result }}" in
             success) echo "- Build Status: ✅ Success" >> $GITHUB_STEP_SUMMARY ;;
             skipped) echo "- Build Status: 🚫 Skipped (No Ubuntu targets)" >> $GITHUB_STEP_SUMMARY ;;
@@ -161,8 +167,14 @@ jobs:
           esac
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          echo "#### 🍏 macOS Platforms Attempted:" >> $GITHUB_STEP_SUMMARY
-          echo "${{ join(fromJson(needs.filter_platforms.outputs.macPlatforms), ', ') || '🚫 None' }}" >> $GITHUB_STEP_SUMMARY
+          echo "#### 🍏 macOS Platforms Attempted" >> $GITHUB_STEP_SUMMARY
+          mac_list="${{ needs.filter_platforms.outputs.macPlatforms }}"
+          if [[ "$mac_list" == "[]" ]]; then
+            echo "- 🚫 None" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Platforms: \`$(echo "$mac_list" | jq -r '.[]' | paste -sd ', ')`\n" >> $GITHUB_STEP_SUMMARY
+          fi
+
           case "${{ needs.build_on_macos.result }}" in
             success) echo "- Build Status: ✅ Success" >> $GITHUB_STEP_SUMMARY ;;
             skipped) echo "- Build Status: 🚫 Skipped (No macOS targets)" >> $GITHUB_STEP_SUMMARY ;;
