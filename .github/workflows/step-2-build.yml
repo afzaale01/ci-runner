@@ -88,9 +88,8 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.projectName }}-${{ matrix.targetPlatform }}
+          name: ${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
           path: build/${{ matrix.targetPlatform }}
-          if-no-files-found: error
           retention-days: ${{ inputs.retentionDays }}
 
   build_on_ubuntu:
@@ -135,9 +134,8 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.projectName }}-${{ matrix.targetPlatform }}
+          name: ${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
           path: build/${{ matrix.targetPlatform }}
-          if-no-files-found: error
           retention-days: ${{ inputs.retentionDays }}
 
   confirm_builds:

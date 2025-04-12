@@ -80,45 +80,21 @@ jobs:
 
       - name: 🧮 Upload Artifacts
         run: |
-          PROJECT="${{ inputs.projectName }}"
           VERSION="${{ inputs.version }}"
-          BUILD_TYPE="${{ inputs.buildType }}"
+          PROJECT="${{ inputs.projectName }}"
           PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]')
-        
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          BRANCH="${GITHUB_REF_NAME}"
-          COMMIT="${GITHUB_SHA}"
-        
+
+          # Use release ID from check or create step
           RELEASE_ID="${{ steps.check_release.outputs.release_id || steps.create_release.outputs.release_id }}"
-        
+
           for PLATFORM in $PLATFORMS; do
-            ARTIFACT_PATH="release-artifacts/${PROJECT}/${PLATFORM}"
-        
+            ARTIFACT_PATH="release-artifacts/${{ inputs.buildType }}-${PROJECT}-${PLATFORM}-${VERSION}"
+            ZIP_NAME="${PROJECT}-${PLATFORM}-${VERSION}.zip"
+
             if [ -d "$ARTIFACT_PATH" ]; then
-              # 🧾 Write metadata
-              echo "Project: $PROJECT" > "$ARTIFACT_PATH/metadata.txt"
-              echo "Platform: $PLATFORM" >> "$ARTIFACT_PATH/metadata.txt"
-              echo "BuildType: $BUILD_TYPE" >> "$ARTIFACT_PATH/metadata.txt"
-              echo "Version: $VERSION" >> "$ARTIFACT_PATH/metadata.txt"
-              echo "Branch: $BRANCH" >> "$ARTIFACT_PATH/metadata.txt"
-              echo "Commit: $COMMIT" >> "$ARTIFACT_PATH/metadata.txt"
-              echo "PR: ${PR_NUMBER:-N/A}" >> "$ARTIFACT_PATH/metadata.txt"
-        
-              # 🏷 Determine filename
-              if [ "$BUILD_TYPE" = "release" ]; then
-                ZIP_NAME="${PROJECT}-${PLATFORM}-${VERSION}.zip"
-              else
-                if [ -n "$PR_NUMBER" ]; then
-                  ZIP_NAME="${PROJECT}-${PLATFORM}-pr${PR_NUMBER}.zip"
-                else
-                  ZIP_NAME="${PROJECT}-${PLATFORM}-manual.zip"
-                fi
-              fi
-        
-              # 📦 Zip and upload
-              echo "📦 Zipping $ARTIFACT_PATH to $ZIP_NAME"
+              echo "📦 Zipping $ARTIFACT_PATH"
               zip -r "$ZIP_NAME" "$ARTIFACT_PATH"
-        
+
               echo "📤 Uploading $ZIP_NAME to release ID $RELEASE_ID"
               curl -s -X POST \
                 -H "Authorization: Bearer ${{ github.token }}" \
