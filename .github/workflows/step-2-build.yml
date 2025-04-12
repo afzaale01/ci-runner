@@ -149,33 +149,33 @@ jobs:
     steps:
       - name: 📋 Write Build Summary
         run: |
-          echo "### ✅ Unity Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📝 Build Summary" > build_summary.txt
+          
+          echo "Build Type: ${{ inputs.buildType }}" >> build_summary.txt
+          echo "Project Name: ${{ inputs.projectName }}" >> build_summary.txt
+          echo "Target Platforms: ${{ inputs.targetPlatforms }}" >> build_summary.txt
+          echo "Timeout Minutes: ${{ inputs.timeoutMinutes }}" >> build_summary.txt
+          echo "Retention Days: ${{ inputs.retentionDays }}" >> build_summary.txt
 
-          echo "#### 🐧 Ubuntu Platforms Attempted" >> $GITHUB_STEP_SUMMARY
-          ubuntu_list="${{ needs.filter_platforms.outputs.ubuntuPlatforms }}"
-          if [[ "$ubuntu_list" == "[]" ]]; then
-            echo "- ⏭️ None" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- Platforms: \`$(echo "$ubuntu_list" | jq -r '.[]' | paste -sd ', ')`\n" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Mac Platforms: ${{ needs.filter_platforms.outputs.macPlatforms }}" >> build_summary.txt
+          echo "✅ Ubuntu Platforms: ${{ needs.filter_platforms.outputs.ubuntuPlatforms }}" >> build_summary.txt
+
+          echo "Builds completed for the following platforms:" >> build_summary.txt
+
+          # Check macOS and Ubuntu platforms
+          if [[ -n "${{ needs.filter_platforms.outputs.macPlatforms }}" ]]; then
+            echo "✅ macOS: ${{ needs.filter_platforms.outputs.macPlatforms }}" >> build_summary.txt
+          fi
+          if [[ -n "${{ needs.filter_platforms.outputs.ubuntuPlatforms }}" ]]; then
+            echo "✅ Ubuntu: ${{ needs.filter_platforms.outputs.ubuntuPlatforms }}" >> build_summary.txt
           fi
 
-          case "${{ needs.build_on_ubuntu.result }}" in
-            success) echo "- Build Status: ✅ Success" >> $GITHUB_STEP_SUMMARY ;;
-            skipped) echo "- Build Status: ⏭️ Skipped (No Ubuntu targets)" >> $GITHUB_STEP_SUMMARY ;;
-            *)       echo "- Build Status: ❌ One or more Ubuntu builds failed" >> $GITHUB_STEP_SUMMARY ;;
-          esac
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Build completed successfully at $(date)" >> build_summary.txt
 
-          echo "#### 🍏 macOS Platforms Attempted" >> $GITHUB_STEP_SUMMARY
-          mac_list="${{ needs.filter_platforms.outputs.macPlatforms }}"
-          if [[ "$mac_list" == "[]" ]]; then
-            echo "- ⏭️ None" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- Platforms: \`$(echo "$mac_list" | jq -r '.[]' | paste -sd ', ')`\n" >> $GITHUB_STEP_SUMMARY
-          fi
+          cat build_summary.txt
 
-          case "${{ needs.build_on_macos.result }}" in
-            success) echo "- Build Status: ✅ Success" >> $GITHUB_STEP_SUMMARY ;;
-            skipped) echo "- Build Status: ⏭️ Skipped (No macOS targets)" >> $GITHUB_STEP_SUMMARY ;;
-            *)       echo "- Build Status: ❌ One or more macOS builds failed" >> $GITHUB_STEP_SUMMARY ;;
+      - name: Upload Build Summary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-summary
+          path: build_summary.txt
