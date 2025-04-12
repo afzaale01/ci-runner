@@ -47,12 +47,15 @@
 
 | File | Purpose |
 |------|---------|
-| `step-1-test.yml` | Detects and runs Unity tests |
-| `step-2-build.yml` | Builds for multiple platforms |
-| `step-3-release.yml` | Publishes GitHub releases |
-| `unity-tests-detection.yml` | Detects if EditMode / PlayMode tests exist |
-| `unity-tests-runner.yml` | Runs Unity tests for specified mode |
-| `unity-license-uploader.yml` | Uploads Unity `.ulf` license |
+| `step-0-analyze.yml`          | Runs static analysis using `dotnet format` |
+| `step-1-test.yml`             | Detects and runs Unity tests |
+| `step-2-build.yml`            | Builds for multiple platforms |
+| `step-3-release.yml`          | Publishes GitHub releases |
+| `step-4-deploy.yml`           | Deploys to platforms like itch.io, S3, Steam, etc. |
+| `step-5-notify.yml`           | Sends Discord, Slack, and Teams notifications |
+| `unity-tests-detection.yml`   | Detects if EditMode / PlayMode tests exist |
+| `unity-tests-runner.yml`      | Runs Unity tests for specified mode |
+| `unity-license-uploader.yml`  | Uploads Unity `.ulf` license |
 | `target-platforms-filter.yml` | Filters platforms into macOS/Ubuntu |
 | `build-version-generator.yml` | Auto-generates timestamp or tag-based versioning |
 
