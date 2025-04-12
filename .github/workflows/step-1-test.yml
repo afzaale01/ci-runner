@@ -94,5 +94,19 @@ jobs:
         run: |
           echo "### 🧪 Unity Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- 🥪 EditMode: ${{ needs.run-editmode.result == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 🎮 PlayMode: ${{ needs.run-playmode.result == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+
+          HAS_EDITMODE=${{ needs.run-editmode.result != 'skipped' }}
+          HAS_PLAYMODE=${{ needs.run-playmode.result != 'skipped' }}
+
+          if [[ "$HAS_EDITMODE" == "false" && "$HAS_PLAYMODE" == "false" ]]; then
+            echo "- ℹ️ No EditMode or PlayMode tests detected." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          if [[ "$HAS_EDITMODE" == "true" ]]; then
+            echo "- 🥪 EditMode: ${{ needs.run-editmode.result == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "$HAS_PLAYMODE" == "true" ]]; then
+            echo "- 🎮 PlayMode: ${{ needs.run-playmode.result == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          fi
