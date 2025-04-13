@@ -1,4 +1,4 @@
-name: ✨ Step 2 - Build
+name: 🧩 Step 2 - Build
 
 on:
   workflow_call:
@@ -59,7 +59,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: 
+        os:
           - macOS-latest
         targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.macPlatforms) }}
 
@@ -85,11 +85,20 @@ jobs:
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
 
+      - name: Organize Build Output
+        run: |
+          VERSION="${{ needs.determine_version.outputs.version }}"
+          PLATFORM="${{ matrix.targetPlatform }}"
+          DEST="${{ inputs.projectName }}-${VERSION}/${PLATFORM}"
+
+          mkdir -p "$DEST"
+          mv build/"$PLATFORM"/* "$DEST"/
+
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.projectName }}_${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
-          path: build/${{ matrix.targetPlatform }}
+          name: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}-${{ matrix.targetPlatform }}
+          path: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}
           retention-days: ${{ inputs.retentionDays }}
 
   build_on_ubuntu:
@@ -101,7 +110,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: 
+        os:
           - ubuntu-latest
         targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.ubuntuPlatforms) }}
 
@@ -131,18 +140,74 @@ jobs:
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
 
+      - name: Fix Permissions (Linux)
+        run: sudo chown -R $USER:$USER build/
+
+      - name: Organize Build Output
+        run: |
+          VERSION="${{ needs.determine_version.outputs.version }}"
+          PLATFORM="${{ matrix.targetPlatform }}"
+          DEST="${{ inputs.projectName }}-${VERSION}/${PLATFORM}"
+
+          mkdir -p "$DEST"
+          mv build/"$PLATFORM"/* "$DEST"/
+
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.projectName }}_${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
-          path: build/${{ matrix.targetPlatform }}
+          name: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}-${{ matrix.targetPlatform }}
+          path: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}
+          retention-days: ${{ inputs.retentionDays }}
+
+  combine_builds:
+    name: Combine All Platform Builds
+    runs-on: ubuntu-latest
+    needs: [build_on_ubuntu, build_on_macos, determine_version]
+    steps:
+      - name: 📥 Download All Platform Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+
+      - name: 🗂 Combine Into Single Versioned Folder
+        run: |
+          VERSION="${{ needs.determine_version.outputs.version }}"
+          PROJECT="${{ inputs.projectName }}"
+          COMBINED_DIR="${PROJECT}-${VERSION}"
+          mkdir -p "$COMBINED_DIR"
+
+          echo "Combining artifacts into: $COMBINED_DIR"
+
+          for DIR in all-artifacts/*; do
+            PLATFORM=$(basename "$DIR" | sed -E "s/^${PROJECT}-${VERSION}-//")
+            echo "→ Merging platform: $PLATFORM"
+            mkdir -p "$COMBINED_DIR/$PLATFORM"
+
+            # Step into first-level folder (e.g. Unity_CI_Templates-manual-main)
+            INNER=$(find "$DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)
+            CURRENT="$INNER"
+
+            # Flatten nested folders like Android/Android/Android
+            while [ -d "$CURRENT/$(basename "$CURRENT")" ]; do
+              CURRENT="$CURRENT/$(basename "$CURRENT")"
+            done
+
+            echo "→ Resolved real content at: $CURRENT"
+            cp -r "$CURRENT/"* "$COMBINED_DIR/$PLATFORM/" || echo "⚠️ Nothing to copy for $PLATFORM"
+          done
+
+      - name: 📦 Upload Combined Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}
+          path: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}
           retention-days: ${{ inputs.retentionDays }}
 
   confirm_builds:
     name: 📄 Summarize Build Results
     if: always()
     runs-on: ubuntu-latest
-    needs: [build_on_ubuntu, build_on_macos, filter_platforms]
+    needs: [build_on_ubuntu, build_on_macos, combine_builds, filter_platforms]
     steps:
       - name: Write Build Summary
         run: |
