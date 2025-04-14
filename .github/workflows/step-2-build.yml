@@ -94,9 +94,15 @@ jobs:
           VERSION="${{ needs.determine_version.outputs.version }}"
           PLATFORM="${{ matrix.targetPlatform }}"
           DEST="${{ inputs.projectName }}-${VERSION}/${PLATFORM}"
+          SOURCE="build/${PLATFORM}"
+
+          # Flatten nested folders like WebGL/WebGL/WebGL
+          while [ -d "$SOURCE/$(basename "$SOURCE")" ]; do
+           SOURCE="$SOURCE/$(basename "$SOURCE")"
+          done
 
           mkdir -p "$DEST"
-          mv build/"$PLATFORM"/* "$DEST"/
+          mv "$SOURCE"/* "$DEST"/
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
