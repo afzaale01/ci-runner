@@ -98,7 +98,7 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-3-release.yml@main
     with:
       buildType: release
-      version: ${{ github.ref_name }}
+      version: ${{ needs.build.outputs.version }}
       projectName: ${{ vars.PROJECT_NAME }}
       targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
     secrets: inherit
@@ -115,6 +115,7 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
+      version: ${{ needs.build.outputs.version }}
       projectName: ${{ vars.PROJECT_NAME }}
       deployTargets: ${{ vars.DEPLOY_TARGETS }} # optional env like 'itch.io', 'aws', etc.
     secrets: inherit

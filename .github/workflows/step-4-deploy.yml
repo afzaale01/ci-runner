@@ -6,6 +6,10 @@ on:
       buildType:
         type: string
         required: true
+      version:
+        description: "The version/tag name (e.g., v1.2.3)"
+        type: string
+        required: true
       projectName:
         type: string
         required: true
