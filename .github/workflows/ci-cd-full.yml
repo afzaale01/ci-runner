@@ -108,7 +108,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy (Optional)
-    needs: [ release ]
+    needs: [ build, release ]
     if: >
       needs.release.result == 'success' &&
       fromJson(vars.DEPLOY_TARGETS) != '[]'
