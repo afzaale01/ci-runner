@@ -88,8 +88,8 @@ jobs:
           RELEASE_ID="${{ steps.check_release.outputs.release_id || steps.create_release.outputs.release_id }}"
 
           for PLATFORM in $PLATFORMS; do
-            ARTIFACT_PATH="release-artifacts/${{ inputs.buildType }}-${PROJECT}-${PLATFORM}-${VERSION}"
-            ZIP_NAME="${PROJECT}-${PLATFORM}-${VERSION}.zip"
+            ARTIFACT_PATH="release-artifacts/${PROJECT}-${VERSION}-${PLATFORM}"
+            ZIP_NAME="${PROJECT}-${VERSION}-${PLATFORM}.zip"
 
             if [ -d "$ARTIFACT_PATH" ]; then
               echo "📦 Zipping $ARTIFACT_PATH"
