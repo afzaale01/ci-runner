@@ -143,6 +143,18 @@ jobs:
             exit 1
           fi
 
+      - name: 🧯 Decompress Brotli Files for GitHub Pages
+        if: matrix.target == 'gh-pages'
+        run: |
+          echo "📦 Decompressing .br files for GitHub Pages (no Content-Encoding support)..."
+          sudo apt-get update && sudo apt-get install -y brotli
+          for FILE in $(find "$DEPLOY_DIR/WebGL" -name "*.br"); do
+            TARGET="${FILE%.br}"
+            echo "➤ $FILE → $TARGET"
+            brotli -d -f "$FILE" -o "$TARGET"
+          done
+          find "$DEPLOY_DIR/WebGL" -name "*.br" -delete
+
       - name: 🌍 Deploy to GitHub Pages
         if: matrix.target == 'gh-pages'
         uses: peaceiris/actions-gh-pages@v3
