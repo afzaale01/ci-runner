@@ -34,6 +34,10 @@ on:
         required: true
       UNITY_LICENSE:
         required: true
+    outputs:
+      version:
+        description: "The resolved version string used in the build"
+        value: ${{ jobs.determine_version.outputs.version }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
