@@ -203,7 +203,8 @@ jobs:
             mkdir -p "$DEST"
 
             # Copy contents directly, excluding unity license
-            rsync -a --exclude='unity_license' "$DIR/" "$DEST/" || echo "⚠️ Nothing to copy for $PLATFORM"
+            cp -r "$DIR/"* "$DEST/" || echo "⚠️ Nothing to copy for $PLATFORM"
+            rm -rf "$DEST/unity_license"
           done
 
       - name: 📦 Upload Combined Artifact
