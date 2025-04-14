@@ -195,21 +195,15 @@ jobs:
           echo "Combining artifacts into: $COMBINED_DIR"
 
           for DIR in all-artifacts/*; do
-            PLATFORM=$(basename "$DIR" | sed -E "s/^${PROJECT}-${VERSION}-//")
-            echo "→ Merging platform: $PLATFORM"
-            mkdir -p "$COMBINED_DIR/$PLATFORM"
+            ARTIFACT_NAME=$(basename "$DIR")
+            PLATFORM="${ARTIFACT_NAME##*-}"  # Get the last dash-separated segment (the platform)
+            DEST="$COMBINED_DIR/$PLATFORM"
 
-            # Step into first-level folder (e.g. Unity_CI_Templates-manual-main)
-            INNER=$(find "$DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)
-            CURRENT="$INNER"
+            echo "→ Merging platform: $PLATFORM into $DEST"
+            mkdir -p "$DEST"
 
-            # Flatten nested folders like Android/Android/Android
-            while [ -d "$CURRENT/$(basename "$CURRENT")" ]; do
-              CURRENT="$CURRENT/$(basename "$CURRENT")"
-            done
-
-            echo "→ Resolved real content at: $CURRENT"
-            cp -r "$CURRENT/"* "$COMBINED_DIR/$PLATFORM/" || echo "⚠️ Nothing to copy for $PLATFORM"
+            # Copy contents directly, assuming the structure is already clean
+            cp -r "$DIR/"* "$DEST/" || echo "⚠️ Nothing to copy for $PLATFORM"
           done
 
       - name: 📦 Upload Combined Artifact
