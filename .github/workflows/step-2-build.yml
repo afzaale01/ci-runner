@@ -202,8 +202,8 @@ jobs:
             echo "→ Merging platform: $PLATFORM into $DEST"
             mkdir -p "$DEST"
 
-            # Copy contents directly, assuming the structure is already clean
-            cp -r "$DIR/"* "$DEST/" || echo "⚠️ Nothing to copy for $PLATFORM"
+            # Copy contents directly, excluding unity license
+            rsync -a --exclude='unity_license' "$DIR/" "$DEST/" || echo "⚠️ Nothing to copy for $PLATFORM"
           done
 
       - name: 📦 Upload Combined Artifact
