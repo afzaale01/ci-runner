@@ -107,7 +107,7 @@ jobs:
   # 4. Deploy
   # ─────────────────────────────────────────────────────────────────────────────
   deploy:
-    name: Deploy (Optional)
+    name: Deploy
     needs: [ build, release ]
     if: >
       needs.release.result == 'success' &&
@@ -124,7 +124,7 @@ jobs:
   # 5. Notify
   # ─────────────────────────────────────────────────────────────────────────────
   notify:
-    name: Notify (Optional)
+    name: Notify
     needs: [ release, deploy ]
     if: always() && needs.release.result != 'skipped'
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main

@@ -45,12 +45,12 @@ concurrency:
 
 jobs:
   filter_platforms:
-    uses: ./.github/workflows/target-platforms-filter.yml
+    uses: avalin/unity-ci-templates/.github/workflows/target-platforms-filter.yml@main
     with:
       targetPlatforms: ${{ inputs.targetPlatforms }}
 
   determine_version:
-    uses: ./.github/workflows/build-version-generator.yml
+    uses: avalin/unity-ci-templates/.github/workflows/build-version-generator.yml@main
     with:
       buildType: ${{ inputs.buildType }}
 
