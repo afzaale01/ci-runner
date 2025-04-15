@@ -135,15 +135,42 @@ jobs:
           aws s3 sync "$DEPLOY_DIR/WebGL" "s3://${{ secrets.S3_BUCKET }}" --delete
 
       # ───── GitHub Pages ─────
-      - name: 🔍 Check WebGL Build Exists
+      - name: 🩹 Patch & Decompress Unity WebGL for GitHub Pages
         if: matrix.target == 'gh-pages'
         run: |
-          if [ ! -d "$DEPLOY_DIR/WebGL" ]; then
-            echo "❌ WebGL build not found. Cannot deploy to GitHub Pages."
-            exit 1
-          fi
+          echo "🔧 Patching Unity WebGL files for GitHub Pages (no Content-Encoding)..."
 
-      # ——— GitHub Pages (WebGL Compatibility Patch) ———
+          sudo apt-get update && sudo apt-get install -y brotli gzip
+    
+          cd "$DEPLOY_DIR/WebGL"
+    
+          echo "🛠️ Decompressing .br and .gz files..."
+          find . -type f -name "*.br" | while read f; do
+            target="${f%.br}"
+            echo "Brotli: $f → $target"
+            brotli -d -f "$f" -o "$target"
+            rm "$f"
+          done
+    
+          find . -type f -name "*.gz" | while read f; do
+            target="${f%.gz}"
+            echo "Gzip: $f → $target"
+            gunzip -c "$f" > "$target"
+            rm "$f"
+          done
+
+          echo "🔄 Removing .br/.gz references and disabling compressionFormat..."
+          find . -type f \( -name "*.js" -o -name "*.json" \) | while read f; do
+            sed -i 's/\.br//g' "$f"
+            sed -i 's/\.gz//g' "$f"
+            sed -i 's/compressionFormat:"br"/compressionFormat:null/g' "$f"
+            sed -i 's/compressionFormat:"gzip"/compressionFormat:null/g' "$f"
+            sed -i 's/"compressionFormat":"br"/"compressionFormat":null/g' "$f"
+            sed -i 's/"compressionFormat":"gzip"/"compressionFormat":null/g' "$f"
+          done
+
+          echo "✅ Patch complete for GitHub Pages"
+
       - name: 🌍 Deploy to GitHub Pages
         if: matrix.target == 'gh-pages'
         uses: peaceiris/actions-gh-pages@v3
