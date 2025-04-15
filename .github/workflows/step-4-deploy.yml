@@ -150,18 +150,23 @@ jobs:
 
           echo "🔍 Checking for compression in WebGL build..."
 
-          # Check for any .br or .gz files
-          if find . -type f \( -name "*.br" -o -name "*.gz" \) | grep -q .; then
-            echo "⚠️ Compressed files detected (.br/.gz)"
-          else
-            echo "✅ No compressed files found"
+          has_br=0
+          has_gz=0
+
+          if find . -type f -name "*.br" | grep -q .; then
+            has_br=1
           fi
 
-          # Check for compressionFormat hints in relevant files
-          if grep -r --include=\*.{js,json,html} -E 'compressionFormat.*(br|gzip)' .; then
-            echo "⚠️ Detected compressionFormat references in code"
+          if find . -type f -name "*.gz" | grep -q .; then
+            has_gz=1
+          fi
+
+          if [ "$has_br" -eq 1 ]; then
+            echo "⚠️ WebGL build is compressed: .br files or code references likely present."
+          elif [ "$has_gz" -eq 1 ]; then
+            echo "⚠️ WebGL build is compressed: .gz files or code references likely present."
           else
-            echo "✅ No compressionFormat references found"
+            echo "✅ WebGL build is uncompressed (no .br/.gz files)."
           fi
 
       - name: 🩹 Patch & Decompress Unity WebGL for GitHub Pages
