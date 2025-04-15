@@ -35,6 +35,8 @@ on:
         required: false
       S3_BUCKET:
         required: false
+      GH_PAGES_TOKEN:
+        required: false
       STEAM_USERNAME:
         required: false
       STEAM_PASSWORD:
@@ -133,14 +135,79 @@ jobs:
           aws s3 sync "$DEPLOY_DIR/WebGL" "s3://${{ secrets.S3_BUCKET }}" --delete
 
       # ───── GitHub Pages ─────
-      - name: 🌍 Trigger GitHub Pages Deployment Workflow
+      - name: 🔍 Check WebGL Build Exists
         if: matrix.target == 'gh-pages'
-        uses: avalin/unity-ci-templates/.github/workflows/deploy-to-gh-pages.yml@main
+        run: |
+          if [ ! -d "$DEPLOY_DIR/WebGL" ]; then
+            echo "❌ WebGL build not found. Cannot deploy to GitHub Pages."
+            exit 1
+          fi
+
+      - name: 🔎 Detect WebGL Compression Format
+        if: matrix.target == 'gh-pages'
+        run: |
+          cd "$DEPLOY_DIR/WebGL"
+
+          echo "🔍 Checking for compression in WebGL build..."
+
+          # Check for any .br or .gz files
+          if find . -type f \( -name "*.br" -o -name "*.gz" \) | grep -q .; then
+            echo "⚠️ Compressed files detected (.br/.gz)"
+          else
+            echo "✅ No compressed files found"
+          fi
+
+          # Check for compressionFormat hints in relevant files
+          if grep -r --include=\*.{js,json,html} -E 'compressionFormat.*(br|gzip)' .; then
+            echo "⚠️ Detected compressionFormat references in code"
+          else
+            echo "✅ No compressionFormat references found"
+          fi
+
+      - name: 🩹 Patch & Decompress Unity WebGL for GitHub Pages
+        if: matrix.target == 'gh-pages'
+        run: |
+          echo "🔧 Patching Unity WebGL files for GitHub Pages (remove .br/.gz + references)..."
+
+          # Install brotli/gzip tools if needed
+          sudo apt-get update && sudo apt-get install -y brotli gzip
+
+          cd "$DEPLOY_DIR/WebGL"
+
+          # 1) Decompress any .br → original
+          find . -type f -name "*.br" | while read f; do
+            out="${f%.br}"
+            echo "Decompressing Brotli: $f → $out"
+            brotli -d -f "$f" -o "$out"
+            rm "$f"
+          done
+
+          # 2) Decompress any .gz → original
+          find . -type f -name "*.gz" | while read f; do
+            out="${f%.gz}"
+            echo "Decompressing Gzip: $f → $out"
+            gunzip -c "$f" > "$out"
+            rm "$f"
+          done
+
+          # 3) Strip out .br/.gz references and disable compressionFormat in all .js, .json, and .html
+          #    (Sometimes Unity stashes references in index.html or other JS files)
+          find . -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" \) -print0 | xargs -0 sed -i \
+            -e 's/\.br//g' \
+            -e 's/\.gz//g' \
+            -e 's/compressionFormat:"br"/compressionFormat:null/g' \
+            -e 's/compressionFormat:"gzip"/compressionFormat:null/g' \
+            -e 's/"compressionFormat":"br"/"compressionFormat":null/g' \
+            -e 's/"compressionFormat":"gzip"/"compressionFormat":null/g'
+
+          echo "✅ All .br/.gz references removed; files are now uncompressed for GH Pages."
+
+      - name: 🌍 Deploy to GitHub Pages
+        if: matrix.target == 'gh-pages'
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          projectName: ${{ inputs.projectName }}
-          version: ${{ inputs.version }}
-        secrets:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ env.DEPLOY_DIR }}/WebGL
 
       # ───── Steam ─────
       - name: 🎮 Deploy to Steam
