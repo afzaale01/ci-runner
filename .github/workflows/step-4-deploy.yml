@@ -135,6 +135,14 @@ jobs:
           aws s3 sync "$DEPLOY_DIR/WebGL" "s3://${{ secrets.S3_BUCKET }}" --delete
 
       # ───── GitHub Pages ─────
+      - name: 🔍 Check WebGL Build Exists
+        if: matrix.target == 'gh-pages'
+        run: |
+          if [ ! -d "$DEPLOY_DIR/WebGL" ]; then
+            echo "❌ WebGL build not found. Cannot deploy to GitHub Pages."
+            exit 1
+          fi
+
       - name: 🩹 Patch & Decompress Unity WebGL for GitHub Pages
         if: matrix.target == 'gh-pages'
         run: |
