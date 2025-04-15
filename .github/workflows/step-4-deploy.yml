@@ -138,38 +138,40 @@ jobs:
       - name: 🩹 Patch & Decompress Unity WebGL for GitHub Pages
         if: matrix.target == 'gh-pages'
         run: |
-          echo "🔧 Patching Unity WebGL files for GitHub Pages (no Content-Encoding)..."
+          echo "🔧 Patching Unity WebGL files for GitHub Pages (remove .br/.gz + references)..."
 
+          # Install brotli/gzip tools if needed
           sudo apt-get update && sudo apt-get install -y brotli gzip
-    
+
           cd "$DEPLOY_DIR/WebGL"
-    
-          echo "🛠️ Decompressing .br and .gz files..."
+
+          # 1) Decompress any .br → original
           find . -type f -name "*.br" | while read f; do
-            target="${f%.br}"
-            echo "Brotli: $f → $target"
-            brotli -d -f "$f" -o "$target"
+            out="${f%.br}"
+            echo "Decompressing Brotli: $f → $out"
+            brotli -d -f "$f" -o "$out"
             rm "$f"
           done
-    
+
+          # 2) Decompress any .gz → original
           find . -type f -name "*.gz" | while read f; do
-            target="${f%.gz}"
-            echo "Gzip: $f → $target"
-            gunzip -c "$f" > "$target"
+            out="${f%.gz}"
+            echo "Decompressing Gzip: $f → $out"
+            gunzip -c "$f" > "$out"
             rm "$f"
           done
 
-          echo "🔄 Removing .br/.gz references and disabling compressionFormat..."
-          find . -type f \( -name "*.js" -o -name "*.json" \) | while read f; do
-            sed -i 's/\.br//g' "$f"
-            sed -i 's/\.gz//g' "$f"
-            sed -i 's/compressionFormat:"br"/compressionFormat:null/g' "$f"
-            sed -i 's/compressionFormat:"gzip"/compressionFormat:null/g' "$f"
-            sed -i 's/"compressionFormat":"br"/"compressionFormat":null/g' "$f"
-            sed -i 's/"compressionFormat":"gzip"/"compressionFormat":null/g' "$f"
-          done
+          # 3) Strip out .br/.gz references and disable compressionFormat in all .js, .json, and .html
+          #    (Sometimes Unity stashes references in index.html or other JS files)
+          find . -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" \) -print0 | xargs -0 sed -i \
+            -e 's/\.br//g' \
+            -e 's/\.gz//g' \
+            -e 's/compressionFormat:"br"/compressionFormat:null/g' \
+            -e 's/compressionFormat:"gzip"/compressionFormat:null/g' \
+            -e 's/"compressionFormat":"br"/"compressionFormat":null/g' \
+            -e 's/"compressionFormat":"gzip"/"compressionFormat":null/g'
 
-          echo "✅ Patch complete for GitHub Pages"
+          echo "✅ All .br/.gz references removed; files are now uncompressed for GH Pages."
 
       - name: 🌍 Deploy to GitHub Pages
         if: matrix.target == 'gh-pages'
