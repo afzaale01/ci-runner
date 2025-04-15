@@ -144,38 +144,6 @@ jobs:
           fi
 
       # ——— GitHub Pages (WebGL Compatibility Patch) ———
-      - name: 🔧 Patch Unity WebGL Loader for GitHub Pages
-        if: matrix.target == 'gh-pages'
-        run: |
-          echo "📆 Patching loader for GitHub Pages..."
-    
-          LOADER_JS=$(find "$DEPLOY_DIR/WebGL" -name "*.loader.js" | head -n 1)
-          if [ ! -f "$LOADER_JS" ]; then
-            echo "❌ No loader file found!" && exit 1
-          fi
-    
-          # Remove .br extensions from the loader
-          sed -i 's/\.br//g' "$LOADER_JS"
-
-          # Disable compression in config (make sure 'compressionFormat' is null)
-          sed -i 's/compressionFormat:"br"/compressionFormat:null/g' "$LOADER_JS"
-          sed -i 's/compressionFormat:"gzip"/compressionFormat:null/g' "$LOADER_JS"
-
-          echo "✅ Loader patched: $LOADER_JS"
-
-      - name: 🛡️ Decompress Brotli Files for GitHub Pages
-        if: matrix.target == 'gh-pages'
-        run: |
-          echo "📆 Decompressing .br files for GitHub Pages (no Content-Encoding support)..."
-          sudo apt-get update && sudo apt-get install -y brotli
-          for FILE in $(find "$DEPLOY_DIR/WebGL" -name "*.br"); do
-            TARGET="${FILE%.br}"
-            echo "➡️ $FILE → $TARGET"
-            brotli -d -f "$FILE" -o "$TARGET"
-          done
-          find "$DEPLOY_DIR/WebGL" -name "*.br" -delete
-          echo "📆 All .br files removed."
-
       - name: 🌍 Deploy to GitHub Pages
         if: matrix.target == 'gh-pages'
         uses: peaceiris/actions-gh-pages@v3
