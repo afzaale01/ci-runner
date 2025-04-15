@@ -147,16 +147,20 @@ jobs:
       - name: 🔧 Patch Unity WebGL Loader for GitHub Pages
         if: matrix.target == 'gh-pages'
         run: |
-          echo "📆 Detected GitHub Pages deployment - patching loader for decompressed files..."
-
+          echo "📆 Patching loader for GitHub Pages..."
+    
           LOADER_JS=$(find "$DEPLOY_DIR/WebGL" -name "*.loader.js" | head -n 1)
           if [ ! -f "$LOADER_JS" ]; then
-            echo "❌ No loader file found! Cannot patch." && exit 1
+            echo "❌ No loader file found!" && exit 1
           fi
+    
+          # Remove .br extensions from the loader
+          sed -i 's/\.br//g' "$LOADER_JS"
 
-          # Patch: Replace .br references with normal filenames
-          sed -i 's/\.br\"/\"/g' "$LOADER_JS"
-          sed -i 's/\.br'"'/'"'/g' "$LOADER_JS"
+          # Disable compression in config (make sure 'compressionFormat' is null)
+          sed -i 's/compressionFormat:"br"/compressionFormat:null/g' "$LOADER_JS"
+          sed -i 's/compressionFormat:"gzip"/compressionFormat:null/g' "$LOADER_JS"
+
           echo "✅ Loader patched: $LOADER_JS"
 
       - name: 🛡️ Decompress Brotli Files for GitHub Pages
