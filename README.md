@@ -85,19 +85,20 @@ Can be found under:
 
 | Variable Name               | Description |
 |-----------------------------|-------------|
+| `DEPLOY_TARGETS`            | Deployment targets (JSON array) |
 | `PROJECT_NAME`              | Name of the Unity project |
-| `UNITY_VERSION`             | Unity version (e.g. `auto` or `2022.3.13f1`) |
-| `USE_GIT_LFS`               | Use Git LFS (`true`/`false`) |
+| `EXCLUDE_UNITY_TESTS`       | Exclude tests from pipeline (`true`/`false`) |
 | `LICENSE_ARTIFACT_NAME`     | Artifact name for uploaded license |
-| `UNITY_TESTS_EDITMODE_PATH` | Path to EditMode tests |
-| `UNITY_TESTS_PLAYMODE_PATH` | Path to PlayMode tests |
+| `RETENTION_DAYS_PREVIEW`    | Days to retain preview builds |
+| `RETENTION_DAYS_RELEASE`    | Days to retain release builds |
 | `TARGET_PLATFORMS_PREVIEW`  | Preview build platforms (JSON) |
 | `TARGET_PLATFORMS_RELEASE`  | Release build platforms (JSON) |
 | `TIMEOUT_TESTS_IN_MINUTES`  | Test timeout per job |
 | `TIMEOUT_BUILD_IN_MINUTES`  | Build timeout per job |
-| `RETENTION_DAYS_PREVIEW`    | Days to retain preview builds |
-| `RETENTION_DAYS_RELEASE`    | Days to retain release builds |
-| `DEPLOY_TARGETS`            | Deployment targets (JSON array) |
+| `UNITY_TESTS_EDITMODE_PATH` | Path to EditMode tests |
+| `UNITY_TESTS_PLAYMODE_PATH` | Path to PlayMode tests |
+| `UNITY_VERSION`             | Unity version (e.g. `auto` or `2022.3.13f1`) |
+| `USE_GIT_LFS`               | Use Git LFS (`true`/`false`) |
 
 #### ⚙️ Repository Variable Examples
 
