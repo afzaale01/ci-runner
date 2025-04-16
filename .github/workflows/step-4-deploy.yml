@@ -92,6 +92,7 @@ jobs:
           fi
 
       - name: 🔎 Detect WebGL Compression Format
+        id: detect-compression
         if: matrix.target == 'gh-pages'
         run: |
           cd "$DEPLOY_DIR/WebGL"
@@ -117,8 +118,14 @@ jobs:
             echo "✅ WebGL build is uncompressed (no .br/.gz files)."
           fi
 
+          if [ "$has_br" -eq 1 ] || [ "$has_gz" -eq 1 ]; then
+            echo "needs_patch=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs_patch=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: 🩹 Patch & Decompress Unity WebGL for GitHub Pages
-        if: matrix.target == 'gh-pages'
+        if: matrix.target == 'gh-pages' && steps.detect-compression.outputs.needs_patch == 'true'
         run: |
           echo "🔧 Patching Unity WebGL files for GitHub Pages (remove .br/.gz + references)..."
 
