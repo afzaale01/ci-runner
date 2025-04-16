@@ -82,58 +82,6 @@ jobs:
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
 
-      # ───── itch.io ─────
-      - name: 🕹️ Deploy to itch.io
-        if: matrix.target == 'itch.io'
-        run: |
-          if [ -z "${{ secrets.ITCH_USERNAME }}" ] || [ -z "${{ secrets.ITCH_PROJECT }}" ]; then
-            echo "⚠️ Missing itch.io credentials. Skipping..."; exit 0;
-          fi
-          butler push "$DEPLOY_DIR" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
-        env:
-          BUTLER_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
-
-      # ───── App Center ─────
-      - name: 📱 Deploy to App Center
-        if: matrix.target == 'appcenter'
-        run: |
-          if [ -z "${{ secrets.APPCENTER_OWNER_NAME }}" ] || [ -z "${{ secrets.DEPLOY_API_KEY }}" ]; then
-            echo "⚠️ Missing App Center credentials. Skipping..."; exit 0;
-          fi
-          FILES=$(find "$DEPLOY_DIR" -type f \( -name "*.apk" -o -name "*.aab" -o -name "*.ipa" \))
-          if [ -z "$FILES" ]; then echo "❌ No mobile artifacts found."; exit 0; fi
-
-          for file in $FILES; do
-            echo "🚀 Deploying $file"
-            npx appcenter distribute release \
-              --app "${{ secrets.APPCENTER_OWNER_NAME }}/${{ inputs.projectName }}" \
-              --file "$file" \
-              --group "Testers" \
-              --token "${{ secrets.DEPLOY_API_KEY }}"
-          done
-
-      # ───── Firebase ─────
-      - name: 🔥 Deploy to Firebase Hosting
-        if: matrix.target == 'firebase'
-        run: |
-          if [ -z "${{ secrets.FIREBASE_TOKEN }}" ]; then
-            echo "⚠️ Missing Firebase token. Skipping..."; exit 0;
-          fi
-          cd "$DEPLOY_DIR/WebGL" || exit 1
-          npm install -g firebase-tools
-          firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}"
-
-      # ───── AWS S3 ─────
-      - name: ☁️ Deploy to AWS S3
-        if: matrix.target == 's3'
-        run: |
-          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ] || [ -z "${{ secrets.S3_BUCKET }}" ]; then
-            echo "⚠️ Missing AWS credentials or bucket. Skipping..."; exit 0;
-          fi
-          aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
-          aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-          aws s3 sync "$DEPLOY_DIR/WebGL" "s3://${{ secrets.S3_BUCKET }}" --delete
-
       # ───── GitHub Pages ─────
       - name: 🔍 Check WebGL Build Exists
         if: matrix.target == 'gh-pages'
@@ -213,6 +161,58 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ env.DEPLOY_DIR }}/WebGL
+
+      # ───── itch.io ─────
+      - name: 🕹️ Deploy to itch.io
+        if: matrix.target == 'itch.io'
+        run: |
+          if [ -z "${{ secrets.ITCH_USERNAME }}" ] || [ -z "${{ secrets.ITCH_PROJECT }}" ]; then
+            echo "⚠️ Missing itch.io credentials. Skipping..."; exit 0;
+          fi
+          butler push "$DEPLOY_DIR" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
+        env:
+          BUTLER_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
+
+      # ───── App Center ─────
+      - name: 📱 Deploy to App Center
+        if: matrix.target == 'appcenter'
+        run: |
+          if [ -z "${{ secrets.APPCENTER_OWNER_NAME }}" ] || [ -z "${{ secrets.DEPLOY_API_KEY }}" ]; then
+            echo "⚠️ Missing App Center credentials. Skipping..."; exit 0;
+          fi
+          FILES=$(find "$DEPLOY_DIR" -type f \( -name "*.apk" -o -name "*.aab" -o -name "*.ipa" \))
+          if [ -z "$FILES" ]; then echo "❌ No mobile artifacts found."; exit 0; fi
+
+          for file in $FILES; do
+            echo "🚀 Deploying $file"
+            npx appcenter distribute release \
+              --app "${{ secrets.APPCENTER_OWNER_NAME }}/${{ inputs.projectName }}" \
+              --file "$file" \
+              --group "Testers" \
+              --token "${{ secrets.DEPLOY_API_KEY }}"
+          done
+
+      # ───── Firebase ─────
+      - name: 🔥 Deploy to Firebase Hosting
+        if: matrix.target == 'firebase'
+        run: |
+          if [ -z "${{ secrets.FIREBASE_TOKEN }}" ]; then
+            echo "⚠️ Missing Firebase token. Skipping..."; exit 0;
+          fi
+          cd "$DEPLOY_DIR/WebGL" || exit 1
+          npm install -g firebase-tools
+          firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}"
+
+      # ───── AWS S3 ─────
+      - name: ☁️ Deploy to AWS S3
+        if: matrix.target == 's3'
+        run: |
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ] || [ -z "${{ secrets.S3_BUCKET }}" ]; then
+            echo "⚠️ Missing AWS credentials or bucket. Skipping..."; exit 0;
+          fi
+          aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          aws s3 sync "$DEPLOY_DIR/WebGL" "s3://${{ secrets.S3_BUCKET }}" --delete
 
       # ───── Steam ─────
       - name: 🎮 Deploy to Steam
