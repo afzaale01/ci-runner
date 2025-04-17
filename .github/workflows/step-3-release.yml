@@ -78,7 +78,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: 🧮 Upload Artifacts
+      - name: 🧮 Upload Per-Platform Artifacts
         run: |
           VERSION="${{ inputs.version }}"
           PROJECT="${{ inputs.projectName }}"
@@ -105,5 +105,31 @@ jobs:
               echo "⚠️ Skipping: $ARTIFACT_PATH not found"
             fi
           done
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: 🧮 Upload Combined Artifact
+        run: |
+          VERSION="${{ inputs.version }}"
+          PROJECT="${{ inputs.projectName }}"
+          COMBINED_PATH="release-artifacts/${PROJECT}-${VERSION}"
+          COMBINED_ZIP="${PROJECT}-${VERSION}-all-platforms.zip"
+
+          # Use release ID from check or create step
+          RELEASE_ID="${{ steps.check_release.outputs.release_id || steps.create_release.outputs.release_id }}"
+
+          if [ -d "$COMBINED_PATH" ]; then
+            echo "📦 Zipping combined artifact: $COMBINED_PATH → $COMBINED_ZIP"
+            zip -r "$COMBINED_ZIP" "$COMBINED_PATH"
+
+            echo "📤 Uploading $COMBINED_ZIP to release ID $RELEASE_ID"
+            curl -s -X POST \
+              -H "Authorization: Bearer ${{ github.token }}" \
+              -H "Content-Type: application/zip" \
+              --data-binary @"$COMBINED_ZIP" \
+              "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets?name=$COMBINED_ZIP"
+          else
+            echo "ℹ️ No combined build artifact found — skipping."
+          fi
         env:
           GITHUB_TOKEN: ${{ github.token }}
