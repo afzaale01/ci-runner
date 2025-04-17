@@ -21,6 +21,7 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/generate-notification.yml@main
     with:
       releaseResult: ${{ inputs.releaseResult }}
+      releaseErrorMessage: ${{ inputs.releaseErrorMessage }}
       deployResult: ${{ inputs.deployResult }}
       version: ${{ inputs.version }}
 

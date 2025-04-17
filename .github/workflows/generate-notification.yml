@@ -40,7 +40,7 @@ jobs:
           RELEASE="${{ inputs.releaseResult }}"
           DEPLOY="${{ inputs.deployResult }}"
           VERSION="${{ inputs.version }}"
-          ERROR_MSG="${{ inputs.releaseErrorMessage }}"
+          ERROR="${{ inputs.releaseErrorMessage }}"
           REPO="${{ github.repository }}"
           RELEASE_URL="https://github.com/${REPO}/releases/tag/${VERSION}"
           RUN_URL="https://github.com/${REPO}/actions/runs/${GITHUB_RUN_ID}"
@@ -61,8 +61,8 @@ jobs:
             fi
           else
             TITLE="❌ Release Failed - ${VERSION}"
-            if [[ -n "$ERROR_MSG" ]]; then
-              MESSAGE="Release \`${VERSION}\` failed: \`$ERROR_MSG\`"
+            if [[ -n "$ERROR" ]]; then
+              MESSAGE="Release \`${VERSION}\` failed: \`$ERROR\`. [View Logs](${RUN_URL})"
             else
               MESSAGE="Release \`${VERSION}\` failed. [View Workflow Logs](${RUN_URL}) for details."
             fi
