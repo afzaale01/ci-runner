@@ -1,0 +1,12 @@
+name: 🧪 Test Notify Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-notify:
+    uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
+    with:
+      releaseResult: "success"
+      deployResult: "failure"
+      version: "v1.2.3"
