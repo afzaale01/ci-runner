@@ -34,44 +34,42 @@ jobs:
           DURATION_TEXT=""
 
           if [ -n "$START_TIME" ]; then
-            START_EPOCH=$(date -d "$START_TIME" +%s)
-            SECONDS=$((END_TIME - START_EPOCH))
-            MINS=$((SECONDS / 60))
-            SECS=$((SECONDS % 60))
-            DURATION_TEXT="⏱ **Duration**: ${MINS}m ${SECS}s"
+            START_EPOCH=$(date -d "$START_TIME" +%s || echo "")
+            if [ -n "$START_EPOCH" ]; then
+              SECONDS=$((END_TIME - START_EPOCH))
+              MINS=$((SECONDS / 60))
+              SECS=$((SECONDS % 60))
+              DURATION_TEXT="⏱ **Duration**: ${MINS}m ${SECS}s"
+            fi
           fi
-
-          TITLE=""
-          MESSAGE=""
-          STATUS=""
 
           if [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
               TITLE="✅ Release & Deploy Succeeded"
-              MESSAGE="🎉 **\`${VERSION}\` released**\n🔗 [Release Page](${RELEASE_URL})"
+              MESSAGE=$'🎉 **`'"$VERSION"$'` released**\n🔗 [Release Page]('"$RELEASE_URL"$')]'
               STATUS="success"
             elif [[ "$DEPLOY" == "skipped" ]]; then
               TITLE="✅ Release Succeeded (No Deploy)"
-              MESSAGE="🎉 **\`${VERSION}\` released** (No deploy targets)\n🔗 [Release Page](${RELEASE_URL})"
+              MESSAGE=$'🎉 **`'"$VERSION"$'` released** (No deploy targets)\n🔗 [Release Page]('"$RELEASE_URL"$')]'
               STATUS="neutral"
             else
               TITLE="⚠️ Release Succeeded, Deploy Failed"
-              MESSAGE="⚠️ **\`${VERSION}\` released** but deployment failed\n🔗 [Release Page](${RELEASE_URL})"
+              MESSAGE=$'⚠️ **`'"$VERSION"$'` released** but deployment failed\n🔗 [Release Page]('"$RELEASE_URL"$')]'
               STATUS="failure"
             fi
           else
             TITLE="❌ Release Failed"
-            MESSAGE="❌ **\`${VERSION}\` release failed**. Check logs below."
+            MESSAGE=$'❌ **`'"$VERSION"$'` release failed**. Check logs below.'
             STATUS="failure"
           fi
 
-          FULL_MESSAGE="${MESSAGE}\n🔍 [View Workflow Logs](${RUN_URL})"
+          MESSAGE="${MESSAGE}"$'\n🔍 [View Workflow Logs]('"$RUN_URL"$')]"
           if [ -n "$DURATION_TEXT" ]; then
-            FULL_MESSAGE="${FULL_MESSAGE}\n${DURATION_TEXT}"
+            MESSAGE="${MESSAGE}"$'\n'"$DURATION_TEXT"
           fi
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
-          echo "message=$FULL_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
 
       - name: 🧪 Collect Failed Deploy Targets
@@ -96,19 +94,17 @@ jobs:
           SUMMARY_PATH="${{ github.workspace }}/../_temp/_github_step_summary.md"
           FAILS=""
           if [[ -f "$SUMMARY_PATH" ]]; then
-            echo "🔍 Scanning for failed deployment targets..."
             while IFS= read -r line; do
               if [[ "$line" == "### 📦 Deployment:"* ]]; then
                 RAW_TARGET="${line#*Deployment: }"
               fi
               if [[ "$line" == *"❌ Failed"* ]]; then
                 EMOJI_TARGET=$(map_target "$RAW_TARGET")
-                FAILS="${FAILS}- ${EMOJI_TARGET}\n"
+                FAILS="${FAILS}- ${EMOJI_TARGET}"$'\n'
               fi
             done < "$SUMMARY_PATH"
           fi
 
-          echo -e "❌ Failed Targets:\n${FAILS}"
           echo "failList=${FAILS}" >> "$GITHUB_OUTPUT"
 
       - name: 🧩 Append Failed Targets to Message
@@ -121,7 +117,7 @@ jobs:
           fi
           {
             echo "final<<EOF"
-            echo -e "$MSG"
+            echo "$MSG"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
