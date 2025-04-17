@@ -145,6 +145,7 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
       releaseResult: ${{ needs.release.result }}
+      releaseErrorMessage: ${{ needs.release.outputs.releaseErrorMessage }}
       deployResult: ${{ needs.deploy.result }}
       version: ${{ needs.build.outputs.version }}
     secrets: inherit
