@@ -89,9 +89,6 @@ jobs:
         include: ${{ fromJson(needs.generate_matrix.outputs.matrix) }}
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
       - name: Restore Unity Library Cache
         uses: actions/cache@v4
         with:
@@ -100,6 +97,9 @@ jobs:
           restore-keys: |
             Library-${{ matrix.targetPlatform }}-
             Library-
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
       - name: Check Free Disk Space (Android only)
         if: matrix.targetPlatform == 'Android'
