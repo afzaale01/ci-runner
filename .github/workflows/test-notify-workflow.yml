@@ -8,7 +8,7 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
       releaseResult: "success"
-      deployResult: "failure"
+      deployResult: "success"
       version: "v1.2.3"
     secrets: inherit
       
