@@ -97,7 +97,7 @@ These are the required secrets for each optional deploy target, only include if 
 
 ## ⚙️ Repository Variables
 
-**⚠️ All variables must be defined. ⚠️**
+**⚠️ All variables must be defined, otherwise pipeline might hang. ⚠️**
 
 They can be found under:
 
