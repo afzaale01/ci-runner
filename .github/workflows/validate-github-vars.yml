@@ -1,4 +1,4 @@
-name: 🛡️ Validate Required GitHub Variables and Secrets
+name: 🛡️ Validate Required GitHub Variables
 
 on:
   workflow_call:
@@ -8,56 +8,28 @@ on:
         required: true
         type: string # JSON array
 
-      requiredSecrets:
-        description: 'List of required GitHub secrets to validate (optional)'
-        required: false
-        type: string
-
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - name: 🔍 Validate GitHub Vars
+      - name: 🔍 Validate Required GitHub Variables
         run: |
           VARS=$(echo '${{ inputs.requiredVars }}' | jq -r '.[]')
           VALUE='${{ toJson(vars) }}'
           ERRORS=()
-
+      
           for VAR in $VARS; do
             if ! echo "$VALUE" | jq -e --arg key "$VAR" 'has($key)' > /dev/null; then
               ERRORS+=("$VAR")
             fi
           done
-
+      
           if [[ ${#ERRORS[@]} -gt 0 ]]; then
             echo "❌ Missing required GitHub Variables:"
             for V in "${ERRORS[@]}"; do
-              echo "  - VAR:$V"
+              echo "  - $V"
             done
             exit 1
           fi
-
+      
           echo "✅ All required GitHub Variables are defined."
-
-      - name: 🔐 Validate GitHub Secrets
-        if: ${{ inputs.requiredSecrets != '' }}
-        run: |
-          SECRETS=$(echo '${{ inputs.requiredSecrets }}' | jq -r '.[]')
-          ERRORS=()
-
-          for SECRET in $SECRETS; do
-            VALUE="${!SECRET}"
-            if [[ -z "$VALUE" ]]; then
-              ERRORS+=("$SECRET")
-            fi
-          done
-
-          if [[ ${#ERRORS[@]} -gt 0 ]]; then
-            echo "❌ Missing required GitHub Secrets:"
-            for S in "${ERRORS[@]}"; do
-              echo "  - SECRET:$S"
-            done
-            exit 1
-          fi
-
-          echo "✅ All required GitHub Secrets are defined."
