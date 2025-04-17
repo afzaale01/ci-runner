@@ -189,26 +189,30 @@ jobs:
     name: 📄 Summarize Build Results
     if: always()
     runs-on: ubuntu-latest
-    needs: [build_platforms, combine_builds]
+    needs: [determine_version, build_platforms, combine_builds]
     steps:
-      - name: Write Build Summary
+      - name: 📥 Download All Platform Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+
+      - name: 📥 Download Combined Artifact
+        if: ${{ vars.COMBINE_ARTIFACTS == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ vars.PROJECT_NAME }}-${{ needs.determine_version.outputs.version }}
+          path: combined-artifact
+
+      - name: 📝 Write Build Summary
         run: |
           echo "### ✅ Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          RESULT="${{ needs.build_platforms.result }}"
-          if [[ "$RESULT" == "skipped" ]]; then
-            echo "- ℹ️ No platform builds were run." >> $GITHUB_STEP_SUMMARY
-            exit 0
-          fi
-
-          echo "- 🧱 Multi-platform Build: $([[ "$RESULT" == "success" ]] && echo '✅ Success' || echo '❌ Failed')" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
 
-          for platform in $(ls all-artifacts); do
+          for dir in all-artifacts/*; do
+            platform=$(basename "$dir")
             case "$platform" in
               *Android*) label="Android" ;;
               *WebGL*) label="WebGL" ;;
@@ -219,7 +223,7 @@ jobs:
               *) label="$platform" ;;
             esac
 
-            if [ -d "all-artifacts/$platform" ]; then
+            if [ -d "$dir" ]; then
               echo "| $label | ✅ |" >> $GITHUB_STEP_SUMMARY
             else
               echo "| $label | ❌ |" >> $GITHUB_STEP_SUMMARY
@@ -229,8 +233,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [[ "${{ vars.COMBINE_ARTIFACTS }}" == "true" ]]; then
-            COMBINED="${{ vars.PROJECT_NAME }}-${{ needs.determine_version.outputs.version }}"
-            if [ -d "$COMBINED" ] || [ -d "all-artifacts/$COMBINED" ]; then
+            if [ -d "combined-artifact" ]; then
               echo "- 📦 Combined Artifact: ✅ Uploaded" >> $GITHUB_STEP_SUMMARY
             else
               echo "- 📦 Combined Artifact: ❌ Missing" >> $GITHUB_STEP_SUMMARY
