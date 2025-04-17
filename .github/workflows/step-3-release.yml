@@ -19,6 +19,10 @@ on:
         description: "JSON array of platforms to expect artifacts for"
         type: string
         required: true
+    outputs:
+      releaseErrorMessage:
+        description: "Error message if release failed"
+        value: ${{ jobs.publish.outputs.releaseErrorMessage }}
 
 jobs:
   publish:
@@ -27,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       releaseErrorMessage: ${{ steps.error-handler.outputs.releaseErrorMessage }}
-
+   
     steps:
       - name: 📥 Download Artifacts
         uses: actions/download-artifact@v4
