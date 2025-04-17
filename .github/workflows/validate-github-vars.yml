@@ -1,0 +1,35 @@
+name: 🛡️ Validate Required GitHub Variables
+
+on:
+  workflow_call:
+    inputs:
+      requiredVars:
+        description: 'List of required GitHub vars to validate'
+        required: true
+        type: string # JSON array
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔍 Validate Required GitHub Variables
+        run: |
+          VARS=$(echo '${{ inputs.requiredVars }}' | jq -r '.[]')
+          ERRORS=()
+
+          for VAR in $VARS; do
+            VALUE="${{ toJson(vars) }}" 
+            if ! echo "$VALUE" | jq -e --arg key "$VAR" 'fromjson | has($key)' > /dev/null; then
+              ERRORS+=("$VAR")
+            fi
+          done
+
+          if [[ ${#ERRORS[@]} -gt 0 ]]; then
+            echo "❌ Missing required GitHub Variables:"
+            for V in "${ERRORS[@]}"; do
+              echo "  - $V"
+            done
+            exit 1
+          fi
+
+          echo "✅ All required GitHub Variables are defined."
