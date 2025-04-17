@@ -199,6 +199,40 @@ jobs:
           RESULT="${{ needs.build_platforms.result }}"
           if [[ "$RESULT" == "skipped" ]]; then
             echo "- ℹ️ No platform builds were run." >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- 🧱 Multi-platform Build: $([[ "$RESULT" == "success" ]] && echo '✅ Success' || echo '❌ Failed')" >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          echo "- 🧱 Multi-platform Build: $([[ "$RESULT" == "success" ]] && echo '✅ Success' || echo '❌ Failed')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          for platform in $(ls all-artifacts); do
+            case "$platform" in
+              *Android*) label="Android" ;;
+              *WebGL*) label="WebGL" ;;
+              *StandaloneWindows*) label="Windows" ;;
+              *StandaloneLinux*) label="Linux" ;;
+              *StandaloneOSX*) label="macOS" ;;
+              *iOS*) label="iOS" ;;
+              *) label="$platform" ;;
+            esac
+
+            if [ -d "all-artifacts/$platform" ]; then
+              echo "| $label | ✅ |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| $label | ❌ |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ vars.COMBINE_ARTIFACTS }}" == "true" ]]; then
+            COMBINED="${{ vars.PROJECT_NAME }}-${{ needs.determine_version.outputs.version }}"
+            if [ -d "$COMBINED" ] || [ -d "all-artifacts/$COMBINED" ]; then
+              echo "- 📦 Combined Artifact: ✅ Uploaded" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- 📦 Combined Artifact: ❌ Missing" >> $GITHUB_STEP_SUMMARY
+            fi
           fi
