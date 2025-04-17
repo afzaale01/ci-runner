@@ -97,7 +97,7 @@ jobs:
   release:
     name: Release
     needs: [ build ]
-    if: always() && startsWith(github.ref, 'refs/tags/')
+    if: always() && needs.build.result == 'success' && startsWith(github.ref, 'refs/tags/')
     uses: avalin/unity-ci-templates/.github/workflows/step-3-release.yml@main
     with:
       buildType: release
