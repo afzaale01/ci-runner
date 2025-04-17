@@ -81,11 +81,23 @@ Can be found under:
 | `DISCORD_WEBHOOK` | ❌ | Discord Webhook URL for optional CI notifications |
 | `SLACK_WEBHOOK`  | ❌ | Slack Webhook URL for optional CI notifications |
 
+### 🔐 Deployment Target Secrets
+
+These are the required secrets for each optional deploy target, only include if needed:
+
+| Target       | Required Secrets                                                                 |
+|--------------|------------------------------------------------------------------------------------|
+| `itch.io`    | `DEPLOY_API_KEY`, `ITCH_USERNAME`, `ITCH_PROJECT`                                |
+| `testflight` | `APPSTORE_API_KEY_ID`, `APPSTORE_API_ISSUER_ID`, `APPSTORE_API_PRIVATE_KEY`      |
+| `steam`      | `STEAM_USERNAME`, `STEAM_PASSWORD`, `STEAM_APP_ID`                               |
+
 ---
 
 ## ⚙️ Repository Variables
 
-Can be found under:
+**⚠️ All variables must be defined. ⚠️**
+
+They can be found under:
 
 `Settings → Secrets and variables → Actions → Variables`
 
