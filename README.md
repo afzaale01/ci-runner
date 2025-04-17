@@ -5,6 +5,7 @@
 ![CI](https://github.com/Avalin/CI-CD-Unity-Test-Project/actions/workflows/ci-cd-full.yml/badge.svg)
 ![License](https://img.shields.io/github/license/Avalin/CI-CD-Unity-Test-Project?color=blue)
 ![Unity](https://img.shields.io/badge/unity-2022.3%2B-black?logo=unity)
+![Latest Release](https://img.shields.io/github/v/release/Avalin/CI-CD-Unity-Test-Project)
 
 ## 🧠 Getting Started
 
