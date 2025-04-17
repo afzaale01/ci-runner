@@ -117,7 +117,7 @@ jobs:
           MSG="${{ steps.vars.outputs.message }}"
           FAIL_LIST="${{ steps.failed_targets.outputs.failList }}"
           if [ -n "$FAIL_LIST" ]; then
-            MSG="${MSG}\n${FAIL_LIST}"
+            MSG="${MSG}"$'\n\n'"${FAIL_LIST}"
           fi
           {
             echo "final<<EOF"
