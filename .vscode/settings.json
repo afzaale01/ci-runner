@@ -56,5 +56,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "CICD Unity Test Project.sln"
+    "dotnet.defaultSolution": "CICD Unity Test Project.sln",
+    "dotnet.preferCSharpExtension": true
 }
