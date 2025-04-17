@@ -36,10 +36,9 @@ jobs:
         with:
           payload: |
             {
-              "text": "*${{ needs.generate-notification.outputs.title }}* - `${{ github.repository }}`",
+              "text": "*${{ needs.generate-notification.outputs.title }}* - `${{ github.repository }}`\n${{ needs.generate-notification.outputs.message }}",
               "attachments": [
                 {
-                  "text": "${{ needs.generate-notification.outputs.message }}",
                   "color": "${{ needs.generate-notification.outputs.status == 'success' && 'good' || needs.generate-notification.outputs.status == 'failure' && 'danger' || '#cccccc' }}"
                 }
               ]
@@ -51,9 +50,17 @@ jobs:
       - name: 📢 Send Discord Notification (if configured)
         if: ${{ env.DISCORD_WEBHOOK != '' }}
         run: |
+          COLOR=$([[ "${{ needs.generate-notification.outputs.status }}" == "success" ]] && echo 3066993 || ([[ "${{ needs.generate-notification.outputs.status }}" == "failure" ]] && echo 15158332 || echo 9807270))
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d "{\"username\":\"GitHub CI\",\"embeds\":[{\"title\":\"${{ needs.generate-notification.outputs.title }}\",\"description\":\"${{ needs.generate-notification.outputs.message }}\",\"color\":${{ needs.generate-notification.outputs.status == 'success' && 3066993 || needs.generate-notification.outputs.status == 'failure' && 15158332 || 9807270 }} }]}" \
+               -d '{
+                     "username": "GitHub CI",
+                     "embeds": [{
+                       "title": "'"${{ needs.generate-notification.outputs.title }}"'",
+                       "description": "'"${{ needs.generate-notification.outputs.message }}"'",
+                       "color": '"$COLOR"'
+                     }]
+                   }' \
                $DISCORD_WEBHOOK
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
