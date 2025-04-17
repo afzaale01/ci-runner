@@ -67,8 +67,8 @@ jobs:
           mac=${{ toJson(needs.filter_platforms.outputs.macPlatforms) }}
           ubuntu=${{ toJson(needs.filter_platforms.outputs.ubuntuPlatforms) }}
 
-          echo "🧩 macPlatforms: $mac"
-          echo "🧩 ubuntuPlatforms: $ubuntu"
+          echo "🍏 Mac targets → $mac"
+          echo "🐧 Ubuntu targets → $ubuntu"
 
           matrix=$(jq -c -n \
             --argjson mac "$mac" \
