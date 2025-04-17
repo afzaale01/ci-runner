@@ -23,10 +23,10 @@ on:
         default: 30
         required: false
       retentionDays:
-          description: "How many days to keep the uploaded build artifacts (e.g. 7 for preview, 30 for release)"
-          type: number
-          default: 7
-          required: false
+        description: "How many days to keep the uploaded build artifacts (e.g. 7 for preview, 30 for release)"
+        type: number
+        default: 7
+        required: false
     outputs:
       version:
         description: "The resolved version string used in the build"
@@ -54,75 +54,39 @@ jobs:
     with:
       buildType: ${{ inputs.buildType }}
 
-  build_on_macos:
-    name: Build for ${{ matrix.targetPlatform }}
-    if: needs.filter_platforms.outputs.macPlatforms != '[]'
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: ${{ inputs.timeoutMinutes }}
-    needs: [filter_platforms, determine_version]
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - macOS-latest
-        targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.macPlatforms) }}
-
+  generate_matrix:
+    name: 🧮 Generate Build Matrix
+    runs-on: ubuntu-latest
+    needs: filter_platforms
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Restore Unity Library Cache
-        uses: actions/cache@v4
-        with:
-          path: Library
-          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: |
-            Library-${{ matrix.targetPlatform }}-
-            Library-
-
-      - name: Build Unity Project
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-
-      - name: Organize Build Output
+      - name: Combine macOS and Ubuntu platforms into matrix
+        id: set-matrix
         run: |
-          VERSION="${{ needs.determine_version.outputs.version }}"
-          PLATFORM="${{ matrix.targetPlatform }}"
-          DEST="${{ inputs.projectName }}-${VERSION}"
-          SOURCE="build/${PLATFORM}"
+          mac=${{ toJson(needs.filter_platforms.outputs.macPlatforms) }}
+          ubuntu=${{ toJson(needs.filter_platforms.outputs.ubuntuPlatforms) }}
 
-          # Flatten nested folders
-          while [ -d "$SOURCE/$(basename "$SOURCE")" ]; do
-           SOURCE="$SOURCE/$(basename "$SOURCE")"
-          done
+          echo "🧩 macPlatforms: $mac"
+          echo "🧩 ubuntuPlatforms: $ubuntu"
 
-          mkdir -p "$DEST"
-          mv "$SOURCE"/* "$DEST"/
+          matrix=$(jq -c -n \
+            --argjson mac "$mac" \
+            --argjson ubuntu "$ubuntu" '
+            ($mac | map({ os: "macos-latest", targetPlatform: . })) +
+            ($ubuntu | map({ os: "ubuntu-latest", targetPlatform: . }))')
 
-      - name: Upload Platform Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}-${{ matrix.targetPlatform }}
-          path: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}
-          retention-days: ${{ inputs.retentionDays }}
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
-  build_on_ubuntu:
-    name: Build for ${{ matrix.targetPlatform }}
-    if: needs.filter_platforms.outputs.ubuntuPlatforms != '[]'
+  build_platforms:
+    name: Build for ${{ matrix.targetPlatform }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ inputs.timeoutMinutes }}
-    needs: [filter_platforms, determine_version]
+    needs: [generate_matrix, determine_version]
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-        targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.ubuntuPlatforms) }}
+        include: ${{ fromJson(needs.generate_matrix.outputs.matrix) }}
 
     steps:
       - name: Checkout Repository
@@ -150,7 +114,8 @@ jobs:
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
 
-      - name: Fix Permissions (Linux)
+      - name: Fix Permissions (Linux only)
+        if: startsWith(matrix.os, 'ubuntu')
         run: sudo chown -R $USER:$USER build/
 
       - name: Organize Build Output
@@ -160,9 +125,8 @@ jobs:
           DEST="${{ inputs.projectName }}-${VERSION}"
           SOURCE="build/${PLATFORM}"
 
-          # Flatten nested folders
           while [ -d "$SOURCE/$(basename "$SOURCE")" ]; do
-           SOURCE="$SOURCE/$(basename "$SOURCE")"
+            SOURCE="$SOURCE/$(basename "$SOURCE")"
           done
 
           mkdir -p "$DEST"
@@ -179,7 +143,7 @@ jobs:
     name: 📦 Combine All Platform Builds
     if: ${{ vars.COMBINE_ARTIFACTS == 'true' }}
     runs-on: ubuntu-latest
-    needs: [build_on_ubuntu, build_on_macos, determine_version]
+    needs: [build_platforms, determine_version]
     steps:
       - name: 📥 Download All Platform Artifacts
         uses: actions/download-artifact@v4
@@ -191,7 +155,7 @@ jobs:
         run: |
           COUNT=$(find all-artifacts -mindepth 1 -maxdepth 1 -type d | wc -l)
           echo "Found $COUNT platform artifact(s)."
-          echo "platform_count=$COUNT" >> $GITHUB_OUTPUT      
+          echo "platform_count=$COUNT" >> $GITHUB_OUTPUT
 
       - name: 🗂 Combine Into Single Versioned Folder
         if: ${{ steps.platform_count.outputs.platform_count > 1 }}
@@ -205,13 +169,11 @@ jobs:
 
           for DIR in all-artifacts/*; do
             ARTIFACT_NAME=$(basename "$DIR")
-            PLATFORM="${ARTIFACT_NAME##*-}"  # Get the last dash-separated segment (the platform)
+            PLATFORM="${ARTIFACT_NAME##*-}"
             DEST="$COMBINED_DIR/$PLATFORM"
 
             echo "→ Merging platform: $PLATFORM into $DEST"
             mkdir -p "$DEST"
-
-            # Copy contents directly, excluding unity license
             cp -r "$DIR/"* "$DEST/" || echo "⚠️ Nothing to copy for $PLATFORM"
             rm -rf "$DEST/unity_license"
           done
@@ -227,25 +189,16 @@ jobs:
     name: 📄 Summarize Build Results
     if: always()
     runs-on: ubuntu-latest
-    needs: [build_on_ubuntu, build_on_macos, combine_builds, filter_platforms]
+    needs: [build_platforms, combine_builds]
     steps:
       - name: Write Build Summary
         run: |
           echo "### ✅ Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          HAS_UBUNTU=${{ needs.build_on_ubuntu.result != 'skipped' }}
-          HAS_MACOS=${{ needs.build_on_macos.result != 'skipped' }}
-
-          if [[ "$HAS_UBUNTU" == "false" && "$HAS_MACOS" == "false" ]]; then
-            echo "- ℹ️ No builds detected for Ubuntu or macOS." >> $GITHUB_STEP_SUMMARY
-            exit 0
-          fi
-
-          if [[ "$HAS_UBUNTU" == "true" ]]; then
-            echo "- 🐧 Ubuntu Builds: ${{ needs.build_on_ubuntu.result == 'success' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [[ "$HAS_MACOS" == "true" ]]; then
-            echo "- 🍏 macOS Builds: ${{ needs.build_on_macos.result == 'success' && '✅ Success' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          RESULT="${{ needs.build_platforms.result }}"
+          if [[ "$RESULT" == "skipped" ]]; then
+            echo "- ℹ️ No platform builds were run." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- 🧱 Multi-platform Build: $([[ "$RESULT" == "success" ]] && echo '✅ Success' || echo '❌ Failed')" >> $GITHUB_STEP_SUMMARY
           fi
