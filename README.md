@@ -92,8 +92,8 @@ Can be found under:
 | `RETENTION_DAYS_RELEASE`    | Days to retain release builds |
 | `TARGET_PLATFORMS_PREVIEW`  | Preview build platforms (JSON) |
 | `TARGET_PLATFORMS_RELEASE`  | Release build platforms (JSON) |
-| `TIMEOUT_TESTS_IN_MINUTES`  | Test timeout per job |
-| `TIMEOUT_BUILD_IN_MINUTES`  | Build timeout per job |
+| `TIMEOUT_TESTS_IN_MINUTES`  | Test timeout per job in minutes (default is `15`) |
+| `TIMEOUT_BUILD_IN_MINUTES`  | Build timeout per job in minutes (default is `30`) |
 | `UNITY_TESTS_EDITMODE_PATH` | Path to EditMode tests |
 | `UNITY_TESTS_PLAYMODE_PATH` | Path to PlayMode tests |
 | `UNITY_VERSION`             | Unity version (e.g. `auto` or `2022.3.13f1`) |
