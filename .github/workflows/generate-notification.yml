@@ -57,6 +57,16 @@ jobs:
           RELEASE_URL="https://github.com/${REPO}/releases/tag/${VERSION}"
           RUN_URL="https://github.com/${REPO}/actions/runs/${GITHUB_RUN_ID}"
 
+          BRANCH="${GITHUB_REF_NAME}"
+          COMMIT="${GITHUB_SHA}"
+          PR_NUMBER="${{ github.event.pull_request.number || '' }}"
+
+          # Build optional traceability context
+          TRACE=""
+          [[ -n "$PR_NUMBER" ]] && TRACE+="PR #$(printf '%04d' "$PR_NUMBER")"
+          [[ -n "$BRANCH" ]] && TRACE+="${TRACE:+ | }Branch: \`$BRANCH\`"
+          [[ -n "$COMMIT" ]] && TRACE+="${TRACE:+ | }Commit: \`$(echo "$COMMIT" | cut -c1-7)\`"
+
           if [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
               TITLE="✅ Release & Deploy Succeeded - ${VERSION}"
@@ -81,7 +91,12 @@ jobs:
             STATUS="failure"
           fi
 
-          # Platform-specific formatting
+          # Append context if available
+          if [[ -n "$TRACE" ]]; then
+            MESSAGE="$MESSAGE\n$TRACE"
+          fi
+
+          # Slack-specific formatting
           SLACK_MSG=$(echo "$MESSAGE" | sed "s#\\[View Pipeline\\](${RUN_URL})#<${RUN_URL}|View Pipeline>#g")
           SLACK_MSG=$(echo "$SLACK_MSG" | sed "s#\\[View Release\\](${RELEASE_URL})#<${RELEASE_URL}|View Release>#g")
 
