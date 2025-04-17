@@ -89,10 +89,13 @@ jobs:
         include: ${{ fromJson(needs.generate_matrix.outputs.matrix) }}
 
     steps:
-      - name: Restore Unity Library Cache
+      - name: Restore Unity Caches (Library + BuildCache)
         uses: actions/cache@v4
         with:
-          path: Library
+          path: |
+            Library
+            Library/BuildCache
+            Library/Il2cppBuildCache
           key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
             Library-${{ matrix.targetPlatform }}-
