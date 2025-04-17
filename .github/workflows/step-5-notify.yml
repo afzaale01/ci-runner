@@ -119,7 +119,11 @@ jobs:
           if [ -n "$FAIL_LIST" ]; then
             MSG="${MSG}\n${FAIL_LIST}"
           fi
-          echo "final=$MSG" >> "$GITHUB_OUTPUT"
+          {
+            echo "final<<EOF"
+            echo -e "$MSG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: 📢 Send Slack Notification (if configured)
         if: ${{ env.SLACK_WEBHOOK != '' }}
