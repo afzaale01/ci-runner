@@ -17,7 +17,6 @@ jobs:
   notify:
     if: startsWith(inputs.version, 'v') && !contains(inputs.version, '-preview')
     runs-on: ubuntu-latest
-
     steps:
       - name: 🧠 Set Notification Variables
         id: vars
@@ -26,100 +25,31 @@ jobs:
           DEPLOY="${{ inputs.deployResult }}"
           VERSION="${{ inputs.version }}"
           REPO="${{ github.repository }}"
-          RUN_URL="https://github.com/${REPO}/actions/runs/${{ github.run_id }}"
           RELEASE_URL="https://github.com/${REPO}/releases/tag/${VERSION}"
-
-          START_TIME="${{ github.event.workflow_run.created_at || github.event.head_commit.timestamp || '' }}"
-          END_TIME=$(date -u +%s)
-          DURATION_TEXT=""
-
-          if [ -n "$START_TIME" ]; then
-            START_EPOCH=$(date -d "$START_TIME" +%s || echo "")
-            if [ -n "$START_EPOCH" ]; then
-              SECONDS=$((END_TIME - START_EPOCH))
-              MINS=$((SECONDS / 60))
-              SECS=$((SECONDS % 60))
-              DURATION_TEXT="⏱ **Duration**: ${MINS}m ${SECS}s"
-            fi
-          fi
 
           if [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
               TITLE="✅ Release & Deploy Succeeded"
-              MESSAGE=$'🎉 **`'"$VERSION"$'` released**\n🔗 [Release Page]('"$RELEASE_URL"$')]'
+              MESSAGE="Release \`${VERSION}\` completed successfully. [View Release](${RELEASE_URL})"
               STATUS="success"
             elif [[ "$DEPLOY" == "skipped" ]]; then
               TITLE="✅ Release Succeeded (No Deploy)"
-              MESSAGE=$'🎉 **`'"$VERSION"$'` released** (No deploy targets)\n🔗 [Release Page]('"$RELEASE_URL"$')]'
+              MESSAGE="Release \`${VERSION}\` completed successfully. No deployment targets set. [View Release](${RELEASE_URL})"
               STATUS="neutral"
             else
               TITLE="⚠️ Release Succeeded, Deploy Failed"
-              MESSAGE=$'⚠️ **`'"$VERSION"$'` released** but deployment failed\n🔗 [Release Page]('"$RELEASE_URL"$')]'
+              MESSAGE="Release \`${VERSION}\` succeeded, but deployment failed. [View Release](${RELEASE_URL})"
               STATUS="failure"
             fi
           else
             TITLE="❌ Release Failed"
-            MESSAGE=$'❌ **`'"$VERSION"$'` release failed**. Check logs below.'
+            MESSAGE="Release \`${VERSION}\` failed. Check logs for details."
             STATUS="failure"
-          fi
-
-          MESSAGE="${MESSAGE}"$'\n🔍 [View Workflow Logs]('"$RUN_URL"$')]"
-          if [ -n "$DURATION_TEXT" ]; then
-            MESSAGE="${MESSAGE}"$'\n'"$DURATION_TEXT"
           fi
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
-
-      - name: 🧪 Collect Failed Deploy Targets
-        id: failed_targets
-        if: always()
-        run: |
-          map_target() {
-            case "$1" in
-              "itch.io") echo "🕹️ itch.io" ;;
-              "testflight") echo "🍏 TestFlight" ;;
-              "steam") echo "🎮 Steam" ;;
-              "firebase") echo "🔥 Firebase" ;;
-              "s3") echo "☁️ AWS S3" ;;
-              "gh-pages") echo "🌍 GitHub Pages" ;;
-              "discord") echo "💬 Discord" ;;
-              "appcenter") echo "📱 App Center" ;;
-              "custom-server") echo "🖥️ Custom Server" ;;
-              *) echo "❓ $1" ;;
-            esac
-          }
-
-          SUMMARY_PATH="${{ github.workspace }}/../_temp/_github_step_summary.md"
-          FAILS=""
-          if [[ -f "$SUMMARY_PATH" ]]; then
-            while IFS= read -r line; do
-              if [[ "$line" == "### 📦 Deployment:"* ]]; then
-                RAW_TARGET="${line#*Deployment: }"
-              fi
-              if [[ "$line" == *"❌ Failed"* ]]; then
-                EMOJI_TARGET=$(map_target "$RAW_TARGET")
-                FAILS="${FAILS}- ${EMOJI_TARGET}"$'\n'
-              fi
-            done < "$SUMMARY_PATH"
-          fi
-
-          echo "failList=${FAILS}" >> "$GITHUB_OUTPUT"
-
-      - name: 🧩 Append Failed Targets to Message
-        id: final_message
-        run: |
-          MSG="${{ steps.vars.outputs.message }}"
-          FAIL_LIST="${{ steps.failed_targets.outputs.failList }}"
-          if [ -n "$FAIL_LIST" ]; then
-            MSG="${MSG}"$'\n\n'"${FAIL_LIST}"
-          fi
-          {
-            echo "final<<EOF"
-            echo "$MSG"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
 
       - name: 📢 Send Slack Notification (if configured)
         if: ${{ env.SLACK_WEBHOOK != '' }}
@@ -130,7 +60,7 @@ jobs:
               "text": "*${{ steps.vars.outputs.title }}* - `${{ github.repository }}`",
               "attachments": [
                 {
-                  "text": "${{ steps.final_message.outputs.final }}",
+                  "text": "${{ steps.vars.outputs.message }}",
                   "color": "${{ steps.vars.outputs.status == 'success' && 'good' || steps.vars.outputs.status == 'failure' && 'danger' || '#cccccc' }}"
                 }
               ]
@@ -144,7 +74,7 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d "{\"username\":\"GitHub CI\",\"embeds\":[{\"title\":\"${{ steps.vars.outputs.title }}\",\"description\":\"${{ steps.final_message.outputs.final }}\",\"color\":${{ steps.vars.outputs.status == 'success' && 3066993 || steps.vars.outputs.status == 'failure' && 15158332 || 9807270 }} }]}" \
+               -d "{\"username\":\"GitHub CI\",\"embeds\":[{\"title\":\"${{ steps.vars.outputs.title }}\",\"description\":\"${{ steps.vars.outputs.message }}\",\"color\":${{ steps.vars.outputs.status == 'success' && 3066993 || steps.vars.outputs.status == 'failure' && 15158332 || 9807270 }} }]}" \
                $DISCORD_WEBHOOK
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -165,7 +95,7 @@ jobs:
                      \"summary\": \"CI/CD Notification\",
                      \"themeColor\": \"$COLOR\",
                      \"title\": \"${{ steps.vars.outputs.title }}\",
-                     \"text\": \"${{ steps.final_message.outputs.final }}\"
+                     \"text\": \"${{ steps.vars.outputs.message }}\"
                    }" \
                $MSTEAMS_WEBHOOK
         env:
