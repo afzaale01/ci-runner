@@ -136,7 +136,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   notify:
     name: Notify
-    needs: [ release, deploy ]
+    needs: [ build, release, deploy ]
     if: > 
       always() && 
       needs.release.result != 'skipped' && 
