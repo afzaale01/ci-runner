@@ -10,3 +10,5 @@ jobs:
       releaseResult: "success"
       deployResult: "failure"
       version: "v1.2.3"
+    secrets: inherit
+      
