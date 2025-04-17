@@ -40,10 +40,11 @@ jobs:
           RELEASE="${{ inputs.releaseResult }}"
           DEPLOY="${{ inputs.deployResult }}"
           VERSION="${{ inputs.version }}"
+          ERROR_MSG="${{ inputs.releaseErrorMessage }}"
           REPO="${{ github.repository }}"
           RELEASE_URL="https://github.com/${REPO}/releases/tag/${VERSION}"
           RUN_URL="https://github.com/${REPO}/actions/runs/${GITHUB_RUN_ID}"
-    
+
           if [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
               TITLE="✅ Release & Deploy Succeeded - ${VERSION}"
@@ -60,7 +61,11 @@ jobs:
             fi
           else
             TITLE="❌ Release Failed - ${VERSION}"
-            MESSAGE="Release \`${VERSION}\` failed. [View Workflow Logs](${RUN_URL}) for details."
+            if [[ -n "$ERROR_MSG" ]]; then
+              MESSAGE="Release \`${VERSION}\` failed: \`$ERROR_MSG\`"
+            else
+              MESSAGE="Release \`${VERSION}\` failed. [View Workflow Logs](${RUN_URL}) for details."
+            fi
             STATUS="failure"
           fi
 
