@@ -1,0 +1,65 @@
+name: ♻️ Generate Notification
+
+on:
+  workflow_call:
+    inputs:
+      releaseResult:
+        required: true
+        type: string
+      deployResult:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+    outputs:
+      title:
+        description: 'Main notification title'
+        value: ${{ jobs.generate.outputs.title }}
+      message:
+        description: 'Notification body message'
+        value: ${{ jobs.generate.outputs.message }}
+      status:
+        description: 'Status for use in color codes (success, failure, etc)'
+        value: ${{ jobs.generate.outputs.status }}
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    outputs:
+      title: ${{ steps.vars.outputs.title }}
+      message: ${{ steps.vars.outputs.message }}
+      status: ${{ steps.vars.outputs.status }}
+    steps:
+      - name: 🧠 Set Notification Variables
+        id: vars
+        run: |
+          RELEASE="${{ inputs.releaseResult }}"
+          DEPLOY="${{ inputs.deployResult }}"
+          VERSION="${{ inputs.version }}"
+          REPO="${{ github.repository }}"
+          RELEASE_URL="https://github.com/${REPO}/releases/tag/${VERSION}"
+
+          if [[ "$RELEASE" == "success" ]]; then
+            if [[ "$DEPLOY" == "success" ]]; then
+              TITLE="✅ Release & Deploy Succeeded - ${VERSION}"
+              MESSAGE="Release \`${VERSION}\` completed successfully. [View Release](${RELEASE_URL})"
+              STATUS="success"
+            elif [[ "$DEPLOY" == "skipped" ]]; then
+              TITLE="✅ Release Succeeded (No Deploy) - ${VERSION}"
+              MESSAGE="Release \`${VERSION}\` completed successfully. No deployment targets set. [View Release](${RELEASE_URL})"
+              STATUS="neutral"
+            else
+              TITLE="⚠️ Release Succeeded, Deploy Failed - ${VERSION}"
+              MESSAGE="Release \`${VERSION}\` succeeded, but deployment failed. [View Release](${RELEASE_URL})"
+              STATUS="failure"
+            fi
+          else
+            TITLE="❌ Release Failed - ${VERSION}"
+            MESSAGE="Release \`${VERSION}\` failed. Check logs for details."
+            STATUS="failure"
+          fi
+
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
