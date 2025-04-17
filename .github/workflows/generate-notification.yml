@@ -81,9 +81,9 @@ jobs:
             STATUS="failure"
           fi
 
-          # Slack-specific formatting
-          SLACK_MSG=$(echo "$MESSAGE" | sed "s|\\[View Logs\\](${RUN_URL})|<${RUN_URL}|View Logs>|g")
-          SLACK_MSG=$(echo "$SLACK_MSG" | sed "s|\\[View Release\\](${RELEASE_URL})|<${RELEASE_URL}|View Release>|g")
+          # Platform-specific formatting
+          SLACK_MSG=$(echo "$MESSAGE" | sed "s#\\[View Logs\\](${RUN_URL})#<${RUN_URL}|View Logs>#g")
+          SLACK_MSG=$(echo "$SLACK_MSG" | sed "s#\\[View Release\\](${RELEASE_URL})#<${RELEASE_URL}|View Release>#g")
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
