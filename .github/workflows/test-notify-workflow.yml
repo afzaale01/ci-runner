@@ -4,6 +4,29 @@ on:
   workflow_dispatch:
 
 jobs:
+  validate-vars:
+    name: Validate GitHub Variables
+    uses: avalin/unity-ci-templates/.github/workflows/validate-github-vars.yml@main
+    with:
+      requiredVars: |
+        [
+          "COMBINE_ARTIFACTS",
+          "DEPLOY_TARGETS",
+          "EXCLUDE_UNITY_TESTS",
+          "LICENSE_ARTIFACT_NAME",
+          "PROJECT_NAME",
+          "RETENTION_DAYS_PREVIEW",
+          "RETENTION_DAYS_RELEASE",
+          "TARGET_PLATFORMS_PREVIEW",
+          "TARGET_PLATFORMS_RELEASE",
+          "TIMEOUT_BUILD_IN_MINUTES",
+          "TIMEOUT_TESTS_IN_MINUTES",
+          "UNITY_TESTS_EDITMODE_PATH",
+          "UNITY_TESTS_PLAYMODE_PATH",
+          "UNITY_VERSION",
+          "USE_GIT_LFS"
+        ]
+
   test-notify:
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
