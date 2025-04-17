@@ -13,6 +13,8 @@
 2. Set your required secrets and repository variables.
 3. Ready-up a PR or create a Git tag to trigger the pipeline!
 
+> ⚠️ Currently tested deploy targets: `gh-pages` (WebGL only). Others are implemented but not yet fully verified. Contributions welcome!
+
 ---
 
 ## 📌 Features
