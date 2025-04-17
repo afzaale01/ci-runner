@@ -46,6 +46,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   run-tests:
     name: Run Tests
+    if: ${{ vars.EXCLUDE_UNITY_TESTS == 'false' }}
     needs: [ analyze ]
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
@@ -70,6 +71,8 @@ jobs:
     # - Tests passed
     # - The event is a pull_request, workflow_dispatch, or version tag push
     if: >
+      always() &&
+      (needs.run-tests.result == 'success' || needs.run-tests.result == 'skipped') &&
       (
         github.event_name == 'pull_request' ||
         github.event_name == 'workflow_dispatch' ||
