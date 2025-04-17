@@ -74,15 +74,15 @@ jobs:
           else
             TITLE="❌ Release Failed - ${VERSION}"
             if [[ -n "$ERROR" ]]; then
-              MESSAGE="Release \`${VERSION}\` failed: \`${ERROR}\`. [View Logs](${RUN_URL})"
+              MESSAGE="Release \`${VERSION}\` failed: \`${ERROR}\`. [View Pipeline](${RUN_URL})"
             else
-              MESSAGE="Release \`${VERSION}\` failed. [View Workflow Logs](${RUN_URL}) for details."
+              MESSAGE="Release \`${VERSION}\` failed. [View Pipeline](${RUN_URL}) for details."
             fi
             STATUS="failure"
           fi
 
           # Platform-specific formatting
-          SLACK_MSG=$(echo "$MESSAGE" | sed "s#\\[View Logs\\](${RUN_URL})#<${RUN_URL}|View Logs>#g")
+          SLACK_MSG=$(echo "$MESSAGE" | sed "s#\\[View Pipeline\\](${RUN_URL})#<${RUN_URL}|View Pipeline>#g")
           SLACK_MSG=$(echo "$SLACK_MSG" | sed "s#\\[View Release\\](${RELEASE_URL})#<${RELEASE_URL}|View Release>#g")
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
