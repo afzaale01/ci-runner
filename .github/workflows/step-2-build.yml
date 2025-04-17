@@ -203,7 +203,7 @@ jobs:
           name: ${{ vars.PROJECT_NAME }}-${{ needs.determine_version.outputs.version }}
           path: combined-artifact
 
-      - name: 📝 Write Build Summary
+      - name: 📘 Write Build Summary
         run: |
           echo "### ✅ Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -233,9 +233,14 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [[ "${{ vars.COMBINE_ARTIFACTS }}" == "true" ]]; then
+            echo "### 📦 Combined Artifact" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
             if [ -d "combined-artifact" ]; then
-              echo "- 📦 Combined Artifact: ✅ Uploaded" >> $GITHUB_STEP_SUMMARY
+              echo "- ✅ Combined artifact successfully created and uploaded." >> $GITHUB_STEP_SUMMARY
             else
-              echo "- 📦 Combined Artifact: ❌ Missing" >> $GITHUB_STEP_SUMMARY
+              echo "- ❌ Combined artifact was expected but is missing!" >> $GITHUB_STEP_SUMMARY
             fi
+          else
+            echo "ℹ️ Combined artifacts were not requested (COMBINE_ARTIFACTS is false)." >> $GITHUB_STEP_SUMMARY
           fi
