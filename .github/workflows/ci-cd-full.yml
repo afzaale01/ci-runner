@@ -46,7 +46,11 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   run-tests:
     name: Run Tests
-    if: ${{ vars.EXCLUDE_UNITY_TESTS == 'false' }}
+    if: ${{ 
+       vars.EXCLUDE_UNITY_TESTS == 'false' &&
+       (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip tests]')) ||
+       github.event_name == 'pull_request'
+      }}
     needs: [ analyze ]
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
