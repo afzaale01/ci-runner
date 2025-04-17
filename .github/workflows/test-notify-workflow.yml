@@ -26,6 +26,13 @@ jobs:
           "UNITY_VERSION",
           "USE_GIT_LFS"
         ]
+      requiredSecrets: |
+        [
+          "UNITY_LICENSE",
+          "UNITY_EMAIL",
+          "UNITY_PASSWORD"
+        ]
+    secrets: inherit
 
   test-notify:
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
