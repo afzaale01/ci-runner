@@ -9,9 +9,13 @@ on:
       deployResult:
         required: true
         type: string
+      version:
+        required: true
+        type: string
 
 jobs:
   notify:
+    if: startsWith(inputs.version, 'v') && !contains(inputs.version, '-preview')
     runs-on: ubuntu-latest
     steps:
       - name: 🧠 Set Notification Variables
@@ -19,24 +23,27 @@ jobs:
         run: |
           RELEASE="${{ inputs.releaseResult }}"
           DEPLOY="${{ inputs.deployResult }}"
+          VERSION="${{ inputs.version }}"
+          REPO="${{ github.repository }}"
+          RELEASE_URL="https://github.com/${REPO}/releases/tag/${VERSION}"
 
           if [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
               TITLE="✅ Release & Deploy Succeeded"
-              MESSAGE="Release and deployment completed successfully."
+              MESSAGE="Release \`${VERSION}\` completed successfully. [View Release](${RELEASE_URL})"
               STATUS="success"
             elif [[ "$DEPLOY" == "skipped" ]]; then
               TITLE="✅ Release Succeeded (No Deploy)"
-              MESSAGE="Release completed successfully."
+              MESSAGE="Release \`${VERSION}\` completed successfully. No deployment targets set. [View Release](${RELEASE_URL})"
               STATUS="neutral"
             else
               TITLE="⚠️ Release Succeeded, Deploy Failed"
-              MESSAGE="Release completed, but deployment failed."
+              MESSAGE="Release \`${VERSION}\` succeeded, but deployment failed. [View Release](${RELEASE_URL})"
               STATUS="failure"
             fi
           else
             TITLE="❌ Release Failed"
-            MESSAGE="Release failed."
+            MESSAGE="Release \`${VERSION}\` failed. Check logs for details."
             STATUS="failure"
           fi
 
@@ -93,4 +100,3 @@ jobs:
                $MSTEAMS_WEBHOOK
         env:
           MSTEAMS_WEBHOOK: ${{ secrets.MSTEAMS_WEBHOOK }}
-         

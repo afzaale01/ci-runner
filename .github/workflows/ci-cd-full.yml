@@ -145,4 +145,5 @@ jobs:
     with:
       releaseResult: ${{ needs.release.result }}
       deployResult: ${{ needs.deploy.result }}
+      version: ${{ needs.build.outputs.version }}
     secrets: inherit
