@@ -25,6 +25,8 @@ jobs:
     if: ${{ inputs.buildType == 'release' }}
     name: 📤 Publish GitHub Release
     runs-on: ubuntu-latest
+    outputs:
+      releaseErrorMessage: ${{ steps.error-handler.outputs.releaseErrorMessage }}
 
     steps:
       - name: 📥 Download Artifacts
@@ -133,3 +135,19 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+      - name: 🛠️ Capture Release Errors
+        if: failure()
+        id: error-handler
+        run: |
+          ERROR_MESSAGE="Unknown release failure"
+
+          if ! ls release-artifacts/* >/dev/null 2>&1; then
+            ERROR_MESSAGE="No artifacts found in 'release-artifacts/'"
+          elif ! jq -e .id response.json >/dev/null 2>&1; then
+            ERROR_MESSAGE="Failed to create or fetch GitHub Release"
+          else
+            ERROR_MESSAGE="One or more upload steps failed"
+          fi
+
+          echo "releaseErrorMessage=$ERROR_MESSAGE" >> $GITHUB_OUTPUT
