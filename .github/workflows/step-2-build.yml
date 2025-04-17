@@ -104,7 +104,7 @@ jobs:
           mkdir -p "$DEST"
           mv "$SOURCE"/* "$DEST"/
 
-      - name: Upload Build Artifact
+      - name: Upload Platform Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}-${{ matrix.targetPlatform }}
@@ -168,7 +168,7 @@ jobs:
           mkdir -p "$DEST"
           mv "$SOURCE"/* "$DEST"/
 
-      - name: Upload Build Artifact
+      - name: Upload Platform Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}-${{ matrix.targetPlatform }}
