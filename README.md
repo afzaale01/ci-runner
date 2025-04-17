@@ -6,6 +6,12 @@
 ![License](https://img.shields.io/github/license/Avalin/CI-CD-Unity-Test-Project?color=blue)
 ![Unity](https://img.shields.io/badge/unity-2022.3%2B-black?logo=unity)
 
+## 🧠 Getting Started
+
+1. Clone this repo or copy the `ci-cd-full.yml` workflow into your Unity project.
+2. Set your required secrets and repository variables.
+3. Ready-up a PR or create a Git tag to trigger the pipeline!
+
 ---
 
 ## 📌 Features
