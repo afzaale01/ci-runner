@@ -40,8 +40,7 @@
 
 | File | Purpose |
 |------|---------|
-| [`ci-cd-full.yml`](.github/workflows/ci-cd-full.yml) | Full pipeline: tests, builds, release |
-| [`ci-cd-stripped.yml`](.github/workflows/ci-cd-stripped.yml) | Quick pipeline (build-only) — optional |
+| [`ci-cd-full.yml`](.github/workflows/ci-cd-full.yml) | Full pipeline: test, build, release, deploy & notify |
 
 ### 🤩 Modular Reusable Templates
 
