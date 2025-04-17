@@ -7,6 +7,15 @@
 ![Unity](https://img.shields.io/badge/unity-2022.3%2B-black?logo=unity)
 ![Latest Release](https://img.shields.io/github/v/release/Avalin/Unity-CI-Templates)
 
+## 🌐 WebGL Demo
+
+See a live WebGL build deployed using this CI/CD pipeline:
+
+➡️ [**Play the Demo**](https://avalin.github.io/Unity-CI-Templates/)
+
+> Deployed via GitHub Pages using the `gh-pages` deploy target.
+
+
 ## 🧠 Getting Started
 
 1. Clone this repo or copy the `ci-cd-full.yml` workflow into your Unity project.
