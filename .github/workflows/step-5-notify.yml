@@ -29,20 +29,20 @@ jobs:
 
           if [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
-              TITLE="✅ Release & Deploy Succeeded"
+              TITLE="✅ Release & Deploy Succeeded - ${VERSION}"
               MESSAGE="Release \`${VERSION}\` completed successfully. [View Release](${RELEASE_URL})"
               STATUS="success"
             elif [[ "$DEPLOY" == "skipped" ]]; then
-              TITLE="✅ Release Succeeded (No Deploy)"
+              TITLE="✅ Release Succeeded (No Deploy) - ${VERSION}"
               MESSAGE="Release \`${VERSION}\` completed successfully. No deployment targets set. [View Release](${RELEASE_URL})"
               STATUS="neutral"
             else
-              TITLE="⚠️ Release Succeeded, Deploy Failed"
+              TITLE="⚠️ Release Succeeded, Deploy Failed - ${VERSION}"
               MESSAGE="Release \`${VERSION}\` succeeded, but deployment failed. [View Release](${RELEASE_URL})"
               STATUS="failure"
             fi
           else
-            TITLE="❌ Release Failed"
+            TITLE="❌ Release Failed - ${VERSION}"
             MESSAGE="Release \`${VERSION}\` failed. Check logs for details."
             STATUS="failure"
           fi
