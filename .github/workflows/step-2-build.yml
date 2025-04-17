@@ -186,7 +186,15 @@ jobs:
         with:
           path: all-artifacts
 
+      - name: 🧮 Check Number of Platforms
+        id: platform_count
+        run: |
+          COUNT=$(find all-artifacts -mindepth 1 -maxdepth 1 -type d | wc -l)
+          echo "Found $COUNT platform artifact(s)."
+          echo "platform_count=$COUNT" >> $GITHUB_OUTPUT      
+
       - name: 🗂 Combine Into Single Versioned Folder
+        if: ${{ steps.platform_count.outputs.platform_count > 1 }}
         run: |
           VERSION="${{ needs.determine_version.outputs.version }}"
           PROJECT="${{ vars.PROJECT_NAME }}"
