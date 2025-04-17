@@ -22,6 +22,15 @@ on:
       message:
         description: 'Notification body message'
         value: ${{ jobs.generate.outputs.message }}
+      slackMessage:
+        description: 'Slack-formatted message'
+        value: ${{ jobs.generate.outputs.slackMessage }}
+      discordMessage:
+        description: 'Discord-formatted message'
+        value: ${{ jobs.generate.outputs.discordMessage }}
+      teamsMessage:
+        description: 'Teams-formatted message'
+        value: ${{ jobs.generate.outputs.teamsMessage }}
       status:
         description: 'Status for use in color codes (success, failure, etc)'
         value: ${{ jobs.generate.outputs.status }}
@@ -32,6 +41,9 @@ jobs:
     outputs:
       title: ${{ steps.vars.outputs.title }}
       message: ${{ steps.vars.outputs.message }}
+      slackMessage: ${{ steps.vars.outputs.slackMessage }}
+      discordMessage: ${{ steps.vars.outputs.discordMessage }}
+      teamsMessage: ${{ steps.vars.outputs.teamsMessage }}
       status: ${{ steps.vars.outputs.status }}
     steps:
       - name: 🧠 Set Notification Variables
@@ -62,13 +74,21 @@ jobs:
           else
             TITLE="❌ Release Failed - ${VERSION}"
             if [[ -n "$ERROR" ]]; then
-              MESSAGE="Release \`${VERSION}\` failed: \`$ERROR\`. [View Logs](${RUN_URL})"
+              MESSAGE="Release \`${VERSION}\` failed: \`${ERROR}\`. [View Logs](${RUN_URL})"
             else
               MESSAGE="Release \`${VERSION}\` failed. [View Workflow Logs](${RUN_URL}) for details."
             fi
             STATUS="failure"
           fi
 
+          # Platform-specific formatting
+          SLACK_MSG="$MESSAGE"
+          SLACK_MSG="${SLACK_MSG//[View Logs](${RUN_URL})/<${RUN_URL}|View Logs>}"
+          SLACK_MSG="${SLACK_MSG//[View Release](${RELEASE_URL})/<${RELEASE_URL}|View Release>}"
+
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          echo "slackMessage=$SLACK_MSG" >> "$GITHUB_OUTPUT"
+          echo "discordMessage=$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "teamsMessage=$MESSAGE" >> "$GITHUB_OUTPUT"

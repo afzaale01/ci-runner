@@ -36,7 +36,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "*${{ needs.generate-notification.outputs.title }}* - `${{ github.repository }}`\n${{ needs.generate-notification.outputs.message }}",
+              "text": "*${{ needs.generate-notification.outputs.title }}* - `${{ github.repository }}`\n${{ needs.generate-notification.outputs.slackMessage }}",
               "attachments": [
                 {
                   "color": "${{ needs.generate-notification.outputs.status == 'success' && 'good' || needs.generate-notification.outputs.status == 'failure' && 'danger' || '#cccccc' }}"
@@ -55,11 +55,11 @@ jobs:
                -X POST \
                -d '{
                      "username": "GitHub CI",
-                     "embeds": [{
+                     "embeds": [ {
                        "title": "'"${{ needs.generate-notification.outputs.title }}"'",
-                       "description": "'"${{ needs.generate-notification.outputs.message }}"'",
+                       "description": "'"${{ needs.generate-notification.outputs.discordMessage }}"'",
                        "color": '"$COLOR"'
-                     }]
+                     } ]
                    }' \
                $DISCORD_WEBHOOK
         env:
@@ -81,7 +81,7 @@ jobs:
                      \"summary\": \"CI/CD Notification\",
                      \"themeColor\": \"$COLOR\",
                      \"title\": \"${{ needs.generate-notification.outputs.title }}\",
-                     \"text\": \"${{ needs.generate-notification.outputs.message }}\"
+                     \"text\": \"${{ needs.generate-notification.outputs.teamsMessage }}\"
                    }" \
                $MSTEAMS_WEBHOOK
         env:
