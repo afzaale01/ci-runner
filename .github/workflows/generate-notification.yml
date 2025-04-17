@@ -39,29 +39,30 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     outputs:
-      title: ${{ steps.vars.outputs.title }}
-      message: ${{ steps.vars.outputs.message }}
-      slackMessage: ${{ steps.vars.outputs.slackMessage }}
-      discordMessage: ${{ steps.vars.outputs.discordMessage }}
-      teamsMessage: ${{ steps.vars.outputs.teamsMessage }}
-      status: ${{ steps.vars.outputs.status }}
+      title: ${{ steps.set-outputs.outputs.title }}
+      message: ${{ steps.set-outputs.outputs.message }}
+      slackMessage: ${{ steps.set-outputs.outputs.slackMessage }}
+      discordMessage: ${{ steps.set-outputs.outputs.discordMessage }}
+      teamsMessage: ${{ steps.set-outputs.outputs.teamsMessage }}
+      status: ${{ steps.set-outputs.outputs.status }}
     steps:
-      - name: 🧠 Set Notification Variables
-        id: vars
+      - name: 🧱 Prepare Variables
+        id: prep
         run: |
-          RELEASE="${{ inputs.releaseResult }}"
-          DEPLOY="${{ inputs.deployResult }}"
-          VERSION="${{ inputs.version }}"
-          ERROR="${{ inputs.releaseErrorMessage }}"
-          REPO="${{ github.repository }}"
-          RELEASE_URL="https://github.com/${REPO}/releases/tag/${VERSION}"
-          RUN_URL="https://github.com/${REPO}/actions/runs/${GITHUB_RUN_ID}"
+          echo "RELEASE=${{ inputs.releaseResult }}" >> $GITHUB_ENV
+          echo "DEPLOY=${{ inputs.deployResult }}" >> $GITHUB_ENV
+          echo "VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+          echo "ERROR=${{ inputs.releaseErrorMessage }}" >> $GITHUB_ENV
+          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
+          echo "RELEASE_URL=https://github.com/${{ github.repository }}/releases/tag/${{ inputs.version }}" >> $GITHUB_ENV
+          echo "RUN_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
+          echo "BRANCH=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          echo "COMMIT=${GITHUB_SHA}" >> $GITHUB_ENV
+          echo "PR_NUMBER=${{ github.event.pull_request.number || '' }}" >> $GITHUB_ENV
 
-          BRANCH="${GITHUB_REF_NAME}"
-          COMMIT="${GITHUB_SHA}"
-          PR_NUMBER="${{ github.event.pull_request.number || '' }}"
-
-          # Build optional traceability context
+      - name: 🧠 Determine Status and Message
+        id: determine
+        run: |
           TRACE=""
           [[ -n "$PR_NUMBER" ]] && TRACE+="PR #$(printf '%04d' "$PR_NUMBER")"
           [[ -n "$BRANCH" ]] && TRACE+="${TRACE:+ | }Branch: \`$BRANCH\`"
@@ -69,36 +70,39 @@ jobs:
 
           if [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
-              TITLE="✅ Release & Deploy Succeeded - ${VERSION}"
-              MESSAGE="Release \`${VERSION}\` completed successfully. [View Release](${RELEASE_URL})"
+              TITLE="✅ Release & Deploy Succeeded - $VERSION"
+              MESSAGE="Release \`$VERSION\` completed successfully. [View Release]($RELEASE_URL)"
               STATUS="success"
             elif [[ "$DEPLOY" == "skipped" ]]; then
-              TITLE="✅ Release Succeeded (No Deploy) - ${VERSION}"
-              MESSAGE="Release \`${VERSION}\` completed successfully. No deployment targets set. [View Release](${RELEASE_URL})"
+              TITLE="✅ Release Succeeded (No Deploy) - $VERSION"
+              MESSAGE="Release \`$VERSION\` completed successfully. No deployment targets set. [View Release]($RELEASE_URL)"
               STATUS="neutral"
             else
-              TITLE="⚠️ Release Succeeded, Deploy Failed - ${VERSION}"
-              MESSAGE="Release \`${VERSION}\` succeeded, but deployment failed. [View Release](${RELEASE_URL})"
+              TITLE="⚠️ Release Succeeded, Deploy Failed - $VERSION"
+              MESSAGE="Release \`$VERSION\` succeeded, but deployment failed. [View Release]($RELEASE_URL)"
               STATUS="failure"
             fi
           else
-            TITLE="❌ Release Failed - ${VERSION}"
+            TITLE="❌ Release Failed - $VERSION"
             if [[ -n "$ERROR" ]]; then
-              MESSAGE="Release \`${VERSION}\` failed: \`${ERROR}\`. [View Pipeline](${RUN_URL})"
+              MESSAGE="Release \`$VERSION\` failed: \`$ERROR\`. [View Pipeline]($RUN_URL)"
             else
-              MESSAGE="Release \`${VERSION}\` failed. [View Pipeline](${RUN_URL}) for details."
+              MESSAGE="Release \`$VERSION\` failed. [View Pipeline]($RUN_URL) for details."
             fi
             STATUS="failure"
           fi
 
-          # Append context if available
-          if [[ -n "$TRACE" ]]; then
-            MESSAGE="$MESSAGE\n$TRACE"
-          fi
+          [[ -n "$TRACE" ]] && MESSAGE="$MESSAGE\n$TRACE"
 
-          # Slack-specific formatting
-          SLACK_MSG=$(echo "$MESSAGE" | sed "s#\\[View Pipeline\\](${RUN_URL})#<${RUN_URL}|View Pipeline>#g")
-          SLACK_MSG=$(echo "$SLACK_MSG" | sed "s#\\[View Release\\](${RELEASE_URL})#<${RELEASE_URL}|View Release>#g")
+          echo "TITLE=$TITLE" >> $GITHUB_ENV
+          echo "MESSAGE=$MESSAGE" >> $GITHUB_ENV
+          echo "STATUS=$STATUS" >> $GITHUB_ENV
+
+      - name: 💬 Format Messages
+        id: set-outputs
+        run: |
+          SLACK_MSG=$(echo "$MESSAGE" | sed "s#\\[View Pipeline\\]($RUN_URL)#<${RUN_URL}|View Pipeline>#g")
+          SLACK_MSG=$(echo "$SLACK_MSG" | sed "s#\\[View Release\\]($RELEASE_URL)#<${RELEASE_URL}|View Release>#g")
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
