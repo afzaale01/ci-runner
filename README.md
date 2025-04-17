@@ -99,7 +99,7 @@ Can be found under:
 | `UNITY_VERSION`             | Unity version (e.g. `auto` or `2022.3.13f1`) |
 | `USE_GIT_LFS`               | Use Git LFS (`true`/`false`) |
 
-#### ⚙️ Repository Variable Examples
+#### ⚙️ Repository JSON Variable Examples
 
 | Variable Name               | Full JSON strings |
 |-----------------------------|-------------|
