@@ -61,6 +61,16 @@ jobs:
           COMMIT="${GITHUB_SHA}"
           PR_NUMBER="${{ github.event.pull_request.number || '' }}"
 
+          # Common link labels
+          VIEW_RELEASE_TEXT="View Release"
+          VIEW_PIPELINE_TEXT="View Pipeline"
+
+          # Reusable link formats
+          LINK_RELEASE="[${VIEW_RELEASE_TEXT}](${RELEASE_URL})"
+          LINK_PIPELINE="[${VIEW_PIPELINE_TEXT}](${RUN_URL})"
+          SLACK_LINK_RELEASE="<${RELEASE_URL}|${VIEW_RELEASE_TEXT}>"
+          SLACK_LINK_PIPELINE="<${RUN_URL}|${VIEW_PIPELINE_TEXT}>"
+
           # Build optional traceability context
           TRACE=""
           [[ -n "$PR_NUMBER" ]] && TRACE+="PR #$(printf '%04d' "$PR_NUMBER")"
@@ -70,23 +80,23 @@ jobs:
           if [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
               TITLE="✅ Release & Deploy Succeeded - ${VERSION}"
-              MESSAGE="Release \`${VERSION}\` completed successfully. [View Release](${RELEASE_URL})"
+              MESSAGE="Release \`${VERSION}\` completed successfully. ${LINK_RELEASE}"
               STATUS="success"
             elif [[ "$DEPLOY" == "skipped" ]]; then
               TITLE="✅ Release Succeeded (No Deploy) - ${VERSION}"
-              MESSAGE="Release \`${VERSION}\` completed successfully. No deployment targets set. [View Release](${RELEASE_URL})"
+              MESSAGE="Release \`${VERSION}\` completed successfully. No deployment targets set. ${LINK_RELEASE}"
               STATUS="neutral"
             else
               TITLE="⚠️ Release Succeeded, Deploy Failed - ${VERSION}"
-              MESSAGE="Release \`${VERSION}\` succeeded, but deployment failed. [View Release](${RELEASE_URL})"
+              MESSAGE="Release \`${VERSION}\` succeeded, but deployment failed. ${LINK_RELEASE}"
               STATUS="failure"
             fi
           else
             TITLE="❌ Release Failed - ${VERSION}"
             if [[ -n "$ERROR" ]]; then
-              MESSAGE="Release \`${VERSION}\` failed: \`${ERROR}\`. [View Pipeline](${RUN_URL})"
+              MESSAGE="Release \`${VERSION}\` failed: \`${ERROR}\`. ${LINK_PIPELINE}"
             else
-              MESSAGE="Release \`${VERSION}\` failed. [View Pipeline](${RUN_URL}) for details."
+              MESSAGE="Release \`${VERSION}\` failed. ${LINK_PIPELINE} for details."
             fi
             STATUS="failure"
           fi
@@ -96,9 +106,10 @@ jobs:
             MESSAGE="$MESSAGE\n$TRACE"
           fi
 
-          # Slack-specific formatting
-          SLACK_MSG=$(echo "$MESSAGE" | sed "s#\\[View Pipeline\\](${RUN_URL})#<${RUN_URL}|View Pipeline>#g")
-          SLACK_MSG=$(echo "$SLACK_MSG" | sed "s#\\[View Release\\](${RELEASE_URL})#<${RELEASE_URL}|View Release>#g")
+          # Slack-specific formatting uses preformatted links
+          SLACK_MSG="${MESSAGE}"
+          SLACK_MSG="${SLACK_MSG//$LINK_RELEASE/$SLACK_LINK_RELEASE}"
+          SLACK_MSG="${SLACK_MSG//$LINK_PIPELINE/$SLACK_LINK_PIPELINE}"
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
