@@ -46,37 +46,50 @@ on:
       DISCORD_WEBHOOK: { required: false }
 
 jobs:
+  validate-deploy-targets:
+    name: 🧪 Validate Deploy Targets
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    outputs:
+      valid: ${{ steps.filter.outputs.validTargets }}
+    steps:
+      - name: ⚙️ Filter Valid Targets
+        id: filter
+        run: |
+          VALID_TARGETS=("gh-pages" "itch.io" "appcenter" "firebase" "s3" "steam" "discord" "custom-server" "testflight")
+          INPUTS=$(echo '${{ inputs.deployTargets }}' | jq -r '.[]')
+          VALID=()
+          INVALID=()
+
+          for TARGET in $INPUTS; do
+            if [[ " ${VALID_TARGETS[*]} " =~ " ${TARGET} " ]]; then
+              VALID+=("\"$TARGET\"")
+            else
+              INVALID+=("$TARGET")
+            fi
+          done
+
+          echo "✅ Valid targets: ${VALID[*]}"
+          if [ "${#INVALID[@]}" -gt 0 ]; then
+            echo "⚠️ Invalid targets: ${INVALID[*]}"
+          fi
+
+          # Return JSON array of only valid targets
+          echo "validTargets=[${VALID[*]}]" >> $GITHUB_OUTPUT
+
   resolve-deploy-matrix:
     name: 🧠 Resolve Deploy Matrix
     runs-on: ubuntu-latest
+    needs: validate-deploy-targets
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
       - name: 📁 Checkout repo
         uses: actions/checkout@v4
 
-      - name: ✅ Validate Deploy Targets
-        run: |
-          VALID_TARGETS=("gh-pages" "itch.io" "appcenter" "firebase" "s3" "steam" "discord" "custom-server" "testflight")
-          INVALID=()
-
-          for TARGET in $(echo '${{ inputs.deployTargets }}' | jq -r '.[]'); do
-            if [[ ! " ${VALID_TARGETS[*]} " =~ " ${TARGET} " ]]; then
-              INVALID+=("$TARGET")
-            fi
-          done
-
-          if [ "${#INVALID[@]}" -ne 0 ]; then
-            echo "❌ Invalid deployTargets detected: ${INVALID[*]}"
-            echo "✅ Valid targets: ${VALID_TARGETS[*]}"
-            exit 1
-          fi
-
-          echo "✅ All deployTargets are valid: ${{ inputs.deployTargets }}"
-
       - id: set
         run: |
-          DEPLOY_TARGETS='${{ inputs.deployTargets }}'
+          DEPLOY_TARGETS='${{ needs.validate-deploy-targets.outputs.valid }}'
           CONFIG_FILE=".github/config/deploy-targets.json"
           FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
 
