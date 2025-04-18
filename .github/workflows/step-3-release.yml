@@ -31,12 +31,12 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       releaseErrorMessage: ${{ steps.error-handler.outputs.releaseErrorMessage }}
-   
+
     steps:
       - name: 📥 Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: release-artifacts
+          path: .
 
       - name: 📝 Check if Release Already Exists
         id: check_release
@@ -58,7 +58,7 @@ jobs:
             echo "❌ Release does not exist."
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
-  
+
       - name: 📝 Create GitHub Release
         if: steps.check_release.outputs.exists != 'true'
         id: create_release
@@ -90,11 +90,10 @@ jobs:
           PROJECT="${{ inputs.projectName }}"
           PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]')
 
-          # Use release ID from check or create step
           RELEASE_ID="${{ steps.check_release.outputs.release_id || steps.create_release.outputs.release_id }}"
 
           for PLATFORM in $PLATFORMS; do
-            ARTIFACT_PATH="release-artifacts/${PROJECT}-${VERSION}-${PLATFORM}"
+            ARTIFACT_PATH="${PROJECT}-${VERSION}-${PLATFORM}"
             ZIP_NAME="${PROJECT}-${VERSION}-${PLATFORM}.zip"
 
             if [ -d "$ARTIFACT_PATH" ]; then
@@ -118,10 +117,9 @@ jobs:
         run: |
           VERSION="${{ inputs.version }}"
           PROJECT="${{ inputs.projectName }}"
-          COMBINED_PATH="release-artifacts/${PROJECT}-${VERSION}"
+          COMBINED_PATH="${PROJECT}-${VERSION}"
           COMBINED_ZIP="${PROJECT}-${VERSION}-all-platforms.zip"
 
-          # Use release ID from check or create step
           RELEASE_ID="${{ steps.check_release.outputs.release_id || steps.create_release.outputs.release_id }}"
 
           if [ -d "$COMBINED_PATH" ]; then
@@ -146,8 +144,8 @@ jobs:
         run: |
           ERROR_MESSAGE="Unknown release failure"
 
-          if ! ls release-artifacts/* >/dev/null 2>&1; then
-            ERROR_MESSAGE="No artifacts found in 'release-artifacts/'"
+          if ! ls * >/dev/null 2>&1; then
+            ERROR_MESSAGE="No artifacts found"
           elif ! jq -e .id response.json >/dev/null 2>&1; then
             ERROR_MESSAGE="Failed to create or fetch GitHub Release"
           else
