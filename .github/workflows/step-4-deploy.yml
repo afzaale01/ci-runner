@@ -233,7 +233,8 @@ jobs:
         if: matrix.target == 'itch.io'
         run: |
           if [ -z "${{ secrets.ITCH_USERNAME }}" ] || [ -z "${{ secrets.ITCH_PROJECT }}" ]; then
-            echo "⚠️ Missing itch.io credentials. Skipping..."; exit 0;
+            echo "⚠️ Missing itch.io credentials."; 
+            exit 1;
           fi
           butler push "$DEPLOY_DIR" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
         env:
@@ -244,10 +245,11 @@ jobs:
         if: matrix.target == 'appcenter'
         run: |
           if [ -z "${{ secrets.APPCENTER_OWNER_NAME }}" ] || [ -z "${{ secrets.DEPLOY_API_KEY }}" ]; then
-            echo "⚠️ Missing App Center credentials. Skipping..."; exit 0;
+            echo "⚠️ Missing App Center credentials."; 
+            exit 1;
           fi
           FILES=$(find "$DEPLOY_DIR" -type f \( -name "*.apk" -o -name "*.aab" -o -name "*.ipa" \))
-          if [ -z "$FILES" ]; then echo "❌ No mobile artifacts found."; exit 0; fi
+          if [ -z "$FILES" ]; then echo "❌ No mobile artifacts found."; exit 1; fi
 
           for file in $FILES; do
             echo "🚀 Deploying $file"
@@ -263,7 +265,8 @@ jobs:
         if: matrix.target == 'firebase'
         run: |
           if [ -z "${{ secrets.FIREBASE_TOKEN }}" ]; then
-            echo "⚠️ Missing Firebase token. Skipping..."; exit 0;
+            echo "⚠️ Missing Firebase token."; 
+            exit 1;
           fi
           cd "$DEPLOY_DIR/WebGL" || exit 1
           npm install -g firebase-tools
@@ -274,7 +277,8 @@ jobs:
         if: matrix.target == 's3'
         run: |
           if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ] || [ -z "${{ secrets.S3_BUCKET }}" ]; then
-            echo "⚠️ Missing AWS credentials or bucket. Skipping..."; exit 0;
+            echo "⚠️ Missing AWS credentials or bucket."; 
+            exit 1;
           fi
           aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
           aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
@@ -290,7 +294,8 @@ jobs:
           fi
 
           if [ -z "${{ secrets.STEAM_USERNAME }}" ] || [ -z "${{ secrets.STEAM_PASSWORD }}" ] || [ -z "${{ secrets.STEAM_APP_ID }}" ]; then
-            echo "⚠️ Missing Steam credentials or App ID. Skipping..."; exit 0;
+            echo "⚠️ Missing Steam credentials or App ID."; 
+            exit 1;
           fi
 
           echo "🛠️ Installing SteamCMD..."
@@ -305,11 +310,12 @@ jobs:
         if: matrix.target == 'discord'
         run: |
           if [ -z "${{ secrets.DISCORD_WEBHOOK }}" ]; then
-            echo "⚠️ Missing Discord webhook. Skipping..."; exit 0;
+            echo "⚠️ Missing Discord webhook."; 
+            exit 1;
           fi
 
           FILE=$(find "$DEPLOY_DIR" -type f \( -name "*.apk" -o -name "*.ipa" -o -name "*.zip" \) | head -n 1)
-          if [ -z "$FILE" ]; then echo "❌ No artifact found to upload to Discord."; exit 0; fi
+          if [ -z "$FILE" ]; then echo "❌ No artifact found to upload to Discord."; exit 1; fi
 
           echo "📤 Uploading $FILE to Discord..."
           curl -F "file=@$FILE" "${{ secrets.DISCORD_WEBHOOK }}"
@@ -319,7 +325,8 @@ jobs:
         if: matrix.target == 'custom-server'
         run: |
           if [ -z "${{ secrets.CUSTOM_SERVER_HOST }}" ] || [ -z "${{ secrets.CUSTOM_SERVER_USER }}" ] || [ -z "${{ secrets.CUSTOM_SERVER_KEY }}" ]; then
-            echo "⚠️ Missing custom server credentials. Skipping..."; exit 0;
+            echo "⚠️ Missing custom server credentials."; 
+            exit 1;
           fi
 
           echo "➡️ Deploying to custom server..."
@@ -339,11 +346,12 @@ jobs:
         if: matrix.target == 'testflight'
         run: |
           if [ -z "${{ secrets.APPSTORE_API_KEY_ID }}" ] || [ -z "${{ secrets.APPSTORE_API_ISSUER_ID }}" ] || [ -z "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" ]; then
-            echo "⚠️ Missing App Store Connect API credentials. Skipping..."; exit 0;
+            echo "⚠️ Missing App Store Connect API credentials."; 
+            exit 1;
           fi
 
           FILE=$(find "$DEPLOY_DIR" -type f -name "*.ipa" | head -n 1)
-          if [ -z "$FILE" ]; then echo "❌ No .ipa found to upload."; exit 0; fi
+          if [ -z "$FILE" ]; then echo "❌ No .ipa found to upload."; exit 1; fi
 
           echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" > private_key.p8
 
