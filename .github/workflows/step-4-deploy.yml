@@ -58,7 +58,7 @@ jobs:
       - id: set
         run: |
           DEPLOY_TARGETS='${{ inputs.deployTargets }}'
-          CONFIG_FILE=".github/config/deploy-targetsx.json"
+          CONFIG_FILE=".github/config/deploy-targets.json"
           FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
 
           echo "🔍 Checking for local config file..."
