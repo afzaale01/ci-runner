@@ -173,9 +173,9 @@ Artifacts are named using the following structure for easy traceability:
 ### 📁 Examples
 
 ```
-MyGame_WebGL-manual-main
-MyGame_WebGL-PR-0001
-MyGame_StandaloneWindows64-v1.2.3
+MyGame-manual-main-WebGL
+MyGame-PR-0001-WebGL
+MyGame-v1.2.3-StandaloneWindows64
 ```
 
 ---
