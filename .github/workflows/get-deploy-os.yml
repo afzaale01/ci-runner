@@ -1,0 +1,38 @@
+# .github/workflows/get-deploy-os.yaml
+name: 🧠 Get Deploy OS
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        type: string
+        required: true
+    outputs:
+      os:
+        description: "The OS to use for the deploy target"
+        value: ${{ jobs.get-os.outputs.os }}
+
+jobs:
+  get-os:
+    runs-on: ubuntu-latest
+    outputs:
+      os: ${{ steps.lookup.outputs.os }}
+    steps:
+      - name: 📁 Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: 📄 Read deploy-targets.json
+        id: lookup
+        run: |
+          TARGET="${{ inputs.target }}"
+          FILE=".github/config/deploy-targets.json"
+
+          if [ ! -f "$FILE" ]; then
+            echo "⚠️ Config file not found. Defaulting to ubuntu-latest."
+            echo "os=ubuntu-latest" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          OS=$(jq -r --arg t "$TARGET" '.[$t] // "ubuntu-latest"' "$FILE")
+          echo "🔍 Lookup for $TARGET → $OS"
+          echo "os=$OS" >> $GITHUB_OUTPUT
