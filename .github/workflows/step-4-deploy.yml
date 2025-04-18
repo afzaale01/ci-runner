@@ -81,7 +81,7 @@ jobs:
           echo "✅ Resolved matrix: $MATRIX"
 
   deploy:
-    name: 🚀 Deploy ${{ matrix.target }}
+    name: 🚀 Deploy ${{ matrix.target }} on ${{ matrix.os }}
     needs: resolve-deploy-matrix
     runs-on: ${{ matrix.os }}
     strategy:
