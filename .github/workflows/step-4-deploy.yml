@@ -71,7 +71,7 @@ jobs:
         run: |
           echo "📦 Downloading release artifacts for tag: ${{ inputs.version }}"
 
-          mkdir -p deployment-artifacts
+          mkdir -p "$DEPLOY_DIR"
           ASSETS_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${{ inputs.version }}"
           DOWNLOAD_URLS=$(curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$ASSETS_URL" \
             | jq -r '.assets[] | "\(.name) \(.browser_download_url)"')
@@ -83,10 +83,17 @@ jobs:
 
           while read -r name url; do
             echo "⬇️ Downloading $name"
-            curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url" -o "deployment-artifacts/$name"
+            curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url" -o "$DEPLOY_DIR/$name"
+
+            # If it's a zip matching the combined archive, extract it
+            if [[ "$name" == *-all-platforms.zip ]]; then
+              echo "📂 Extracting $name into $DEPLOY_DIR"
+              unzip -q "$DEPLOY_DIR/$name" -d "$DEPLOY_DIR"
+              rm "$DEPLOY_DIR/$name"
+            fi
           done <<< "$DOWNLOAD_URLS"
 
-          echo "✅ All release assets downloaded to ./deployment-artifacts"
+          echo "✅ All release assets downloaded to $DEPLOY_DIR"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
