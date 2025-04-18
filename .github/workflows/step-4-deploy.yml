@@ -46,6 +46,31 @@ on:
       DISCORD_WEBHOOK: { required: false }
 
 jobs:
+  resolve-deploy-matrix:
+    name: 🧠 Resolve Deploy Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - name: 📁 Checkout repo
+        uses: actions/checkout@v4
+
+      - id: set
+        run: |
+          DEPLOY_TARGETS='${{ inputs.deployTargets }}'
+          CONFIG_FILE=".github/config/deploy-targets.json"
+
+          echo "Resolving deploy matrix..."
+
+          MATRIX='['
+          for TARGET in $(echo "$DEPLOY_TARGETS" | jq -r '.[]'); do
+            OS=$(jq -r --arg t "$TARGET" '.[$t] // "ubuntu-latest"' "$CONFIG_FILE")
+            MATRIX+='{"target":"'"$TARGET"'","os":"'"$OS"'"},'
+          done
+          MATRIX="${MATRIX%,}]"
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "Resolved matrix: $MATRIX"
+
   deploy_ubuntu:
     if: ${{ inputs.deployTargets != '[]' }}
     name: 🚀 Deploy Targets
