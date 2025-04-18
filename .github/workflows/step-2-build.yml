@@ -145,6 +145,9 @@ jobs:
           mkdir -p "$DEST"
           mv "$SOURCE"/* "$DEST"/
 
+          # ⛔ Remove Burst debug artifacts that shouldn't be shipped
+          find "$DEST" -type f -name '*BurstDebugInformation_DoNotShip*' -delete
+
       - name: Upload Platform Artifact
         uses: actions/upload-artifact@v4
         with:
