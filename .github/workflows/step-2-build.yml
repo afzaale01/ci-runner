@@ -146,7 +146,7 @@ jobs:
           mv "$SOURCE"/* "$DEST"/
 
           # ⛔ Remove Burst debug artifacts that shouldn't be shipped
-          find "$DEST" -type f -name '*BurstDebugInformation_DoNotShip*' -delete
+          find "$DEST" -name '*BurstDebugInformation_DoNotShip*' -exec rm -rf {} +
 
       - name: Upload Platform Artifact
         uses: actions/upload-artifact@v4
