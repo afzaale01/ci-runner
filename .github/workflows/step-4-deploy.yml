@@ -81,6 +81,7 @@ jobs:
     name: 🧠 Resolve Deploy Matrix
     runs-on: ubuntu-latest
     needs: validate-deploy-targets
+    if: ${{ needs.validate-deploy-targets.outputs.valid != '[]' }}
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
