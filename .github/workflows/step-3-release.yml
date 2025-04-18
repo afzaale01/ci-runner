@@ -119,13 +119,15 @@ jobs:
           PROJECT="${{ inputs.projectName }}"
           COMBINED_PATH="${PROJECT}-${VERSION}"
           COMBINED_ZIP="${PROJECT}-${VERSION}-all-platforms.zip"
-
+        
           RELEASE_ID="${{ steps.check_release.outputs.release_id || steps.create_release.outputs.release_id }}"
-
+        
           if [ -d "$COMBINED_PATH" ]; then
-            echo "📦 Zipping combined artifact: $COMBINED_PATH → $COMBINED_ZIP"
-            zip -r "$COMBINED_ZIP" "$COMBINED_PATH"
-
+            echo "📦 Zipping contents of: $COMBINED_PATH → $COMBINED_ZIP"
+            cd "$COMBINED_PATH"
+            zip -r "../$COMBINED_ZIP" .
+            cd -
+        
             echo "📤 Uploading $COMBINED_ZIP to release ID $RELEASE_ID"
             curl -s -X POST \
               -H "Authorization: Bearer ${{ github.token }}" \
@@ -135,8 +137,7 @@ jobs:
           else
             echo "ℹ️ No combined build artifact found — skipping."
           fi
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        
 
       - name: 🛠️ Capture Release Errors
         if: failure()
