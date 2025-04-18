@@ -80,14 +80,14 @@ jobs:
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           echo "✅ Resolved matrix: $MATRIX"
 
-  deploy_ubuntu:
-    if: ${{ inputs.deployTargets != '[]' }}
-    name: 🚀 Deploy Targets
+  deploy:
+    name: 🚀 Deploy ${{ matrix.target }}
+    needs: resolve-deploy-matrix
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        target: ${{ fromJson(inputs.deployTargets) }}
-    runs-on: ubuntu-latest
+        include: ${{ fromJson(needs.resolve-deploy-matrix.outputs.matrix) }}
     env:
       DEPLOY_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}
 
@@ -334,33 +334,7 @@ jobs:
           CUSTOM_SERVER_USER: ${{ secrets.CUSTOM_SERVER_USER }}
           CUSTOM_SERVER_KEY: ${{ secrets.CUSTOM_SERVER_KEY }}
 
-      # ───── Summary ─────
-      - name: 🧾 Add to Summary
-        run: |
-          echo "### 📦 Deployment: ${{ matrix.target }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Project: \`${{ inputs.projectName }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Build type: \`${{ inputs.buildType }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Version: \`${{ inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-
-          if [ -d "$DEPLOY_DIR" ]; then
-            echo "- Status: ✅ Success" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- Status: ❌ Failed (No deployment artifacts found)" >> $GITHUB_STEP_SUMMARY
-          fi
-
-  deploy_macOS:
-    if: contains(fromJson(inputs.deployTargets), 'testflight')
-    name: 🍏 Deploy to TestFlight (macOS)
-    runs-on: macos-latest
-    env:
-      DEPLOY_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}
-
-    steps:
-      - name: 📥 Download Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: deployment-artifacts
-
+      # ───── TestFlight ─────
       - name: 🍏 Deploy .ipa to TestFlight
         run: |
           if [ -z "${{ secrets.APPSTORE_API_KEY_ID }}" ] || [ -z "${{ secrets.APPSTORE_API_ISSUER_ID }}" ] || [ -z "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" ]; then
@@ -383,3 +357,17 @@ jobs:
           rm private_key.p8
         env:
           FASTLANE_DISABLE_COLORS: 1
+
+      # ───── Summary ─────
+      - name: 🧾 Add to Summary
+        run: |
+          echo "### 📦 Deployment: ${{ matrix.target }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Project: \`${{ inputs.projectName }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Build type: \`${{ inputs.buildType }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Version: \`${{ inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "$DEPLOY_DIR" ]; then
+            echo "- Status: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Status: ❌ Failed (No deployment artifacts found)" >> $GITHUB_STEP_SUMMARY
+          fi
