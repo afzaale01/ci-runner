@@ -55,7 +55,7 @@ jobs:
       - name: 📁 Checkout repo
         uses: actions/checkout@v4
 
-      - name: ✅ Validate deployTargets input
+      - name: ✅ Validate Deploy Targets
         run: |
           VALID_TARGETS=("gh-pages" "itch.io" "appcenter" "firebase" "s3" "steam" "discord" "custom-server" "testflight")
           INVALID=()
