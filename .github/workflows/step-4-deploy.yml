@@ -47,7 +47,7 @@ on:
 
 jobs:
   validate-deploy-targets:
-    name: 🧪 Validate Deploy Targets
+    name: ✅ Validate Deploy Targets
     runs-on: ubuntu-latest
     continue-on-error: true
     outputs:
