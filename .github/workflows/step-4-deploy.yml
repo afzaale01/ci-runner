@@ -18,41 +18,32 @@ on:
         type: string
         default: '[]'
         required: false
+      artifactSource:
+        description: "Source of deployment artifacts (build or release)"
+        required: false
+        default: 'build'
+        type: string
     secrets:
-      DEPLOY_API_KEY:
-        required: false
-      ITCH_USERNAME:
-        required: false
-      ITCH_PROJECT:
-        required: false
-      APPCENTER_OWNER_NAME:
-        required: false
-      FIREBASE_TOKEN:
-        required: false
-      AWS_ACCESS_KEY_ID:
-        required: false
-      AWS_SECRET_ACCESS_KEY:
-        required: false
-      S3_BUCKET:
-        required: false
-      GH_PAGES_TOKEN:
-        required: false
-      STEAM_USERNAME:
-        required: false
-      STEAM_PASSWORD:
-        required: false
-      STEAM_APP_ID:
-        required: false
-      STEAM_DEPOT_VDF_PATH:
-        required: false
-      APPSTORE_API_KEY_ID:
-        required: false
-      APPSTORE_API_ISSUER_ID:
-        required: false
-      APPSTORE_API_PRIVATE_KEY:
-        required: false
-      DISCORD_WEBHOOK:
-        required: false
+      DEPLOY_API_KEY: { required: false }
+      ITCH_USERNAME: { required: false }
+      ITCH_PROJECT: { required: false }
+      APPCENTER_OWNER_NAME: { required: false }
+      FIREBASE_TOKEN: { required: false }
+      AWS_ACCESS_KEY_ID: { required: false }
+      AWS_SECRET_ACCESS_KEY: { required: false }
+      S3_BUCKET: { required: false }
+      GH_PAGES_TOKEN: { required: false }
+      STEAM_USERNAME: { required: false }
+      STEAM_PASSWORD: { required: false }
+      STEAM_APP_ID: { required: false }
+      STEAM_DEPOT_VDF_PATH: { required: false }
+      APPSTORE_API_KEY_ID: { required: false }
+      APPSTORE_API_ISSUER_ID: { required: false }
+      APPSTORE_API_PRIVATE_KEY: { required: false }
+      CUSTOM_SERVER_HOST: { required: false }
+      CUSTOM_SERVER_USER: { required: false }
+      CUSTOM_SERVER_KEY: { required: false }
+      DISCORD_WEBHOOK: { required: false }
 
 jobs:
   deploy_ubuntu:
@@ -67,10 +58,37 @@ jobs:
       DEPLOY_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}
 
     steps:
-      - name: 📥 Download Artifacts
+      # ───── Build Artifact Download ─────
+      - name: 📥 Download Artifacts from Build
+        if: inputs.artifactSource == 'build'
         uses: actions/download-artifact@v4
         with:
           path: deployment-artifacts
+
+      # ───── Release Artifact Download ─────
+      - name: 📥 Download Artifacts from GitHub Release
+        if: inputs.artifactSource == 'release'
+        run: |
+          echo "📦 Downloading release artifacts for tag: ${{ inputs.version }}"
+
+          mkdir -p deployment-artifacts
+          ASSETS_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${{ inputs.version }}"
+          DOWNLOAD_URLS=$(curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$ASSETS_URL" \
+            | jq -r '.assets[] | "\(.name) \(.browser_download_url)"')
+
+          if [ -z "$DOWNLOAD_URLS" ]; then
+            echo "❌ No release assets found for tag ${{ inputs.version }}"
+            exit 1
+          fi
+
+          while read -r name url; do
+            echo "⬇️ Downloading $name"
+            curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$url" -o "deployment-artifacts/$name"
+          done <<< "$DOWNLOAD_URLS"
+
+          echo "✅ All release assets downloaded to ./deployment-artifacts"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧠 Show Deployment Info
         run: |
