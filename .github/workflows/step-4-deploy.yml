@@ -336,6 +336,7 @@ jobs:
 
       # ───── TestFlight ─────
       - name: 🍏 Deploy .ipa to TestFlight
+        if: matrix.target == 'testflight'
         run: |
           if [ -z "${{ secrets.APPSTORE_API_KEY_ID }}" ] || [ -z "${{ secrets.APPSTORE_API_ISSUER_ID }}" ] || [ -z "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" ]; then
             echo "⚠️ Missing App Store Connect API credentials. Skipping..."; exit 0;
