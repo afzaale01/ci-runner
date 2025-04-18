@@ -55,6 +55,25 @@ jobs:
       - name: 📁 Checkout repo
         uses: actions/checkout@v4
 
+      - name: ✅ Validate deployTargets input
+        run: |
+          VALID_TARGETS=("gh-pages" "itch.io" "appcenter" "firebase" "s3" "steam" "discord" "custom-server" "testflight")
+          INVALID=()
+
+          for TARGET in $(echo '${{ inputs.deployTargets }}' | jq -r '.[]'); do
+            if [[ ! " ${VALID_TARGETS[*]} " =~ " ${TARGET} " ]]; then
+              INVALID+=("$TARGET")
+            fi
+          done
+
+          if [ "${#INVALID[@]}" -ne 0 ]; then
+            echo "❌ Invalid deployTargets detected: ${INVALID[*]}"
+            echo "✅ Valid targets: ${VALID_TARGETS[*]}"
+            exit 1
+          fi
+
+          echo "✅ All deployTargets are valid: ${{ inputs.deployTargets }}"
+
       - id: set
         run: |
           DEPLOY_TARGETS='${{ inputs.deployTargets }}'
