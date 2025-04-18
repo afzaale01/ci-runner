@@ -14,7 +14,6 @@ on:
         description: "JSON array of deploy targets"
         default: '["gh-pages"]'
         required: true
-
 jobs:
   deploy:
     uses: ./.github/workflows/step-4-deploy.yml
@@ -23,4 +22,5 @@ jobs:
       version: ${{ inputs.version }}
       projectName: ${{ inputs.projectName }}
       deployTargets: ${{ inputs.deployTargets }}
+      artifactSource: release
     secrets: inherit
