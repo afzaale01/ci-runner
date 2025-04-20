@@ -46,7 +46,7 @@ jobs:
           fi
 
           # Read valid targets from the JSON keys
-          VALID_TARGETS=$(jq -r 'keys | join(" ")' "$CONFIG_FILE")
+          VALID_TARGETS=$(jq -r 'keys[]' "$CONFIG_FILE")
           echo "📚 Valid targets from config: $VALID_TARGETS"
 
           # Compare each input against the valid list
