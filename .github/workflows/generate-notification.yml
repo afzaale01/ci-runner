@@ -118,7 +118,7 @@ jobs:
           chmod +x .github/scripts/notify/*.sh
 
           SLACK_MESSAGE=$(bash .github/scripts/notify/format-slack.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
-          DISCORD_MESSAGE=$(bash .github/scripts/notify/format-discord.sh "$MESSAGE")
+          DISCORD_MESSAGE=$(BRANCH="$BRANCH" COMMIT="$COMMIT" bash .github/scripts/notify/format-discord.sh "$MESSAGE")
           TEAMS_MESSAGE=$(bash .github/scripts/notify/format-teams.sh "$MESSAGE")
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"

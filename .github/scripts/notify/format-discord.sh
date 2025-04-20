@@ -1,7 +1,7 @@
 #!/bin/bash
 MESSAGE="$1"
 
-# Pull in trace info from env
+# Safely add trace if BRANCH/COMMIT are set
 TRACE=""
 [ -n "$BRANCH" ] && TRACE+="Branch: \`$BRANCH\`"
 [ -n "$COMMIT" ] && TRACE+="${TRACE:+ | }Commit: \`$(echo "$COMMIT" | cut -c1-7)\`"
