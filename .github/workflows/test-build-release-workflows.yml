@@ -1,4 +1,4 @@
-name: 🧪 Test Notify Workflow
+name: 🧪 Test Build & Release Workflow
 
 on:
   workflow_dispatch:
