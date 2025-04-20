@@ -28,6 +28,7 @@ jobs:
         ]
 
   test-notify:
+    name: Test Notify
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
       releaseResult: "failed"
