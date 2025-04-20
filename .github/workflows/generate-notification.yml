@@ -102,6 +102,34 @@ jobs:
           echo "MESSAGE=$MESSAGE" >> $GITHUB_ENV
           echo "STATUS=$STATUS" >> $GITHUB_ENV
 
+      - name: 📥 Download Deploy Result Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: deployment-results-*
+          path: deploy-results
+          merge-multiple: true
+
+      - name: 📊 Append Per-Target Deploy Results
+        run: |
+          SUMMARY=""
+
+          if ls deploy-results/*.json 1> /dev/null 2>&1; then
+            SUMMARY+="\n\n**Deploy Targets:**\n"
+            SUMMARY+="| Target | Status | Details |\n"
+            SUMMARY+="|--------|--------|---------|\n"
+
+            for file in deploy-results/*.json; do
+              TARGET=$(basename "$file" .json)
+              STATUS=$(jq -r '.status' "$file")
+              NOTE=$(jq -r '.note' "$file")
+              SUMMARY+="| $TARGET | $STATUS | $NOTE |\n"
+            done
+          fi
+
+          echo "MESSAGE<<EOF" >> $GITHUB_ENV
+          echo -e "$MESSAGE$SUMMARY" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: 💬 Format Messages
         id: set-outputs
         run: |
