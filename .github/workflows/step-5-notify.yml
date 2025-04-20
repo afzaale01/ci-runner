@@ -34,6 +34,7 @@ jobs:
       DISCORD_STATUS: "⚠️ Webhook not configured"
       TEAMS_STATUS: "⚠️ Webhook not configured"
     steps:
+      # ───── Slack ─────
       - name: 📢 Send Slack Notification (if configured)
         if: ${{ env.SLACK_WEBHOOK != '' }}
         id: slack
@@ -54,14 +55,26 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
       - name: 🧾 Mark Slack Status
-        if: steps.slack.outcome == 'success'
-        run: echo "SLACK_STATUS=✅" >> $GITHUB_ENV
+        if: always() && steps.slack.outcome != ''
+        run: |
+          if [ "${{ steps.slack.outcome }}" == "success" ]; then
+            echo "SLACK_STATUS=✅" >> $GITHUB_ENV
+          else
+            echo "SLACK_STATUS=❌ Failed to send" >> $GITHUB_ENV
+          fi
 
+      # ───── Discord ─────
       - name: 📢 Send Discord Notification (if configured)
         if: ${{ env.DISCORD_WEBHOOK != '' }}
+        id: discord
         continue-on-error: true
         run: |
-          COLOR=$([[ "${{ needs.generate-notification.outputs.status }}" == "success" ]] && echo 3066993 || ([[ "${{ needs.generate-notification.outputs.status }}" == "failure" ]] && echo 15158332 || echo 9807270))
+          case "${{ needs.generate-notification.outputs.status }}" in
+            success) COLOR=3066993 ;;
+            failure) COLOR=15158332 ;;
+            *) COLOR=9807270 ;;
+          esac
+
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "Content-Type: application/json" \
             -X POST \
             -d '{
@@ -82,8 +95,17 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
+      - name: 🧾 Mark Discord Status
+        if: always() && steps.discord.outcome != ''
+        run: |
+          if [ "${{ steps.discord.outcome }}" != "success" ] && [[ "$DISCORD_STATUS" == "⚠️ Webhook not configured" ]]; then
+            echo "DISCORD_STATUS=❌ Failed to send" >> $GITHUB_ENV
+          fi
+
+      # ───── Microsoft Teams ─────
       - name: 📢 Notify Microsoft Teams (if configured)
         if: ${{ env.MSTEAMS_WEBHOOK != '' }}
+        id: teams
         continue-on-error: true
         run: |
           case "${{ needs.generate-notification.outputs.status }}" in
@@ -111,6 +133,14 @@ jobs:
         env:
           MSTEAMS_WEBHOOK: ${{ secrets.MSTEAMS_WEBHOOK }}
 
+      - name: 🧾 Mark Teams Status
+        if: always() && steps.teams.outcome != ''
+        run: |
+          if [ "${{ steps.teams.outcome }}" != "success" ] && [[ "$TEAMS_STATUS" == "⚠️ Webhook not configured" ]]; then
+            echo "TEAMS_STATUS=❌ Failed to send" >> $GITHUB_ENV
+          fi
+
+      # ───── Summary ─────
       - name: 📄 Notification Summary
         if: always()
         run: |
@@ -119,5 +149,3 @@ jobs:
           echo "- Slack: ${SLACK_STATUS}" >> $GITHUB_STEP_SUMMARY
           echo "- Discord: ${DISCORD_STATUS}" >> $GITHUB_STEP_SUMMARY
           echo "- Teams: ${TEAMS_STATUS}" >> $GITHUB_STEP_SUMMARY
-
-
