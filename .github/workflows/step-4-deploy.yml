@@ -89,7 +89,7 @@ jobs:
           fi
 
           # Output valid targets as a JSON array string
-          echo "validTargets=[${VALID[*]}]" >> $GITHUB_OUTPUT
+          echo "validTargets=$(printf '%s\n' "${VALID[@]}" | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
 
   resolve-deploy-matrix:
     name: 🧠 Resolve Deploy Matrix
