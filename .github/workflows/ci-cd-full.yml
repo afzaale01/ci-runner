@@ -130,7 +130,7 @@ jobs:
       buildType: release
       version: ${{ needs.build.outputs.version }}
       projectName: ${{ vars.PROJECT_NAME }}
-      deployTargets: ${{ vars.DEPLOY_TARGETS }} # optional env like 'itch.io', 'aws', etc.
+      deployTargets: ${{ vars.DEPLOY_TARGETS }}
       artifactSource: build      
     secrets: inherit
 
