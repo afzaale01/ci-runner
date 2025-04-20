@@ -47,7 +47,7 @@ jobs:
       - name: 📝 Check if Release Already Exists
         id: check_release
         run: |
-          RESULT=$(./scripts/release/check-release-exists.sh "${{ inputs.version }}" "${{ github.repository }}" "${{ github.token }}")
+          RESULT=$(.github/scripts/release/check-release-exists.sh "${{ inputs.version }}" "${{ github.repository }}" "${{ github.token }}")
           echo "$RESULT" >> $GITHUB_OUTPUT
           echo "$RESULT" > .release-meta
         env:
@@ -81,7 +81,7 @@ jobs:
       - name: 🧮 Upload Per-Platform Artifacts
         run: |
           RELEASE_ID=$(grep release_id .release-meta | cut -d= -f2)
-          ./scripts/release/upload-artifacts.sh \
+          .github/scripts/release/upload-artifacts.sh \
             "${{ inputs.projectName }}" \
             "${{ inputs.version }}" \
             "${RELEASE_ID}" \
