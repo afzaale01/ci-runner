@@ -144,17 +144,17 @@ jobs:
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
 
           echo "message<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$MARKDOWN_MESSAGE"
-          echo "EOF"
+          echo "$MARKDOWN_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
           echo "slackMessage<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$SLACK_MESSAGE"
-          echo "EOF"
+          echo "$SLACK_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
           echo "discordMessage<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$MARKDOWN_MESSAGE"
-          echo "EOF"
+          echo "$MARKDOWN_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
           echo "teamsMessage<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$MARKDOWN_MESSAGE"
-          echo "EOF"
+          echo "$MARKDOWN_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
