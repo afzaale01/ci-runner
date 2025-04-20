@@ -135,10 +135,10 @@ jobs:
       - name: 💬 Format Final Notification Messages
         id: set-outputs
         run: |
-          chmod +x .github/scripts/*.sh
+          chmod +x .github/scripts/notify/*.sh
 
-          MARKDOWN_MESSAGE=$(bash .github/scripts/format-discord.sh "$MESSAGE")
-          SLACK_MESSAGE=$(bash .github/scripts/format-slack.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
+          MARKDOWN_MESSAGE=$(bash .github/scripts/notify/format-discord.sh "$MESSAGE")
+          SLACK_MESSAGE=$(bash .github/scripts/notify/format-slack.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
