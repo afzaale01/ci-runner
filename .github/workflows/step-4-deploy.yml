@@ -473,8 +473,6 @@ jobs:
           echo "| Target | Status | Details |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|--------|---------|" >> $GITHUB_STEP_SUMMARY
 
-          NOTES=""
-
           for file in deployment-results/*.json; do
             TARGET=$(basename "$file" .json)
             STATUS=$(jq -r '.status' "$file")
@@ -482,9 +480,3 @@ jobs:
 
             echo "| $TARGET | $STATUS | $NOTE |" >> $GITHUB_STEP_SUMMARY
           done
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📝 Details" >> $GITHUB_STEP_SUMMARY
-          echo -e "$NOTES" >> $GITHUB_STEP_SUMMARY
