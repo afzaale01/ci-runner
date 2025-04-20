@@ -57,7 +57,21 @@ jobs:
         id: filter
         run: |
           VALID_TARGETS=("gh-pages" "itch.io" "appcenter" "firebase" "s3" "steam" "discord" "custom-server" "testflight")
-          INPUTS=$(echo '${{ inputs.deployTargets }}' | jq -r '.[]')
+          RAW_INPUT='${{ inputs.deployTargets }}'
+
+          echo "🔍 Raw deployTargets input: $RAW_INPUT"
+
+          # Validate and parse JSON safely
+          if echo "$RAW_INPUT" | jq empty 2>/dev/null; then
+            :
+          else
+            echo "❌ Invalid JSON in deployTargets input!"
+            echo "validTargets=[]" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Parse the JSON array
+          INPUTS=$(echo "$RAW_INPUT" | jq -r '.[]')
           VALID=()
           INVALID=()
 
@@ -74,7 +88,7 @@ jobs:
             echo "⚠️ Invalid targets: ${INVALID[*]}"
           fi
 
-          # Return JSON array of only valid targets
+          # Output valid targets as a JSON array string
           echo "validTargets=[${VALID[*]}]" >> $GITHUB_OUTPUT
 
   resolve-deploy-matrix:
@@ -90,7 +104,7 @@ jobs:
 
       - id: set
         run: |
-          DEPLOY_TARGETS='${{ needs.validate-deploy-targets.outputs.valid }}'
+          DEPLOY_TARGETS='${{ needs.validate-deploy-targets.outputs.valid }}'          
           CONFIG_FILE=".github/config/deploy-targets.json"
           FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
 
