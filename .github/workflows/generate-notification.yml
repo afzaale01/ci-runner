@@ -112,39 +112,20 @@ jobs:
           path: deploy-results
           merge-multiple: true
 
-      - name: 📊 Append Per-Target Deploy Results
-        run: |
-          SUMMARY=""
-
-          if ls deploy-results/*.json 1> /dev/null 2>&1; then
-            SUMMARY+="| Target | Status | Details |\n"
-            SUMMARY+="|--------|--------|---------|\n"
-
-            for file in deploy-results/*.json; do
-              TARGET=$(basename "$file" .json)
-              STATUS=$(jq -r '.status' "$file")
-              NOTE=$(jq -r '.note' "$file")
-              SUMMARY+="| $TARGET | $STATUS | $NOTE |\n"
-            done
-          fi
-
-          echo "message<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$MESSAGE$SUMMARY" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
       - name: 💬 Format Final Notification Messages
         id: set-outputs
         run: |
           chmod +x .github/scripts/notify/*.sh
 
-          MARKDOWN_MESSAGE=$(bash .github/scripts/notify/format-discord.sh "$MESSAGE")
           SLACK_MESSAGE=$(bash .github/scripts/notify/format-slack.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
+          DISCORD_MESSAGE=$(bash .github/scripts/notify/format-discord.sh "$MESSAGE")
+          TEAMS_MESSAGE=$(bash .github/scripts/notify/format-teams.sh "$MESSAGE")
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
 
           echo "message<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$MARKDOWN_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "$MESSAGE" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
 
           echo "slackMessage<<EOF" >> "$GITHUB_OUTPUT"
@@ -152,9 +133,9 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
 
           echo "discordMessage<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$MARKDOWN_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "$DISCORD_MESSAGE" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
 
           echo "teamsMessage<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$MARKDOWN_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "$TEAMS_MESSAGE" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
