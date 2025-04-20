@@ -470,8 +470,8 @@ jobs:
           echo "**Deployed At:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          echo "| Target | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Target | Status | Details |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|---------|" >> $GITHUB_STEP_SUMMARY
 
           NOTES=""
 
@@ -480,8 +480,7 @@ jobs:
             STATUS=$(jq -r '.status' "$file")
             NOTE=$(jq -r '.note' "$file")
 
-            echo "| $TARGET | $STATUS |" >> $GITHUB_STEP_SUMMARY
-            NOTES+="- $STATUS **$TARGET**: $NOTE\\n"
+            echo "| $TARGET | $STATUS | $NOTE |" >> $GITHUB_STEP_SUMMARY
           done
 
           echo "" >> $GITHUB_STEP_SUMMARY
