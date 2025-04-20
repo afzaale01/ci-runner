@@ -55,13 +55,15 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
       - name: 🧾 Mark Slack Status
-        if: always() && steps.slack.outcome != ''
+        if: ${{ env.SLACK_WEBHOOK != '' }}
         run: |
           if [ "${{ steps.slack.outcome }}" == "success" ]; then
             echo "SLACK_STATUS=✅" >> $GITHUB_ENV
           else
             echo "SLACK_STATUS=❌ Failed to send" >> $GITHUB_ENV
           fi
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
       # ───── Discord ─────
       - name: 📢 Send Discord Notification (if configured)
@@ -96,11 +98,13 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
       - name: 🧾 Mark Discord Status
-        if: always() && steps.discord.outcome != ''
+        if: ${{ env.DISCORD_WEBHOOK != '' }}
         run: |
           if [ "${{ steps.discord.outcome }}" != "success" ] && [[ "$DISCORD_STATUS" == "⚠️ Webhook not configured" ]]; then
             echo "DISCORD_STATUS=❌ Failed to send" >> $GITHUB_ENV
           fi
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
       # ───── Microsoft Teams ─────
       - name: 📢 Notify Microsoft Teams (if configured)
@@ -134,11 +138,13 @@ jobs:
           MSTEAMS_WEBHOOK: ${{ secrets.MSTEAMS_WEBHOOK }}
 
       - name: 🧾 Mark Teams Status
-        if: always() && steps.teams.outcome != ''
+        if: ${{ env.MSTEAMS_WEBHOOK != '' }}
         run: |
           if [ "${{ steps.teams.outcome }}" != "success" ] && [[ "$TEAMS_STATUS" == "⚠️ Webhook not configured" ]]; then
             echo "TEAMS_STATUS=❌ Failed to send" >> $GITHUB_ENV
           fi
+        env:
+          MSTEAMS_WEBHOOK: ${{ secrets.MSTEAMS_WEBHOOK }}
 
       # ───── Summary ─────
       - name: 📄 Notification Summary
