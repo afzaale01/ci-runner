@@ -35,7 +35,7 @@ jobs:
       TEAMS_STATUS: "⚠️ Webhook not configured"
     steps:
       # ───── Slack ─────
-      - name: 📢 Send Slack Notification (custom)
+      - name: 📢 Send Slack Notification (if configured)
         if: ${{ env.SLACK_WEBHOOK != '' }}
         continue-on-error: true
         run: |
@@ -79,19 +79,28 @@ jobs:
             *) COLOR=9807270 ;;
           esac
 
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "Content-Type: application/json" \
-            -X POST \
-            -d '{
-                  "username": "GitHub CI",
-                  "embeds": [ {
-                    "title": "'"${{ needs.generate-notification.outputs.title }}"'",
-                    "description": "'"${{ needs.generate-notification.outputs.discordMessage }}"'",
-                    "color": '"$COLOR"'
-                  } ]
-                }' \
-            $DISCORD_WEBHOOK)
+          # Safely construct payload using jq to avoid shell escaping issues
+          PAYLOAD=$(jq -n \
+            --arg username "GitHub CI" \
+            --arg title "${{ needs.generate-notification.outputs.title }}" \
+            --arg description "${{ needs.generate-notification.outputs.discordMessage }}" \
+            --argjson color "$COLOR" \
+            '{
+              username: $username,
+              embeds: [{
+                title: $title,
+                description: $description,
+                color: $color
+              }]
+            }')
 
-          # After sending the request
+          # Send the notification
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK")
+
+          # Set status based on response
           if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
             echo "DISCORD_STATUS=✅ Notification sent" >> $GITHUB_ENV
           else
