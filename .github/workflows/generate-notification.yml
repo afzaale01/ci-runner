@@ -156,12 +156,14 @@ jobs:
             SLACK_SUMMARY+="Target      | Status | Details\n"
             SLACK_SUMMARY+="------------|--------|----------------------\n"
 
-            for file in deploy-results/*.json; do
+            while IFS= read -r file; do
               TARGET=$(basename "$file" .json)
               STATUS=$(jq -r '.status' "$file")
               NOTE=$(jq -r '.note' "$file")
-              SLACK_SUMMARY+=$(printf "%-11s | %-6s | %s\n" "$TARGET" "$STATUS" "$NOTE")
-            done
+
+              printf -v ROW "%-11s | %-6s | %s\n" "$TARGET" "$STATUS" "$NOTE"
+              SLACK_SUMMARY+="$ROW"
+            done < <(find deploy-results -type f -name "*.json" | sort)
 
             SLACK_SUMMARY+="\`\`\`"
           fi
