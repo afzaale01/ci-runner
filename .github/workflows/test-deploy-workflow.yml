@@ -40,7 +40,7 @@ jobs:
 
   test-notify:
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
-    if: ${{ inputs.testNotify == 'true' }}
+    if: always() && ${{ inputs.testNotify == 'true' }}
     needs: [ test-deploy ]
     with:
       releaseResult: "success"
