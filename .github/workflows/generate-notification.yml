@@ -1,4 +1,4 @@
-name: ♻️ Generate Notification
+name: 🔔 Generate Notification
 
 on:
   workflow_call:

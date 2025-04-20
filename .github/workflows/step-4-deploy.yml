@@ -394,7 +394,7 @@ jobs:
             exit 0
           fi
 
-          echo "### 🚀 Deployment Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### 🌍 Deployment Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "**Project:** \`${{ inputs.projectName }}\`" >> $GITHUB_STEP_SUMMARY

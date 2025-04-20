@@ -114,7 +114,7 @@ jobs:
       - name: 📄 Notification Summary
         if: always()
         run: |
-          echo "### 🔔 Notification Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### 📣 Notification Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- Slack: ${SLACK_STATUS}" >> $GITHUB_STEP_SUMMARY
           echo "- Discord: ${DISCORD_STATUS}" >> $GITHUB_STEP_SUMMARY
