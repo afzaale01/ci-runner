@@ -2,8 +2,46 @@ name: 🧪 Test Build & Release Workflow
 
 on:
   workflow_dispatch:
+    inputs:
+      buildType:
+        description: "Type of build: 'preview' or 'release'"
+        required: true
+        default: "preview"
+      version:
+        description: "Version string (e.g. v0.1.2 or v0.1.2-preview)"
+        required: true
+        default: "v0.1.2-test"
+      projectName:
+        description: "Project name for artifacts"
+        required: true
+        default: "Unity_CI_Templates"
+      targetPlatforms:
+        description: "JSON array of platforms to build (quoted)"
+        required: true
+        default: '["WebGL", "StandaloneWindows64"]'
 
 jobs:
+  build:
+    name: 🧩 Trigger Unity Build (Step 2)
+    uses: ./.github/workflows/step-2-build.yml
+    with:
+      buildType: ${{ inputs.buildType }}
+      projectName: ${{ inputs.projectName }}
+      targetPlatforms: ${{ inputs.targetPlatforms }}
+    secrets: inherit
+
+  release:
+    name: 📦 Trigger GitHub Release (Step 3)
+    if: ${{ inputs.buildType == 'release' }}
+    needs: build
+    uses: ./.github/workflows/step-3-release.yml
+    with:
+      buildType: ${{ inputs.buildType }}
+      version: ${{ needs.build.outputs.version }}
+      projectName: ${{ inputs.projectName }}
+      targetPlatforms: ${{ inputs.targetPlatforms }}
+    secrets: inherit
+
   validate-vars:
     name: Validate GitHub Variables
     uses: avalin/unity-ci-templates/.github/workflows/validate-github-vars.yml@main
@@ -26,13 +64,3 @@ jobs:
           "UNITY_VERSION",
           "USE_GIT_LFS"
         ]
-
-  test-notify:
-    name: Test Notify
-    uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
-    with:
-      releaseResult: "failed"
-      releaseErrorMessage: "Test error: artifacts missing or malformed"
-      deployResult: "success"
-      version: "v1.2.3"
-    secrets: inherit
