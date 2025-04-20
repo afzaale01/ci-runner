@@ -58,7 +58,7 @@ jobs:
         if: ${{ env.SLACK_WEBHOOK != '' }}
         run: |
           if [ "${{ steps.slack.outcome }}" == "success" ]; then
-            echo "SLACK_STATUS=✅" >> $GITHUB_ENV
+            echo "SLACK_STATUS=✅ Notification sent" >> $GITHUB_ENV
           else
             echo "SLACK_STATUS=❌ Failed to send" >> $GITHUB_ENV
           fi
@@ -89,10 +89,11 @@ jobs:
                 }' \
             $DISCORD_WEBHOOK)
 
+          # After sending the request
           if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
-            echo "DISCORD_STATUS=✅" >> $GITHUB_ENV
+            echo "DISCORD_STATUS=✅ Notification sent" >> $GITHUB_ENV
           else
-            echo "DISCORD_STATUS=❌ (HTTP $RESPONSE)" >> $GITHUB_ENV
+            echo "DISCORD_STATUS=❌ Failed to send (HTTP $RESPONSE)" >> $GITHUB_ENV
           fi
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -130,9 +131,9 @@ jobs:
             $MSTEAMS_WEBHOOK)
 
           if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
-            echo "TEAMS_STATUS=✅" >> $GITHUB_ENV
+            echo "TEAMS_STATUS=✅ Notification sent" >> $GITHUB_ENV
           else
-            echo "TEAMS_STATUS=❌ (HTTP $RESPONSE)" >> $GITHUB_ENV
+            echo "TEAMS_STATUS=❌ Failed to send (HTTP $RESPONSE)" >> $GITHUB_ENV
           fi
         env:
           MSTEAMS_WEBHOOK: ${{ secrets.MSTEAMS_WEBHOOK }}
