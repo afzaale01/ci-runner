@@ -1,0 +1,54 @@
+# .github/workflows/validate-deploy-targets.yaml
+name: ✅ Validate Deploy Targets
+
+on:
+  workflow_call:
+    inputs:
+      deployTargets:
+        type: string
+        required: true
+    outputs:
+      validTargets:
+        value: ${{ jobs.validate.outputs.valid }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.filter.outputs.validTargets }}
+    steps:
+      - name: ⚙️ Filter Valid Targets
+        id: filter
+        run: |
+          VALID_TARGETS=("gh-pages" "itch.io" "appcenter" "firebase" "s3" "steam" "discord" "custom-server" "testflight")
+          RAW_INPUT='${{ inputs.deployTargets }}'
+
+          echo "🔍 Raw deployTargets input: $RAW_INPUT"
+
+          if ! echo "$RAW_INPUT" | jq empty 2>/dev/null; then
+            echo "❌ Invalid JSON in deployTargets input!"
+            echo "validTargets=[]" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          INPUTS=$(echo "$RAW_INPUT" | jq -r '.[]')
+          VALID=()
+          INVALID=()
+
+          for TARGET in $INPUTS; do
+            if [[ " ${VALID_TARGETS[*]} " =~ " ${TARGET} " ]]; then
+              VALID+=("$TARGET")
+            else
+              INVALID+=("$TARGET")
+            fi
+          done
+
+          echo "✅ Valid targets: ${VALID[*]}"
+          if [ "${#INVALID[@]}" -gt 0 ]; then
+            echo "⚠️ Invalid targets: ${INVALID[*]}"
+          fi
+
+          json=$(printf '%s\n' "${VALID[@]}" | jq -R . | jq -s .)
+          echo "validTargets<<EOF" >> $GITHUB_OUTPUT
+          echo "$json" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT

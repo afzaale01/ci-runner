@@ -1,0 +1,46 @@
+# .github/workflows/resolve-deploy-matrix.yaml
+name: 🧠 Resolve Deploy Matrix
+
+on:
+  workflow_call:
+    inputs:
+      validTargets:
+        type: string
+        required: true
+    outputs:
+      matrix:
+        value: ${{ jobs.resolve.outputs.matrix }}
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - name: 📁 Checkout repo
+        uses: actions/checkout@v4
+
+      - id: set
+        run: |
+          DEPLOY_TARGETS='${{ inputs.validTargets }}'
+          CONFIG_FILE=".github/config/deploy-targets.json"
+          FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
+
+          echo "🔍 Checking for local config file..."
+          if [ -f "$CONFIG_FILE" ]; then
+            echo "✅ Found local config file: $CONFIG_FILE"
+          else
+            echo "⚠️ Not found. Downloading from: $FALLBACK_URL"
+            mkdir -p "$(dirname "$CONFIG_FILE")"
+            curl -sSL "$FALLBACK_URL" -o "$CONFIG_FILE"
+          fi
+
+          echo "🔧 Resolving deploy matrix..."
+          MATRIX='['
+          for TARGET in $(echo "$DEPLOY_TARGETS" | jq -r '.[]'); do
+            OS=$(jq -r --arg t "$TARGET" '.[$t] // "ubuntu-latest"' "$CONFIG_FILE")
+            MATRIX+='{"target":"'"$TARGET"'","os":"'"$OS"'"},'
+          done
+          MATRIX="${MATRIX%,}]"
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "✅ Resolved matrix: $MATRIX"
