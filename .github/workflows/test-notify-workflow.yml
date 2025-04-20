@@ -30,7 +30,7 @@ jobs:
   test-notify:
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
-      releaseResult: "success"
+      releaseResult: "failed"
       releaseErrorMessage: "Test error: artifacts missing or malformed"
       deployResult: "success"
       version: "v1.2.3"

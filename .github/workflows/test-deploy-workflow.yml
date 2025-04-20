@@ -20,8 +20,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  deploy:
-    uses: ./.github/workflows/step-4-deploy.yml
+  test-deploy:
+    uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
       version: ${{ inputs.version }}
