@@ -62,22 +62,20 @@ jobs:
           echo "🔍 Raw deployTargets input: $RAW_INPUT"
 
           # Validate and parse JSON safely
-          if echo "$RAW_INPUT" | jq empty 2>/dev/null; then
-            :
-          else
+          if ! echo "$RAW_INPUT" | jq empty 2>/dev/null; then
             echo "❌ Invalid JSON in deployTargets input!"
             echo "validTargets=[]" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # Parse the JSON array
+          # Parse and validate
           INPUTS=$(echo "$RAW_INPUT" | jq -r '.[]')
           VALID=()
           INVALID=()
 
           for TARGET in $INPUTS; do
             if [[ " ${VALID_TARGETS[*]} " =~ " ${TARGET} " ]]; then
-              VALID+=("\"$TARGET\"")
+              VALID+=("$TARGET")
             else
               INVALID+=("$TARGET")
             fi
@@ -88,7 +86,7 @@ jobs:
             echo "⚠️ Invalid targets: ${INVALID[*]}"
           fi
 
-          # Output valid targets as a JSON array string
+          # Output valid targets as JSON array using jq
           json=$(printf '%s\n' "${VALID[@]}" | jq -R . | jq -s .)
           echo "validTargets<<EOF" >> $GITHUB_OUTPUT
           echo "$json" >> $GITHUB_OUTPUT
@@ -98,7 +96,7 @@ jobs:
     name: 🧠 Resolve Deploy Matrix
     runs-on: ubuntu-latest
     needs: validate-deploy-targets
-    if: ${{ needs.validate-deploy-targets.outputs.valid != '[]' }}
+    if: ${{ needs.validate-deploy-targets.outputs.valid && needs.validate-deploy-targets.outputs.valid != '[]' }}
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
