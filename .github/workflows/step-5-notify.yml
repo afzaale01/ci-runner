@@ -68,7 +68,6 @@ jobs:
       # ───── Discord ─────
       - name: 📢 Send Discord Notification (if configured)
         if: ${{ env.DISCORD_WEBHOOK != '' }}
-        id: discord
         continue-on-error: true
         run: |
           case "${{ needs.generate-notification.outputs.status }}" in
@@ -101,7 +100,6 @@ jobs:
       # ───── Microsoft Teams ─────
       - name: 📢 Notify Microsoft Teams (if configured)
         if: ${{ env.MSTEAMS_WEBHOOK != '' }}
-        id: teams
         continue-on-error: true
         run: |
           case "${{ needs.generate-notification.outputs.status }}" in
