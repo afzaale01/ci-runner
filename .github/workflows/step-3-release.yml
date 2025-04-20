@@ -42,7 +42,7 @@ jobs:
           path: .
 
       - name: 🧰 Setup Helper Scripts
-        run: chmod +x scripts/release/*.sh
+        run: chmod +x .github/scripts/release/*.sh
 
       - name: 📝 Check if Release Already Exists
         id: check_release
