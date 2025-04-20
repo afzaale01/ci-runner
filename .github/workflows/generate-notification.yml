@@ -114,7 +114,6 @@ jobs:
           SUMMARY=""
 
           if ls deploy-results/*.json 1> /dev/null 2>&1; then
-            SUMMARY+="\n\n**Deploy Targets:**\n"
             SUMMARY+="| Target | Status | Details |\n"
             SUMMARY+="|--------|--------|---------|\n"
 
