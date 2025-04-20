@@ -45,8 +45,11 @@ jobs:
             *) COLOR="#cccccc" ;;
           esac
       
+          # Interpret literal newlines correctly
+          TEXT=$'*${{ needs.generate-notification.outputs.title }}* - `${{ github.repository }}`\n${{ needs.generate-notification.outputs.slackMessage }}'
+      
           PAYLOAD=$(jq -n \
-            --arg text "*${{ needs.generate-notification.outputs.title }}* - \`${{ github.repository }}\`\n${{ needs.generate-notification.outputs.slackMessage }}" \
+            --arg text "$TEXT" \
             --arg color "$COLOR" \
             '{
               text: $text,
@@ -63,7 +66,7 @@ jobs:
             echo "SLACK_STATUS=❌ Failed to send (HTTP $RESPONSE)" >> $GITHUB_ENV
           fi
         env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}    
     
       # ───── Discord ─────
       - name: 📢 Send Discord Notification (if configured)
