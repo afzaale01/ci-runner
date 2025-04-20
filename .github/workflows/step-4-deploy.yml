@@ -75,7 +75,7 @@ jobs:
           fi
 
           # Return JSON array of only valid targets
-          echo "validTargets=[${VALID[*]}]" >> $GITHUB_OUTPUT
+          echo "validTargets=$(printf '%s\n' "${VALID[@]}" | jq -R . | jq -cs '.')" >> $GITHUB_OUTPUT
 
   resolve-deploy-matrix:
     name: 🧠 Resolve Deploy Matrix
@@ -91,6 +91,13 @@ jobs:
       - id: set
         run: |
           DEPLOY_TARGETS='${{ needs.validate-deploy-targets.outputs.valid }}'
+
+          # Validate that DEPLOY_TARGETS is a proper JSON array
+          if ! echo "$DEPLOY_TARGETS" | jq empty > /dev/null 2>&1; then
+            echo "❌ Invalid JSON in deploy targets: $DEPLOY_TARGETS"
+            exit 1
+          fi
+          
           CONFIG_FILE=".github/config/deploy-targets.json"
           FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
 
