@@ -1,9 +1,16 @@
 #!/bin/bash
 MESSAGE="$1"
 
+# Pull in trace info from env
+TRACE=""
+[ -n "$BRANCH" ] && TRACE+="Branch: \`$BRANCH\`"
+[ -n "$COMMIT" ] && TRACE+="${TRACE:+ | }Commit: \`$(echo "$COMMIT" | cut -c1-7)\`"
+[ -n "$TRACE" ] && MESSAGE="$MESSAGE\n$TRACE"
+
+# Add per-target deploy summary as a Discord-friendly code block
 SUMMARY=""
 if ls deploy-results/*.json 1> /dev/null 2>&1; then
-  SUMMARY+="\`\`\`\n"
+  SUMMARY+="\n\`\`\`\n"
   SUMMARY+="Target       Status   Details\n"
   SUMMARY+="-----------  -------  ----------------------\n"
   for file in deploy-results/*.json; do
@@ -12,7 +19,7 @@ if ls deploy-results/*.json 1> /dev/null 2>&1; then
     NOTE=$(jq -r '.note' "$file")
     SUMMARY+=$(printf "%-12s %-8s %s\n" "$TARGET" "$STATUS" "$NOTE")
   done
-  SUMMARY+="\n\`\`\`"
+  SUMMARY+="\`\`\`"
 fi
 
-echo -e "$MESSAGE\n\n$SUMMARY"
+echo -e "$MESSAGE$SUMMARY"
