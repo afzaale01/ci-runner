@@ -401,15 +401,76 @@ jobs:
           FASTLANE_DISABLE_COLORS: 1
 
       # ───── Summary ─────
-      - name: 🧾 Add to Summary
+      - name: 📌 Store Deployment Result
+        if: always()
         run: |
-          echo "### 📦 Deployment: ${{ matrix.target }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Project: \`${{ inputs.projectName }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Build type: \`${{ inputs.buildType }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Version: \`${{ inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          mkdir -p deployment-results
+          RESULT_FILE="deployment-results/${{ matrix.target }}.json"
 
-          if [ -d "$DEPLOY_DIR" ]; then
-            echo "- Status: ✅ Success" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- Status: ❌ Failed (No deployment artifacts found)" >> $GITHUB_STEP_SUMMARY
+          STATUS="✅"
+          NOTE="Deployed successfully"
+
+          if [ ! -d "$DEPLOY_DIR" ]; then
+            STATUS="❌"
+            NOTE="No deployment artifacts found"
           fi
+
+          echo "{\"status\": \"$STATUS\", \"note\": \"$NOTE\"}" > "$RESULT_FILE"
+
+      - name: 📤 Upload Deployment Result Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-results-${{ matrix.target }}
+          path: deployment-results
+          retention-days: 1
+
+  summarize_deploy:
+    name: 📄 Summarize Deployment Results
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    steps:
+      - name: 📥 Download All Deployment Result Files
+        uses: actions/download-artifact@v4
+        with:
+          pattern: deployment-results-*
+          path: deployment-results
+          merge-multiple: true
+
+      - name: 🧾 Write Deployment Summary
+        run: |
+          if ! ls deployment-results/*.json 1> /dev/null 2>&1; then
+            echo "⚠️ No deployment result files found."
+            echo "No deployment result files were available to summarize." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          echo "### 🚀 Deployment Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "**Project:** \`${{ inputs.projectName }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Type:** \`${{ inputs.buildType }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed At:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "| Target | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          NOTES=""
+
+          for file in deployment-results/*.json; do
+            TARGET=$(basename "$file" .json)
+            STATUS=$(jq -r '.status' "$file")
+            NOTE=$(jq -r '.note' "$file")
+
+            echo "| $TARGET | $STATUS |" >> $GITHUB_STEP_SUMMARY
+            NOTES+="- $STATUS **$TARGET**: $NOTE\\n"
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Details" >> $GITHUB_STEP_SUMMARY
+          echo -e "$NOTES" >> $GITHUB_STEP_SUMMARY
