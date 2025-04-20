@@ -13,11 +13,12 @@ on:
 
 jobs:
   validate:
+    name: ✅ Validate Deploy Targets
     runs-on: ubuntu-latest
     outputs:
       valid: ${{ steps.filter.outputs.validTargets }}
     steps:
-      - name: ⚙️ Filter Valid Targets
+      - name: Filter Valid Targets
         id: filter
         run: |
           VALID_TARGETS=("gh-pages" "itch.io" "appcenter" "firebase" "s3" "steam" "discord" "custom-server" "testflight")
