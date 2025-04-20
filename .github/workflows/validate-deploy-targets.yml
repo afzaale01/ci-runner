@@ -1,4 +1,3 @@
-# .github/workflows/validate-deploy-targets.yaml
 name: ✅ Validate Deploy Targets
 
 on:
@@ -18,26 +17,45 @@ jobs:
     outputs:
       valid: ${{ steps.filter.outputs.validTargets }}
     steps:
-      - name: Filter Valid Targets
+      - name: 📁 Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Filter Valid Targets
         id: filter
         run: |
-          VALID_TARGETS=("gh-pages" "itch.io" "appcenter" "firebase" "s3" "steam" "discord" "custom-server" "testflight")
           RAW_INPUT='${{ inputs.deployTargets }}'
+          CONFIG_FILE=".github/config/deploy-targets.json"
+          FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
 
           echo "🔍 Raw deployTargets input: $RAW_INPUT"
 
+          echo "🔍 Checking for local config file..."
+          if [ -f "$CONFIG_FILE" ]; then
+            echo "✅ Found local config file: $CONFIG_FILE"
+          else
+            echo "⚠️ Not found. Downloading from: $FALLBACK_URL"
+            mkdir -p "$(dirname "$CONFIG_FILE")"
+            curl -sSL "$FALLBACK_URL" -o "$CONFIG_FILE"
+          fi
+
+          # Validate JSON input first
           if ! echo "$RAW_INPUT" | jq empty 2>/dev/null; then
             echo "❌ Invalid JSON in deployTargets input!"
             echo "validTargets=[]" >> $GITHUB_OUTPUT
             exit 0
           fi
 
+          # Read valid targets from the JSON keys
+          VALID_TARGETS=$(jq -r 'keys[]' "$CONFIG_FILE")
+          echo "📚 Valid targets from config: $VALID_TARGETS"
+
+          # Compare each input against the valid list
           INPUTS=$(echo "$RAW_INPUT" | jq -r '.[]')
           VALID=()
           INVALID=()
 
           for TARGET in $INPUTS; do
-            if [[ " ${VALID_TARGETS[*]} " =~ " ${TARGET} " ]]; then
+            if echo "$VALID_TARGETS" | grep -qx "$TARGET"; then
               VALID+=("$TARGET")
             else
               INVALID+=("$TARGET")
@@ -49,6 +67,7 @@ jobs:
             echo "⚠️ Invalid targets: ${INVALID[*]}"
           fi
 
+          # Output valid targets as JSON
           json=$(printf '%s\n' "${VALID[@]}" | jq -R . | jq -s .)
           echo "validTargets<<EOF" >> $GITHUB_OUTPUT
           echo "$json" >> $GITHUB_OUTPUT
