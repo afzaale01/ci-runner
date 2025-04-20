@@ -133,37 +133,62 @@ jobs:
       - name: 💬 Format Final Notification Messages
         id: set-outputs
         run: |
-          SUMMARY=""
-
+          # Markdown-style table for Discord/Teams
+          MARKDOWN_SUMMARY=""
           if ls deploy-results/*.json 1> /dev/null 2>&1; then
-            SUMMARY+="\n\n**Deploy Targets:**\n"
-            SUMMARY+="| Target | Status | Details |\n"
-            SUMMARY+="|--------|--------|---------|\n"
+            MARKDOWN_SUMMARY+="\n\n**Deploy Targets:**\n"
+            MARKDOWN_SUMMARY+="| Target | Status | Details |\n"
+            MARKDOWN_SUMMARY+="|--------|--------|---------|\n"
 
             for file in deploy-results/*.json; do
               TARGET=$(basename "$file" .json)
               STATUS=$(jq -r '.status' "$file")
               NOTE=$(jq -r '.note' "$file")
-              SUMMARY+="| $TARGET | $STATUS | $NOTE |\n"
+              MARKDOWN_SUMMARY+="| $TARGET | $STATUS | $NOTE |\n"
             done
           fi
 
-          FINAL_MESSAGE="$MESSAGE$SUMMARY"
+          # Slack-style table using monospaced code block
+          SLACK_SUMMARY=""
+          if ls deploy-results/*.json 1> /dev/null 2>&1; then
+            SLACK_SUMMARY+="\n\`\`\`\n"
+            SLACK_SUMMARY+="Deploy Targets:\n"
+            SLACK_SUMMARY+="Target      | Status | Details\n"
+            SLACK_SUMMARY+="------------|--------|----------------------\n"
 
-          SLACK_MSG=$(echo "$FINAL_MESSAGE" | sed "s#\\[View Pipeline\\]($RUN_URL)#<${RUN_URL}|View Pipeline>#g")
-          SLACK_MSG=$(echo "$SLACK_MSG" | sed "s#\\[View Release\\]($RELEASE_URL)#<${RELEASE_URL}|View Release>#g")
+            for file in deploy-results/*.json; do
+              TARGET=$(basename "$file" .json)
+              STATUS=$(jq -r '.status' "$file")
+              NOTE=$(jq -r '.note' "$file")
+              SLACK_SUMMARY+=$(printf "%-11s | %-6s | %s\n" "$TARGET" "$STATUS" "$NOTE")
+            done
+
+            SLACK_SUMMARY+="\`\`\`"
+          fi
+
+          # Compose final messages
+          FINAL_MESSAGE="$MESSAGE$MARKDOWN_SUMMARY"
+          FINAL_SLACK_MSG="$MESSAGE$SLACK_SUMMARY"
+
+          # Linkify for Slack
+          FINAL_SLACK_MSG=$(echo "$FINAL_SLACK_MSG" | sed "s#\\[View Pipeline\\]($RUN_URL)#<${RUN_URL}|View Pipeline>#g")
+          FINAL_SLACK_MSG=$(echo "$FINAL_SLACK_MSG" | sed "s#\\[View Release\\]($RELEASE_URL)#<${RELEASE_URL}|View Release>#g")
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
           echo "message<<EOF" >> "$GITHUB_OUTPUT"
           echo "$FINAL_MESSAGE" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
-          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
           echo "slackMessage<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$SLACK_MSG" >> "$GITHUB_OUTPUT"
+          echo "$FINAL_SLACK_MSG" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
+
           echo "discordMessage<<EOF" >> "$GITHUB_OUTPUT"
           echo "$FINAL_MESSAGE" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
+
           echo "teamsMessage<<EOF" >> "$GITHUB_OUTPUT"
           echo "$FINAL_MESSAGE" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
