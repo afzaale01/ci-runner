@@ -152,6 +152,8 @@ jobs:
         run: |
           echo "### 📣 Notification Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Slack: ${SLACK_STATUS}" >> $GITHUB_STEP_SUMMARY
-          echo "- Discord: ${DISCORD_STATUS}" >> $GITHUB_STEP_SUMMARY
-          echo "- Teams: ${TEAMS_STATUS}" >> $GITHUB_STEP_SUMMARY
+          echo "| Channel | Status | Details |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Slack   | ${SLACK_STATUS%% *} | ${SLACK_STATUS#* } |" >> $GITHUB_STEP_SUMMARY
+          echo "| Discord | ${DISCORD_STATUS%% *} | ${DISCORD_STATUS#* } |" >> $GITHUB_STEP_SUMMARY
+          echo "| Teams   | ${TEAMS_STATUS%% *} | ${TEAMS_STATUS#* } |" >> $GITHUB_STEP_SUMMARY
