@@ -130,15 +130,40 @@ jobs:
           echo -e "$MESSAGE$SUMMARY" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: 💬 Format Messages
+      - name: 💬 Format Final Notification Messages
         id: set-outputs
         run: |
-          SLACK_MSG=$(echo "$MESSAGE" | sed "s#\\[View Pipeline\\]($RUN_URL)#<${RUN_URL}|View Pipeline>#g")
+          SUMMARY=""
+
+          if ls deploy-results/*.json 1> /dev/null 2>&1; then
+            SUMMARY+="\n\n**Deploy Targets:**\n"
+            SUMMARY+="| Target | Status | Details |\n"
+            SUMMARY+="|--------|--------|---------|\n"
+
+            for file in deploy-results/*.json; do
+              TARGET=$(basename "$file" .json)
+              STATUS=$(jq -r '.status' "$file")
+              NOTE=$(jq -r '.note' "$file")
+              SUMMARY+="| $TARGET | $STATUS | $NOTE |\n"
+            done
+          fi
+
+          FINAL_MESSAGE="$MESSAGE$SUMMARY"
+
+          SLACK_MSG=$(echo "$FINAL_MESSAGE" | sed "s#\\[View Pipeline\\]($RUN_URL)#<${RUN_URL}|View Pipeline>#g")
           SLACK_MSG=$(echo "$SLACK_MSG" | sed "s#\\[View Release\\]($RELEASE_URL)#<${RELEASE_URL}|View Release>#g")
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
-          echo "message=$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "message<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$FINAL_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
-          echo "slackMessage=$SLACK_MSG" >> "$GITHUB_OUTPUT"
-          echo "discordMessage=$MESSAGE" >> "$GITHUB_OUTPUT"
-          echo "teamsMessage=$MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "slackMessage<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$SLACK_MSG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "discordMessage<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$FINAL_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "teamsMessage<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$FINAL_MESSAGE" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
