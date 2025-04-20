@@ -152,7 +152,7 @@ jobs:
           SLACK_SUMMARY=""
           if ls deploy-results/*.json 1> /dev/null 2>&1; then
             SLACK_SUMMARY+="\n\`\`\`\n"
-            SLACK_SUMMARY+="Deploy Targets:\n"
+            SLACK_SUMMARY+="-'-'-'-'-' DEPLOY TARGETS '-'-'-'-'-\n"
             SLACK_SUMMARY+="Target      | Status | Details\n"
             SLACK_SUMMARY+="------------|--------|----------------------\n"
 
