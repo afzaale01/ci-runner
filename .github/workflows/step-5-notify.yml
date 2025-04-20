@@ -30,9 +30,9 @@ jobs:
     needs: generate-notification
     runs-on: ubuntu-latest
     env:
-      SLACK_STATUS: "⚠️ Not configured"
-      DISCORD_STATUS: "⚠️ Not configured"
-      TEAMS_STATUS: "⚠️ Not configured"
+      SLACK_STATUS: "⚠️ Webhook not configured"
+      DISCORD_STATUS: "⚠️ Webhook not configured"
+      TEAMS_STATUS: "⚠️ Webhook not configured"
     steps:
       - name: 📢 Send Slack Notification (if configured)
         if: ${{ env.SLACK_WEBHOOK != '' }}
