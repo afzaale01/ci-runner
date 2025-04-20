@@ -75,23 +75,23 @@ jobs:
           if [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
               TITLE="✅ Release & Deploy Succeeded - $VERSION"
-              MESSAGE="Release \`$VERSION\` completed successfully. [View Release]($RELEASE_URL)"
+              MESSAGE="Release \`$VERSION\` completed successfully.\n[View Release]($RELEASE_URL)"
               STATUS="success"
             elif [[ "$DEPLOY" == "skipped" ]]; then
               TITLE="✅ Release Succeeded (No Deploy) - $VERSION"
-              MESSAGE="Release \`$VERSION\` completed successfully. No deployment targets set. [View Release]($RELEASE_URL)"
+              MESSAGE="Release \`$VERSION\` completed successfully. No deployment targets set.\n[View Release]($RELEASE_URL)"
               STATUS="neutral"
             else
               TITLE="⚠️ Release Succeeded, Deploy Failed - $VERSION"
-              MESSAGE="Release \`$VERSION\` succeeded, but deployment failed. [View Release]($RELEASE_URL)"
+              MESSAGE="Release \`$VERSION\` succeeded, but deployment failed.\n[View Release]($RELEASE_URL)"
               STATUS="failure"
             fi
           else
             TITLE="❌ Release Failed - $VERSION"
             if [[ -n "$ERROR" ]]; then
-              MESSAGE="Release \`$VERSION\` failed: \`$ERROR\`. [View Pipeline]($RUN_URL)"
+              MESSAGE="Release \`$VERSION\` failed: \`$ERROR\`.\n[View Pipeline]($RUN_URL)"
             else
-              MESSAGE="Release \`$VERSION\` failed. [View Pipeline]($RUN_URL) for details."
+              MESSAGE="Release \`$VERSION\` failed.\n[View Pipeline]($RUN_URL) for details."
             fi
             STATUS="failure"
           fi
