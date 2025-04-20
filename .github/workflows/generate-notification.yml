@@ -126,9 +126,9 @@ jobs:
             done
           fi
 
-          echo "MESSAGE<<EOF" >> $GITHUB_ENV
-          echo -e "$MESSAGE$SUMMARY" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          echo "message<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$MESSAGE$SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: 💬 Format Messages
         id: set-outputs
