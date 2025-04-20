@@ -425,7 +425,10 @@ jobs:
           STATUS="✅"
           NOTE="Deployed successfully"
 
-          if [ ! -d "$DEPLOY_DIR" ]; then
+          if [ "${{ job.status }}" != "success" ]; then
+            STATUS="❌"
+            NOTE="Deployment failed or incomplete"
+          elif [ ! -d "$DEPLOY_DIR" ]; then
             STATUS="❌"
             NOTE="No deployment artifacts found"
           fi
