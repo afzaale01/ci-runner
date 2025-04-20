@@ -14,6 +14,14 @@ on:
         description: "JSON array of deploy targets"
         default: '["gh-pages"]'
         required: true
+      testNotify:
+        description: "Whether notifications needs to be tested too"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - true
+          - false
 
 permissions:
   contents: write
@@ -28,4 +36,14 @@ jobs:
       projectName: ${{ inputs.projectName }}
       deployTargets: ${{ inputs.deployTargets }}
       artifactSource: release
+    secrets: inherit
+
+  test-notify:
+    uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
+    needs: [ test-deploy ]
+    with:
+      releaseResult: "success"
+      releaseErrorMessage: ""
+      deployResult: ${{ needs.test-deploy.result }}
+      version: ${{ inputs.version }}
     secrets: inherit
