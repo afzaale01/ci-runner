@@ -22,73 +22,72 @@ find Assets -name '*.cs' | while read -r file; do
     }
 
     BEGIN {
-      in_header = 0
       header_line = ""
-      attribute_block = ""
+      attrs = ""
     }
 
     /^\s*\[Header\(.*\)\]\s*$/ {
       header_line = $0
-      in_header = 1
       next
     }
 
     /^\s*\[[^]]+\]/ {
-      attribute_block = attribute_block == "" ? trim($0) : attribute_block " " trim($0)
+      # Strip [] and keep attribute name
+      attr = $0
+      gsub(/\[|\]/, "", attr)
+      attr = trim(attr)
+      attrs = attrs == "" ? attr : attrs ", " attr
       next
     }
 
     /^\s*(public|private|protected|internal)[^;]+;/ {
-      access_line = trim($0)
-      serialize_present = 0
-      attr_list = ""
+      line = $0
 
-      n = split(attribute_block, raw_attrs, /\]\s*\[/)
-      for (i = 1; i <= n; i++) {
-        attr = raw_attrs[i]
-        gsub(/\[|\]/, "", attr)
-        attr = trim(attr)
-        if (attr == "SerializeField") {
-          serialize_present = 1
-        } else if (attr != "") {
-          attr_list = attr_list == "" ? attr : attr_list ", " attr
+      split(attrs, all_attrs, ",")
+      serialize_first = ""
+      others = ""
+      for (i in all_attrs) {
+        a = trim(all_attrs[i])
+        if (a == "SerializeField") {
+          serialize_first = a
+        } else if (a != "") {
+          others = others == "" ? a : others ", " a
         }
       }
 
-      sorted_attrs = sort_attrs(attr_list)
-
-      if (in_header) {
+      if (header_line != "") {
         print header_line
-        print ""   # exactly one blank line after header
-        in_header = 0
+        print ""
+        header_line = ""
       }
 
-      if (serialize_present) {
-        if (sorted_attrs != "") {
-          print "    [SerializeField, " sorted_attrs "] " access_line
+      if (serialize_first != "") {
+        if (others != "") {
+          print "    [" serialize_first ", " sort_attrs(others) "] " trim(line)
         } else {
-          print "    [SerializeField] " access_line
+          print "    [" serialize_first "] " trim(line)
         }
-      } else if (sorted_attrs != "") {
-        print "    [" sorted_attrs "] " access_line
+      } else if (others != "") {
+        print "    [" sort_attrs(others) "] " trim(line)
       } else {
-        print "    " access_line
+        print "    " trim(line)
       }
 
-      attribute_block = ""
+      attrs = ""
       next
     }
 
     {
-      if (in_header) {
+      if (header_line != "") {
         print header_line
         print ""
-        in_header = 0
+        header_line = ""
       }
 
-      if (attribute_block != "") {
-        print attribute_block
-        attribute_block = ""
+      if (attrs != "") {
+        # orphaned attributes, print them raw
+        print "    [" attrs "]"
+        attrs = ""
       }
 
       print $0
@@ -103,4 +102,4 @@ find Assets -name '*.cs' | while read -r file; do
   fi
 done
 
-echo "✅ Unity-style format applied: headers spaced, no extra blank lines."
+echo "✅ Unity-style attribute cleanup complete. Safe for CSharpier."
