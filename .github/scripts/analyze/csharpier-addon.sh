@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Unity-style post-processing: one-line fields, Header above, 4-space indent, sorted attributes, spacing before Header..."
+echo "🔧 Unity-style post-processing: one-line fields, Header above, 4-space indent, sorted attributes..."
 
 find Assets -name "*.cs" | while read -r file; do
   awk '
@@ -11,7 +11,6 @@ find Assets -name "*.cs" | while read -r file; do
     in_attr = 0;
     skip_next_blank = 0;
     standard_indent = "    ";
-    last_was_open_brace = 0;
   }
 
   function trim(s) {
@@ -34,6 +33,7 @@ find Assets -name "*.cs" | while read -r file; do
       }
     }
     asorti(attrs, sorted)
+
     line = ""
     if (hasSerializeField) {
       line = "[SerializeField]"
@@ -72,7 +72,6 @@ find Assets -name "*.cs" | while read -r file; do
   # Field after attributes
   in_attr && /^[[:space:]]*(public|private|protected|internal)[^;]*;[[:space:]]*$/ {
     if (header_attr != "") {
-      if (!last_was_open_brace) print "";  # Add newline before Header unless it's directly after {
       print standard_indent header_attr;
     }
     sorted_attrs = sort_attrs(attr_block);
@@ -81,14 +80,13 @@ find Assets -name "*.cs" | while read -r file; do
     header_attr = "";
     in_attr = 0;
     skip_next_blank = 1;
-    last_was_open_brace = 0;
     next;
   }
 
+  # Field without attributes
   /^[[:space:]]*(public|private|protected|internal)[^;]*;[[:space:]]*$/ {
     print standard_indent trim($0);
     skip_next_blank = 1;
-    last_was_open_brace = 0;
     next;
   }
 
@@ -101,18 +99,9 @@ find Assets -name "*.cs" | while read -r file; do
     next;
   }
 
-  /^[[:space:]]*{[[:space:]]*$/ {
-    print $0;
-    last_was_open_brace = 1;
-    next;
-  }
-
   {
     if (attr_block != "" || header_attr != "") {
-      if (header_attr != "") {
-        if (!last_was_open_brace) print "";
-        print standard_indent header_attr;
-      }
+      if (header_attr != "") print standard_indent header_attr;
       if (attr_block != "") {
         sorted_attrs = sort_attrs(attr_block);
         print standard_indent sorted_attrs;
@@ -120,13 +109,11 @@ find Assets -name "*.cs" | while read -r file; do
       attr_block = "";
       header_attr = "";
       in_attr = 0;
-      last_was_open_brace = 0;
     }
     print $0;
     skip_next_blank = 0;
-    last_was_open_brace = 0;
   }
   ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 done
 
-echo "✅ Done! Headers are spaced correctly, attributes sorted, and everything is clean."
+echo "✅ All fields now sorted with SerializeField first, Header above, 4-space indent enforced."
