@@ -1,12 +1,14 @@
 using UnityEngine;
+
 public class FunkyModelRotator : MonoBehaviour
 {
     private Vector3 rotationVelocity = Vector3.zero;
     private Vector3 lastMousePosition;
     private bool isDragging = false;
-    public float dragSensitivity = 0.2f;
 
+    public float dragSensitivity = 0.2f;
     public float momentumDamping = 2f; // Higher = faster stop
+
     void Update()
     {
         // Mouse down
@@ -15,11 +17,13 @@ public class FunkyModelRotator : MonoBehaviour
             isDragging = true;
             lastMousePosition = Input.mousePosition;
         }
+
         // Mouse up
         if (Input.GetMouseButtonUp(0))
         {
             isDragging = false;
         }
+
         if (isDragging)
         {
             Vector3 delta = Input.mousePosition - lastMousePosition;
@@ -35,6 +39,7 @@ public class FunkyModelRotator : MonoBehaviour
                 Time.deltaTime * momentumDamping
             );
         }
+
         // Rotate object based on velocity
         transform.Rotate(rotationVelocity, Space.World);
     }

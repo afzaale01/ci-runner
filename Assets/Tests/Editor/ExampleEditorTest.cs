@@ -1,4 +1,5 @@
 using NUnit.Framework;
+
 public class ExampleEditorTest
 {
     [Test]
