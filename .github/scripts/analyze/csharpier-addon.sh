@@ -1,13 +1,14 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Unity-style post-processing: one-line fields, except Header stays above..."
+echo "🔧 Unity-style post-processing: one-line fields, Header stays above with correct indent..."
 
 find Assets -name "*.cs" | while read -r file; do
   awk '
   BEGIN {
     attr_block = "";
     header_attr = "";
+    header_indent = "";
     in_attr = 0;
     skip_next_blank = 0;
   }
@@ -18,13 +19,19 @@ find Assets -name "*.cs" | while read -r file; do
     return s;
   }
 
+  function get_indent(s) {
+    match(s, /^[ \t]*/);
+    return substr(s, RSTART, RLENGTH);
+  }
+
   /^[[:space:]]*\[/ {
     attr = trim($0);
     if (attr ~ /^\[Header\(/) {
       header_attr = attr;
+      header_indent = get_indent($0);
     } else {
       in_attr = 1;
-      attr_block = attr_block attr;
+      attr_block = attr_block trim($0);
     }
     next;
   }
@@ -33,20 +40,23 @@ find Assets -name "*.cs" | while read -r file; do
     attr = trim($0);
     if (attr ~ /^\[Header\(/) {
       header_attr = attr;
+      header_indent = get_indent($0);
     } else {
-      attr_block = attr_block attr;
+      attr_block = attr_block trim($0);
     }
     next;
   }
 
   # Field follows attributes
   in_attr && /^[[:space:]]*(public|private|protected|internal)[^;]*;[[:space:]]*$/ {
+    indent = get_indent($0);
     if (header_attr != "") {
-      print header_attr;
+      print indent header_attr;
     }
     print attr_block trim($0);
     attr_block = "";
     header_attr = "";
+    header_indent = "";
     in_attr = 0;
     skip_next_blank = 1;
     next;
@@ -72,9 +82,10 @@ find Assets -name "*.cs" | while read -r file; do
   {
     # Catch orphaned attribute blocks
     if (attr_block != "" || header_attr != "") {
-      if (header_attr != "") print header_attr;
+      if (header_attr != "") print header_indent header_attr;
       if (attr_block != "") print attr_block;
       header_attr = "";
+      header_indent = "";
       attr_block = "";
       in_attr = 0;
     }
@@ -84,4 +95,4 @@ find Assets -name "*.cs" | while read -r file; do
   ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 done
 
-echo "✅ Fields flattened, Header preserved above fields, and blank lines removed."
+echo "✅ Fields flattened, Header indented properly, no blank lines left behind."
