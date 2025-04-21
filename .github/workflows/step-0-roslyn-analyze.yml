@@ -18,4 +18,5 @@ jobs:
       - name: Run CSharpier on Unity scripts
         run: |
           echo "📂 Scanning Assets..."
+          export PATH="$PATH:$HOME/.dotnet/tools"
           csharpier --check Assets
