@@ -26,8 +26,10 @@ shorten_url() {
 RELEASE_SHORT=$(shorten_url "$RELEASE_URL")
 RUN_SHORT=$(shorten_url "$RUN_URL")
 
-# --- 🔔 Append formatted link line to the message ---
-MESSAGE="$MESSAGE\n📦 [View Release](<$RELEASE_SHORT>)   ·   🔗 [View Pipeline](<$RUN_SHORT>)"
+# --- 🔔 Modify formatted link line to include the shortened URL ---
+FINAL=$(echo "$MESSAGE" | \
+  sed -E "s#\[View Release\]\([^)]+\)#[View Release](<${SHORT_RELEASE_URL})#g" | \
+  sed -E "s#\[View Pipeline\]\([^)]+\)#[View Pipeline](<${SHORT_RUN_URL})#g")
 
 # --- 🧾 Combine everything ---
 FINAL="$MESSAGE$SUMMARY"
