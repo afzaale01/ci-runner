@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 public class ExampleEditorTest
 {
-[Test]
+    [Test]
     public void ThisTestWillPass()
     {
         Assert.AreEqual(1 + 1, 2);
