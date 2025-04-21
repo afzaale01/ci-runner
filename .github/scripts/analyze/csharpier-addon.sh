@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Running Unity-style CSharpier fixer..."
+echo "🔧 Running Unity-style CSharpier fixer (Header floats, others inline)..."
 
 find Assets -type f -name "*.cs" -print0 | while IFS= read -r -d '' file; do
   echo "📄 Fixing $file..."
@@ -14,50 +14,52 @@ find Assets -type f -name "*.cs" -print0 | while IFS= read -r -d '' file; do
     }
 
     BEGIN {
-      attributeLine = "";
-      inAttributeBlock = 0;
+      headerMode = 0;
+      attrBlock = "";
     }
 
-    # Header stands alone
+    # Handle headers
     /^\[Header\(/ {
-      if (inAttributeBlock) {
-        print attributeLine " " currentDeclaration;
-        attributeLine = "";
-        currentDeclaration = "";
-        inAttributeBlock = 0;
+      if (attrBlock != "") {
+        print trim(attrBlock) " " trim($0);
+        attrBlock = "";
+      } else {
+        print $0;
       }
-      print $0;
+      headerMode = 1;
       next;
     }
 
-    # Match other attributes
+    # Handle other attributes
     /^\[[^H][^ ]*\]/ {
-      attributeLine = (attributeLine == "") ? $0 : attributeLine " " $0;
-      inAttributeBlock = 1;
+      attrBlock = (attrBlock == "") ? $0 : attrBlock " " $0;
       next;
     }
 
-    # Field declaration after attribute(s)
-    /^[[:space:]]*(public|private|protected)/ {
-      if (inAttributeBlock) {
-        currentDeclaration = $0;
-        print trim(attributeLine) " " trim(currentDeclaration);
-        attributeLine = "";
-        currentDeclaration = "";
-        inAttributeBlock = 0;
+    # Handle field declaration
+    /^[ \t]*(public|private|protected)/ {
+      if (headerMode) {
+        if (attrBlock != "") {
+          print trim(attrBlock) " " trim($0);
+          attrBlock = "";
+        } else {
+          print $0;
+        }
+        headerMode = 0;
+      } else if (attrBlock != "") {
+        print trim(attrBlock) " " trim($0);
+        attrBlock = "";
       } else {
         print $0;
       }
       next;
     }
 
-    # Any other line
+    # Print any other lines
     {
-      if (inAttributeBlock) {
-        print attributeLine " " currentDeclaration;
-        attributeLine = "";
-        currentDeclaration = "";
-        inAttributeBlock = 0;
+      if (attrBlock != "") {
+        print trim(attrBlock);
+        attrBlock = "";
       }
       print $0;
     }
