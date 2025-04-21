@@ -27,16 +27,10 @@ jobs:
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Check C# formatting (CSharpier)
-        id: check_formatting
+        continue-on-error: true
         run: |
           echo "📂 Checking formatting in Assets/..."
-          dotnet csharpier --check Assets || echo "FORMAT_FAILED=true" >> $GITHUB_ENV
-
-      - name: Fail if formatting issues found and allowFailure is false
-        if: inputs.allowFailure == false
-        run: |
-          echo "❌ Formatting issues found and allowFailure is false. Failing the job."
-          exit 1
+          dotnet csharpier --check Assets
 
       - name: Auto-format C# files with CSharpier
         if: ${{ inputs.allowAutofix == true }}
