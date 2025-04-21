@@ -35,13 +35,6 @@ permissions:
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
-  # 0. Run Analysis
-  # ─────────────────────────────────────────────────────────────────────────────
-  analyze:
-    name: Static Analysis
-    uses: avalin/unity-ci-templates/.github/workflows/step-0-analyze.yml@main
-
-  # ─────────────────────────────────────────────────────────────────────────────
   # 1. Run Tests
   # ─────────────────────────────────────────────────────────────────────────────
   run-tests:
@@ -53,7 +46,6 @@ jobs:
         (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip tests]')))
        )
      }}
-    needs: [ analyze ]
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}

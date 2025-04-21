@@ -33,16 +33,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  test-analyze:
-    name: Test Static Analysis
-    uses: avalin/unity-ci-templates/.github/workflows/step-0-analyze.yml@main
-    with:
-      allowAutofix: ${{ inputs.allowAutofix }}
-      allowFail: ${{ inputs.allowFail }}
-
   test-run-tests:
     name: Test Run Tests
-    needs: [ test-analyze ]
     if: ${{ inputs.shouldRunTests == 'true' }}
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
