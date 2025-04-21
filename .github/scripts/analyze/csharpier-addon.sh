@@ -1,16 +1,16 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Unity-style post-processing: one-line fields, Header stays above with correct indent..."
+echo "🔧 Unity-style post-processing: one-line fields, Header above, 4-space indent enforced..."
 
 find Assets -name "*.cs" | while read -r file; do
   awk '
   BEGIN {
     attr_block = "";
     header_attr = "";
-    header_indent = "";
     in_attr = 0;
     skip_next_blank = 0;
+    standard_indent = "    "; # 4 spaces
   }
 
   function trim(s) {
@@ -19,19 +19,13 @@ find Assets -name "*.cs" | while read -r file; do
     return s;
   }
 
-  function get_indent(s) {
-    match(s, /^[ \t]*/);
-    return substr(s, RSTART, RLENGTH);
-  }
-
   /^[[:space:]]*\[/ {
     attr = trim($0);
     if (attr ~ /^\[Header\(/) {
       header_attr = attr;
-      header_indent = get_indent($0);
     } else {
       in_attr = 1;
-      attr_block = attr_block trim($0);
+      attr_block = attr_block attr;
     }
     next;
   }
@@ -40,36 +34,33 @@ find Assets -name "*.cs" | while read -r file; do
     attr = trim($0);
     if (attr ~ /^\[Header\(/) {
       header_attr = attr;
-      header_indent = get_indent($0);
     } else {
-      attr_block = attr_block trim($0);
+      attr_block = attr_block attr;
     }
     next;
   }
 
-  # Field follows attributes
+  # Field after attributes
   in_attr && /^[[:space:]]*(public|private|protected|internal)[^;]*;[[:space:]]*$/ {
-    indent = get_indent($0);
     if (header_attr != "") {
-      print indent header_attr;
+      print standard_indent header_attr;
     }
-    print attr_block trim($0);
+    print standard_indent attr_block trim($0);
     attr_block = "";
     header_attr = "";
-    header_indent = "";
     in_attr = 0;
     skip_next_blank = 1;
     next;
   }
 
-  # Field without any attributes
+  # Field without attributes
   /^[[:space:]]*(public|private|protected|internal)[^;]*;[[:space:]]*$/ {
-    print trim($0);
+    print standard_indent trim($0);
     skip_next_blank = 1;
     next;
   }
 
-  # Skip blank lines after a field
+  # Skip blank lines after fields
   /^[[:space:]]*$/ {
     if (skip_next_blank) {
       skip_next_blank = 0;
@@ -80,13 +71,12 @@ find Assets -name "*.cs" | while read -r file; do
   }
 
   {
-    # Catch orphaned attribute blocks
+    # Orphaned attribute blocks (shouldn’t happen, but just in case)
     if (attr_block != "" || header_attr != "") {
-      if (header_attr != "") print header_indent header_attr;
-      if (attr_block != "") print attr_block;
-      header_attr = "";
-      header_indent = "";
+      if (header_attr != "") print standard_indent header_attr;
+      if (attr_block != "") print standard_indent attr_block;
       attr_block = "";
+      header_attr = "";
       in_attr = 0;
     }
     print $0;
@@ -95,4 +85,4 @@ find Assets -name "*.cs" | while read -r file; do
   ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 done
 
-echo "✅ Fields flattened, Header indented properly, no blank lines left behind."
+echo "✅ All fields now start with 4-space indent, Header above fields, no blank lines remain."
