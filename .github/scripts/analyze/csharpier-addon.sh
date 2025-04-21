@@ -1,56 +1,55 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Running Unity-style CSharpier fixer (Header + SerializeField)..."
+echo "🔧 Running Unity-style CSharpier fixer (Header + SerializeField + other attributes)..."
 
 find Assets -type f -name "*.cs" -print0 | while IFS= read -r -d '' file; do
   echo "📄 Fixing $file..."
 
   awk '
+    function flushAttributes() {
+      if (attrCount > 0 && fieldLine != "") {
+        line = "";
+        for (i = 1; i <= attrCount; i++) {
+          line = line (i == 1 ? "" : " ") attributes[i];
+        }
+        print line " " fieldLine;
+        attrCount = 0;
+        fieldLine = "";
+      }
+    }
+
     BEGIN {
-      inSerializeBlock = 0;
+      attrCount = 0;
+      fieldLine = "";
     }
 
-    # Match [Header("...")] — should always be on its own line
     /^\[Header\(/ {
-      if (inSerializeBlock) {
-        print "";
-        inSerializeBlock = 0;
-      }
+      flushAttributes();
+      print "";  # Add spacing before headers
       print $0;
       next;
     }
 
-    # Match [SerializeField] on its own line
-    /^\[SerializeField\]$/ {
-      getline nextLine;
-      if (nextLine ~ /^[[:space:]]*(public|private|protected)/) {
-        print "[SerializeField] " nextLine;
-        inSerializeBlock = 1;
-        next;
-      } else {
-        print $0;
-        print nextLine;
-        next;
-      }
-    }
-
-    # Match one-liner [SerializeField] field
-    /^\[SerializeField\][[:space:]]+(public|private|protected)/ {
-      print $0;
-      inSerializeBlock = 1;
+    /^\[[^]]+\]$/ {
+      attributes[++attrCount] = $0;
       next;
     }
 
-    # Match any other line
+    /^[[:space:]]*(public|private|protected)/ {
+      fieldLine = $0;
+      flushAttributes();
+      next;
+    }
+
     {
-      if (inSerializeBlock) {
-        print "";
-        inSerializeBlock = 0;
-      }
+      flushAttributes();
       print $0;
     }
 
+    END {
+      flushAttributes();
+    }
   ' "$file" > "$file.fixed" && mv "$file.fixed" "$file"
 
 done
