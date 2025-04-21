@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class FunkyModelRotator : MonoBehaviour
 {
-    private Vector3 rotationVelocity = Vector3.zero;
-    private Vector3 lastMousePosition;
-    private bool isDragging = false;
+private Vector3 rotationVelocity = Vector3.zero;
+private Vector3 lastMousePosition;
+private bool isDragging = false;
 
-    public float dragSensitivity = 0.2f;
+public float dragSensitivity = 0.2f;
     public float momentumDamping = 2f; // Higher = faster stop
 
     void Update()
