@@ -77,26 +77,26 @@ jobs:
 
           if [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
-              TITLE="✅ Release & Deploy Succeeded - $VERSION"
-              MESSAGE="Release \`$VERSION\` completed successfully."
+              TITLE="Release & Deploy Succeeded - $VERSION"
+              MESSAGE="✅ Release \`$VERSION\` completed successfully."
               STATUS="success"
             elif [[ "$DEPLOY" == "skipped" ]]; then
-              TITLE="✅ Release Succeeded (No Deploy) - $VERSION"
-              MESSAGE="Release \`$VERSION\` completed successfully. No deployment targets set."
+              TITLE="Release Succeeded (No Deploy) - $VERSION"
+              MESSAGE="✅ Release \`$VERSION\` completed successfully. No deployment targets set."
               STATUS="neutral"
             else
-              TITLE="⚠️ Release Succeeded, Deploy Failed - $VERSION"
-              MESSAGE="Release \`$VERSION\` succeeded, but deployment failed."
+              TITLE="Release Succeeded, Deploy Failed - $VERSION"
+              MESSAGE="⚠️ Release \`$VERSION\` succeeded, but deployment failed."
               STATUS="failure"
             fi
             [[ -n "$TRACE" ]] && MESSAGE="$MESSAGE\n$TRACE"
             MESSAGE="$MESSAGE\n📦 [View Release]($RELEASE_URL)   ·   🔗 [View Pipeline]($RUN_URL)"
           else
-            TITLE="❌ Release Failed - $VERSION"
+            TITLE="Release Failed - $VERSION"
             if [[ -n "$ERROR" ]]; then
-              MESSAGE="Release \`$VERSION\` failed: \`$ERROR\`."
+              MESSAGE="❌ Release \`$VERSION\` failed: \`$ERROR\`."
             else
-              MESSAGE="Release \`$VERSION\` failed."
+              MESSAGE="❌ Release \`$VERSION\` failed."
             fi
             STATUS="failure"
             [[ -n "$TRACE" ]] && MESSAGE="$MESSAGE\n$TRACE"
