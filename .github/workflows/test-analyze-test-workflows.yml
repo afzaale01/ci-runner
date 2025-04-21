@@ -3,30 +3,30 @@ name: 🧪 Test Analyze & Tests Workflow
 on:
   workflow_dispatch:
     inputs:
-        allowAutofix:
-            description: "Whether to allow autofixing lint issues on PR"
-            required: false
-            default: 'false'
-            type: choice
-            options:
-              - 'true'
-              - 'false'
-        allowFailure:
-            description: "Whether lint errors should fail the pipeline"
-            required: false
-            default: 'true'
-            type: choice
-            options:
-            - 'true'
-            - 'false'
-        shouldRunTests:
-            description: "Whether tests should be ran or not"
-            required: false
-            default: 'true'
-            type: choice
-            options:
-            - 'true'
-            - 'false'
+      allowAutofix:
+        description: "Whether to allow autofixing lint issues on PR"
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      allowFailure:
+        description: "Whether lint errors should fail the pipeline"
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      shouldRunTests:
+        description: "Whether tests should be ran or not"
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 permissions:
   contents: write
@@ -36,7 +36,10 @@ jobs:
   test-analyze:
     name: Analyze with Roslynator
     uses: avalin/unity-ci-templates/.github/workflows/step-0-roslyn-analyze.yml@main
-    
+    with:
+      allowAutofix: ${{ inputs.allowAutofix == 'true' }}
+      allowFailure: ${{ inputs.allowFailure == 'true' }}
+
   test-run-tests:
     name: Test Run Tests
     if: ${{ inputs.shouldRunTests == 'true' }}
