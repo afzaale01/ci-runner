@@ -8,6 +8,11 @@ on:
         required: false
         default: 'false'
         type: string
+      allowFail:
+        description: "Whether lint errors should fail the pipeline"
+        required: false
+        default: 'false'
+        type: string
 jobs:
   analyze:
     name: Run dotnet format (if .sln exists)
@@ -90,4 +95,9 @@ jobs:
             fi
           else
             echo "ℹ️ No .sln file found — skipped dotnet format." >> $GITHUB_STEP_SUMMARY
-      
+
+      - name: Fail job if formatting failed and allowFail is true
+        if: steps.formatter.outcome == 'failure' && fromJSON(inputs.allowFail)
+        run: |
+          echo "::error::dotnet format failed and allowFail is true — failing pipeline."
+          exit 1
