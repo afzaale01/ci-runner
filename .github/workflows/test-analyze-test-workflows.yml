@@ -19,6 +19,14 @@ on:
             options:
             - 'true'
             - 'false'
+        shouldRunTests:
+            description: "Whether tests should be ran or not"
+            required: false
+            default: 'true'
+            type: choice
+            options:
+            - 'true'
+            - 'false'
 
 permissions:
   contents: write
@@ -35,6 +43,7 @@ jobs:
   test-run-tests:
     name: Test Run Tests
     needs: [ test-analyze ]
+    if: ${{ inputs.shouldRunTests == 'true' }}
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
