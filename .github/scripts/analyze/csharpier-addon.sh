@@ -24,6 +24,7 @@ find Assets -name '*.cs' | while read -r file; do
     BEGIN {
       header_line = ""
       attrs = ""
+      prev_blank = 0
     }
 
     /^\s*\[Header\(.*\)\]\s*$/ {
@@ -32,7 +33,6 @@ find Assets -name '*.cs' | while read -r file; do
     }
 
     /^\s*\[[^]]+\]/ {
-      # Strip [] and keep attribute name
       attr = $0
       gsub(/\[|\]/, "", attr)
       attr = trim(attr)
@@ -56,8 +56,13 @@ find Assets -name '*.cs' | while read -r file; do
       }
 
       if (header_line != "") {
-        print header_line
-        print ""
+        if (prev_blank == 0) {
+          print header_line
+          print ""
+          prev_blank = 1
+        } else {
+          print header_line
+        }
         header_line = ""
       }
 
@@ -74,32 +79,17 @@ find Assets -name '*.cs' | while read -r file; do
       }
 
       attrs = ""
+      prev_blank = 0
       next
     }
 
-    {
+    /^\s*$/ {
+      # Track blank lines to avoid duplicating after header
       if (header_line != "") {
         print header_line
         print ""
         header_line = ""
+      } else {
+        print ""
       }
-
-      if (attrs != "") {
-        # orphaned attributes, print them raw
-        print "    [" attrs "]"
-        attrs = ""
-      }
-
-      print $0
-    }
-  ' "$file" > "$tmp_file"
-
-  if ! cmp -s "$file" "$tmp_file"; then
-    echo "📝 Fixed: $file"
-    mv "$tmp_file" "$file"
-  else
-    rm "$tmp_file"
-  fi
-done
-
-echo "✅ Unity-style attribute cleanup complete. Safe for CSharpier."
+      prev_blank = 1
