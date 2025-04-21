@@ -4,7 +4,7 @@ using UnityEngine.TestTools;
 
 public class ExamplePlayModeTest
 {
-    [UnityTest]
+[UnityTest]
     public IEnumerator ThisTestAlsoPasses()
     {
         yield return null;
