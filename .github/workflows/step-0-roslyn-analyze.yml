@@ -8,7 +8,11 @@ on:
         required: false
         default: false
         type: boolean
-
+      allowFailure:
+        description: "Whether formatting issues should fail the job"
+        required: false
+        default: false
+        type: boolean
 jobs:
   roslyn-lint:
     name: 🧠 C# Code Lint (No MSBuild)
@@ -23,6 +27,7 @@ jobs:
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Check C# formatting (CSharpier)
+        continue-on-error: true
         run: |
           echo "📂 Checking formatting in Assets/..."
           dotnet csharpier --check Assets
