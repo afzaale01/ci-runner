@@ -11,7 +11,7 @@ on:
             options:
               - 'true'
               - 'false'
-        allowFail:
+        allowFailure:
             description: "Whether lint errors should fail the pipeline"
             required: false
             default: 'true'
