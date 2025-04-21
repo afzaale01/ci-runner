@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Running CSharpier post-fix: Flattening Unity field attributes..."
+echo "🔧 Reformatting fields: one-liner fields with no extra newlines..."
 
 find Assets -name "*.cs" | while read -r file; do
   awk '
@@ -16,42 +16,56 @@ find Assets -name "*.cs" | while read -r file; do
     return s;
   }
 
-  function flush_attr() {
-    if (attr_block != "") {
-      print attr_block;
-      attr_block = "";
-    }
-  }
-
   /^[[:space:]]*\[/ {
+    # Start or continue collecting attribute block
     in_attr = 1;
     attr_block = attr_block trim($0);
     next;
   }
 
   in_attr && /^[[:space:]]*\[/ {
+    # Continue collecting multi-line attributes
     attr_block = attr_block trim($0);
     next;
   }
 
-  in_attr && /^[[:space:]]*(public|private|protected|internal)[^=]*;[[:space:]]*$/ {
-    # Field detected after attributes
+  in_attr && /^[[:space:]]*(public|private|protected|internal)[^;]*;[[:space:]]*$/ {
+    # Field declaration follows attribute block
     print attr_block trim($0);
     attr_block = "";
     in_attr = 0;
     next;
   }
 
+  /^[[:space:]]*(public|private|protected|internal)[^;]*;[[:space:]]*$/ {
+    # Standalone field (no attribute)
+    print trim($0);
+    next;
+  }
+
+  /^[[:space:]]*$/ {
+    # Skip empty lines following a field or attribute
+    if (attr_block != "") {
+      next;
+    }
+    if (prev_line_was_field) {
+      next;
+    }
+    print "";
+    next;
+  }
+
   {
-    if (in_attr) {
-      # If the line isn't a field, flush and reset
+    # Flush any collected attributes if we didn’t hit a field
+    if (attr_block != "") {
       print attr_block;
       attr_block = "";
       in_attr = 0;
     }
     print $0;
+    prev_line_was_field = 0;
   }
   ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 done
 
-echo "✅ Fields flattened to single lines."
+echo "✅ Fields collapsed and blank lines removed."
