@@ -11,7 +11,7 @@ on:
             options:
               - 'true'
               - 'false'
-        allowFail:
+        allowFailure:
             description: "Whether lint errors should fail the pipeline"
             required: false
             default: 'true'
@@ -36,7 +36,10 @@ jobs:
   test-analyze:
     name: Analyze with Roslynator
     uses: avalin/unity-ci-templates/.github/workflows/step-0-roslyn-analyze.yml@main
-    
+    with:
+      allowAutofix: ${{ inputs.allowAutofix }}
+      allowFailure: ${{ inputs.allowFailure }}
+
   test-run-tests:
     name: Test Run Tests
     if: ${{ inputs.shouldRunTests == 'true' }}
