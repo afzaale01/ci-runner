@@ -13,7 +13,7 @@ on:
         required: false
         default: 'false'
         type: string
-      
+
 jobs:
   analyze:
     name: Run dotnet format (if .sln exists)
@@ -23,8 +23,59 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Cache NuGet packages
-        if: ${{ hashFiles('**/*.csproj') != '' }}
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: Check for .sln file
+        id: sln_check
+        run: |
+          sln_files=$(find . -maxdepth 1 -name "*.sln")
+          count=$(echo "$sln_files" | wc -l)
+
+          echo "Found $count solution file(s):"
+          echo "$sln_files"
+
+          if [[ "$count" -eq 1 ]]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "sln_file=$(echo "$sln_files")" >> "$GITHUB_OUTPUT"
+          elif [[ "$count" -gt 1 ]]; then
+            echo "❌ Multiple .sln files found. Please keep only one for CI."
+            exit 1
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Detect NuGet usage
+        id: uses_nuget
+        run: |
+          if grep -q '<PackageReference' ./*.csproj 2>/dev/null; then
+            echo "🧃 Detected NuGet dependencies."
+            echo "nuget=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ℹ️ No NuGet packages found — skipping restore."
+            echo "nuget=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restore NuGet packages (if needed)
+        if: steps.uses_nuget.outputs.nuget == 'true'
+        run: dotnet restore "${{ steps.sln_check.outputs.sln_file }}"
+
+      - name: Check if NuGet packages directory exists (after restore)
+        id: check_nuget_cache
+        if: steps.uses_nuget.outputs.nuget == 'true'
+        run: |
+          if [ -d "$HOME/.nuget/packages" ]; then
+            echo "NuGet packages exist. Will cache."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No NuGet packages found. Skipping cache."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save NuGet cache
+        if: steps.check_nuget_cache.outputs.exists == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
@@ -32,31 +83,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Install .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '7.0.x'
-
-      - name: Debug - List files in repo root
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "Listing files:"
-          ls -alh
-
-      - name: Check for .sln file
-        id: sln_check
-        run: |
-          if find . -maxdepth 1 -name "*.sln" -print -quit | grep -q .; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Run dotnet format
         id: formatter
         if: steps.sln_check.outputs.found == 'true'
         continue-on-error: true
-        run: dotnet format --verify-no-changes --verbosity minimal
+        env:
+          USES_NUGET: ${{ steps.uses_nuget.outputs.nuget }}
+          SLN_FILE: ${{ steps.sln_check.outputs.sln_file }}
+        run: |
+          dotnet restore "$SLN_FILE"
+          dotnet format "$SLN_FILE" --verify-no-changes --verbosity minimal
 
       - name: Auto-fix formatting
         if: failure() && fromJSON(inputs.allowAutofix) && github.event_name == 'pull_request'
@@ -105,8 +141,8 @@ jobs:
             echo "ℹ️ No .sln file found — skipped dotnet format." >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Fail job if formatting failed and allowFail is true
-        if: steps.formatter.outcome == 'failure' && fromJSON(inputs.allowFail)
+      - name: Fail job if formatting failed and allowFail is false
+        if: steps.formatter.outcome == 'failure' && fromJSON(inputs.allowFail) == 'false'
         run: |
-          echo "::error::dotnet format failed and allowFail is true — failing pipeline."
+          echo "::error::dotnet format failed and allowFail is false — failing pipeline."
           exit 1
