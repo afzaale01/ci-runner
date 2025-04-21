@@ -47,6 +47,10 @@ jobs:
           echo "🛠️ Auto-formatting allowed. Applying changes..."
           dotnet csharpier Assets
 
+      - name: Run Unity-style fixer
+        if: ${{ inputs.allowAutofix == true }}
+        run: bash .github/scripts/analyze/csharpier-addon.sh
+
       - name: Commit formatting fixes
         if: ${{ inputs.allowAutofix == true }}
         run: |
