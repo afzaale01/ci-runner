@@ -39,7 +39,7 @@ jobs:
       - name: Check for .sln file
         id: sln_check
         run: |
-          if compgen -G "*.sln" > /dev/null; then
+          if find . -maxdepth 1 -name "*.sln" -print -quit | grep -q .; then
             echo "found=true" >> "$GITHUB_OUTPUT"
           else
             echo "found=false" >> "$GITHUB_OUTPUT"
