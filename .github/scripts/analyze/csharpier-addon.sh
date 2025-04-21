@@ -1,68 +1,56 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Running Unity-style CSharpier fixer (Header floats, others inline)..."
+echo "🔧 Running Unity-style CSharpier fixer (Header + SerializeField)..."
 
 find Assets -type f -name "*.cs" -print0 | while IFS= read -r -d '' file; do
   echo "📄 Fixing $file..."
 
   awk '
-    function trim(str) {
-      sub(/^[ \t\r\n]+/, "", str);
-      sub(/[ \t\r\n]+$/, "", str);
-      return str;
-    }
-
     BEGIN {
-      headerMode = 0;
-      attrBlock = "";
+      inSerializeBlock = 0;
     }
 
-    # Handle headers
+    # Match [Header("...")] — should always be on its own line
     /^\[Header\(/ {
-      if (attrBlock != "") {
-        print trim(attrBlock) " " trim($0);
-        attrBlock = "";
+      if (inSerializeBlock) {
+        print "";
+        inSerializeBlock = 0;
+      }
+      print $0;
+      next;
+    }
+
+    # Match [SerializeField] on its own line
+    /^\[SerializeField\]$/ {
+      getline nextLine;
+      if (nextLine ~ /^[[:space:]]*(public|private|protected)/) {
+        print "[SerializeField] " nextLine;
+        inSerializeBlock = 1;
+        next;
       } else {
         print $0;
+        print nextLine;
+        next;
       }
-      headerMode = 1;
+    }
+
+    # Match one-liner [SerializeField] field
+    /^\[SerializeField\][[:space:]]+(public|private|protected)/ {
+      print $0;
+      inSerializeBlock = 1;
       next;
     }
 
-    # Handle other attributes
-    /^\[[^H][^ ]*\]/ {
-      attrBlock = (attrBlock == "") ? $0 : attrBlock " " $0;
-      next;
-    }
-
-    # Handle field declaration
-    /^[ \t]*(public|private|protected)/ {
-      if (headerMode) {
-        if (attrBlock != "") {
-          print trim(attrBlock) " " trim($0);
-          attrBlock = "";
-        } else {
-          print $0;
-        }
-        headerMode = 0;
-      } else if (attrBlock != "") {
-        print trim(attrBlock) " " trim($0);
-        attrBlock = "";
-      } else {
-        print $0;
-      }
-      next;
-    }
-
-    # Print any other lines
+    # Match any other line
     {
-      if (attrBlock != "") {
-        print trim(attrBlock);
-        attrBlock = "";
+      if (inSerializeBlock) {
+        print "";
+        inSerializeBlock = 0;
       }
       print $0;
     }
+
   ' "$file" > "$file.fixed" && mv "$file.fixed" "$file"
 
 done
