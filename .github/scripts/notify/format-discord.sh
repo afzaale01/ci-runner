@@ -21,6 +21,6 @@ fi
 FINAL="$MESSAGE$SUMMARY"
 
 # Convert Markdown links to Discord format: [text](url) → <url>
-FINAL=$(echo "$FINAL" | sed -E 's/\[([^\]]+)\]\(([^)]+)\)/<\2>/g')
+FINAL=$(echo "$FINAL" | sed -E 's/\[([^\]]+)\]\(([^)]+)\)/[\1](<\2>)/g')
 
 echo "$FINAL"
