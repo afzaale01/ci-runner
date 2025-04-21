@@ -14,6 +14,14 @@ on:
         description: "JSON array of deploy targets"
         default: '["gh-pages"]'
         required: true
+      releaseResult:
+        description: "Whether release should show as a success or a failure"
+        default: "success"
+        required: true
+        type: choice
+        options:
+          - success
+          - failure
       testNotify:
         description: "Whether notifications needs to be tested too"
         required: false
@@ -48,7 +56,7 @@ jobs:
       inputs.testNotify == 'true'
     needs: [ test-deploy ]
     with:
-      releaseResult: "success"
+      releaseResult: ${{ inputs.releaseResult }}
       releaseErrorMessage: ""
       deployResult: ${{ needs.test-deploy.result }}
       version: ${{ inputs.version }}
