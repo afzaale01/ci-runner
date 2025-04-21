@@ -2,7 +2,12 @@ name: 🔍 Step 0 - Static Analysis
 
 on:
   workflow_call:
-
+    inputs:
+      allowAutofix:
+        description: "Whether to allow autofixing lint issues on PR"
+        required: false
+        default: 'false'
+        type: string
 jobs:
   analyze:
     name: Run dotnet format (if .sln exists)
@@ -11,6 +16,14 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Install .NET SDK
         uses: actions/setup-dotnet@v4
@@ -32,6 +45,16 @@ jobs:
         continue-on-error: true
         run: dotnet format --verify-no-changes --verbosity minimal
 
+      - name: Auto-fix formatting
+        if: failure() && fromJSON(inputs.allowAutofix) && github.event_name == 'pull_request'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          dotnet format --verbosity minimal
+          git add .
+          git commit -m "chore: auto-format via dotnet format"
+          git push
+
       - name: Comment on PR if formatting failed
         if: failure() && github.event_name == 'pull_request'
         uses: actions/github-script@v7
@@ -50,4 +73,17 @@ jobs:
 
       - name: Skip dotnet format (no .sln found)
         if: steps.sln_check.outputs.found == 'false'
-        run: echo "ℹ️ No .sln found — skipping static analysis"
+        run: echo "::notice::ℹ️ No .sln file found — skipping static analysis"
+
+      - name: Add analysis summary
+        if: always()
+        run: |
+          echo "### Static Analysis Summary" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ steps.sln_check.outputs.found }}" == "true" ]]; then
+            if [[ "${{ steps.formatter.outcome }}" == "success" ]]; then
+              echo "✅ dotnet format passed." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ dotnet format failed." >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "ℹ️ No .sln file found — skipped dotnet format." >> $GITHUB_STEP_SUMMARY
