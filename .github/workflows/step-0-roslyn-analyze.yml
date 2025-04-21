@@ -16,7 +16,7 @@ on:
 
 jobs:
   roslyn-lint:
-    name: 🧠 C# Code Lint (No MSBuild)
+    name: Lint C# Code
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
