@@ -1,57 +1,53 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Running Unity-style CSharpier fixer (Header + SerializeField + other attributes)..."
+echo "🔧 Running Unity-style CSharpier Addon Fixer..."
 
-find Assets -type f -name "*.cs" -print0 | while IFS= read -r -d '' file; do
-  echo "📄 Fixing $file..."
+# Find all .cs files under Assets
+find Assets -name '*.cs' | while read -r file; do
+  tmp_file="${file}.tmp"
+  in_header_block=false
 
   awk '
-    function flushAttributes() {
-      if (attrCount > 0 && fieldLine != "") {
-        line = "";
-        for (i = 1; i <= attrCount; i++) {
-          line = line (i == 1 ? "" : " ") attributes[i];
-        }
-        print line " " fieldLine;
-        attrCount = 0;
-        fieldLine = "";
+    BEGIN { OFS = ""; in_header = 0 }
+    # Detect [Header(...)]
+    /^\s*\[Header\(.*\)\]\s*$/ {
+      header_line = $0
+      in_header = 1
+      next
+    }
+    # Detect [SerializeField] and possibly other attributes
+    /^\s*(\[.*\])*\s*\[SerializeField\](.*)$/ {
+      line = $0
+      # If a header was previously found, insert it on a separate line above SerializeField
+      if (in_header) {
+        print header_line
+        in_header = 0
       }
+      # Reorder so SerializeField is always first, and collapse other attributes to same line
+      gsub(/\[SerializeField\]/, "", line)
+      gsub(/\s+/, " ", line) # normalize spacing
+      sub(/^\s*/, "")        # remove leading space
+      print "    [SerializeField]" line
+      next
     }
-
-    BEGIN {
-      attrCount = 0;
-      fieldLine = "";
-    }
-
-    /^\[Header\(/ {
-      flushAttributes();
-      print "";  # Add spacing before headers
-      print $0;
-      next;
-    }
-
-    /^\[[^]]+\]$/ {
-      attributes[++attrCount] = $0;
-      next;
-    }
-
-    /^[[:space:]]*(public|private|protected)/ {
-      fieldLine = $0;
-      flushAttributes();
-      next;
-    }
-
+    # Any other line — flush header if we didn’t find SerializeField
     {
-      flushAttributes();
-      print $0;
+      if (in_header) {
+        print header_line
+        in_header = 0
+      }
+      print $0
     }
+  ' "$file" > "$tmp_file"
 
-    END {
-      flushAttributes();
-    }
-  ' "$file" > "$file.fixed" && mv "$file.fixed" "$file"
-
+  # Replace original file if changes were made
+  if ! cmp -s "$file" "$tmp_file"; then
+    echo "📝 Fixed: $file"
+    mv "$tmp_file" "$file"
+  else
+    rm "$tmp_file"
+  fi
 done
 
-echo "✅ Unity-style formatting complete."
+echo "✅ Unity-style attribute layout enforced."
