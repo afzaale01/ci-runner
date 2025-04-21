@@ -6,7 +6,7 @@ on:
       allowAutofix:
         description: "Whether to allow autofixing lint issues on PR"
         required: false
-        default: 'false'
+        default: 'true'
         type: choice
         options:
           - 'true'
