@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Unity-style post-processing: one-line fields, Header above, 4-space indent, sorted attributes..."
+echo "🔧 Unity-style post-processing: one-line fields, Header above, 4-space indent, sorted attributes with spacing..."
 
 find Assets -name "*.cs" | while read -r file; do
   awk '
@@ -41,7 +41,7 @@ find Assets -name "*.cs" | while read -r file; do
     for (i = 1; i <= length(sorted); i++) {
       line = line "[" attrs[sorted[i]] "]"
     }
-    return line
+    return line;
   }
 
   /^[[:space:]]*\[/ {
@@ -75,7 +75,7 @@ find Assets -name "*.cs" | while read -r file; do
       print standard_indent header_attr;
     }
     sorted_attrs = sort_attrs(attr_block);
-    print standard_indent sorted_attrs trim($0);
+    print standard_indent sorted_attrs " " trim($0);
     attr_block = "";
     header_attr = "";
     in_attr = 0;
@@ -116,4 +116,4 @@ find Assets -name "*.cs" | while read -r file; do
   ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 done
 
-echo "✅ All fields now sorted with SerializeField first, Header above, 4-space indent enforced."
+echo "✅ Attributes sorted and spaced. Headers above. All fields cleanly formatted."
