@@ -37,6 +37,12 @@ jobs:
         with:
           dotnet-version: '7.0.x'
 
+      - name: Debug - List files in repo root
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Listing files:"
+          ls -alh
+
       - name: Check for .sln file
         id: sln_check
         run: |
