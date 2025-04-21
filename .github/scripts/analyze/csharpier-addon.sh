@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Unity-style post-processing: one-line fields, Header above, 4-space indent, sorted attributes with spacing..."
+echo "🔧 Unity-style post-processing: grouping, spacing, sorted attributes, etc..."
 
 find Assets -name "*.cs" | while read -r file; do
   awk '
@@ -11,6 +11,7 @@ find Assets -name "*.cs" | while read -r file; do
     in_attr = 0;
     skip_next_blank = 0;
     standard_indent = "    ";
+    last_type = "";  # "field" or "method"
   }
 
   function trim(s) {
@@ -33,7 +34,6 @@ find Assets -name "*.cs" | while read -r file; do
       }
     }
     asorti(attrs, sorted)
-
     line = ""
     if (hasSerializeField) {
       line = "[SerializeField]"
@@ -44,13 +44,13 @@ find Assets -name "*.cs" | while read -r file; do
     return line;
   }
 
+  # ───── Collect Attributes ─────
   /^[[:space:]]*\[/ {
     attr = trim($0);
     if (attr ~ /^\[Header\(/) {
       header_attr = attr;
     } else {
       in_attr = 1;
-      gsub(/^[ \t]+/, "", attr)
       attr = gensub(/\][ \t]*\[/, "][", "g", attr)
       attr_block = attr_block attr;
     }
@@ -62,43 +62,41 @@ find Assets -name "*.cs" | while read -r file; do
     if (attr ~ /^\[Header\(/) {
       header_attr = attr;
     } else {
-      gsub(/^[ \t]+/, "", attr)
       attr = gensub(/\][ \t]*\[/, "][", "g", attr)
       attr_block = attr_block attr;
     }
     next;
   }
 
-  # Field after attributes
+  # ───── Print Field with Attributes ─────
   in_attr && /^[[:space:]]*(public|private|protected|internal)[^;]*;[[:space:]]*$/ {
-    if (header_attr != "") {
-      print standard_indent header_attr;
-    }
+    if (last_type == "method") print "";
+    if (header_attr != "") print standard_indent header_attr;
     sorted_attrs = sort_attrs(attr_block);
     print standard_indent sorted_attrs " " trim($0);
     attr_block = "";
     header_attr = "";
     in_attr = 0;
     skip_next_blank = 1;
+    last_type = "field";
     next;
   }
 
-  # Field without attributes
+  # ───── Print Field without Attributes ─────
   /^[[:space:]]*(public|private|protected|internal)[^;]*;[[:space:]]*$/ {
+    if (last_type == "method" || last_type == "attr_field") print "";
     print standard_indent trim($0);
     skip_next_blank = 1;
+    last_type = "field";
     next;
   }
 
+  # ───── Blank Lines ─────
   /^[[:space:]]*$/ {
-    if (skip_next_blank) {
-      skip_next_blank = 0;
-      next;
-    }
-    print "";
-    next;
+    next;  # handled manually
   }
 
+  # ───── Print Method or Anything Else ─────
   {
     if (attr_block != "" || header_attr != "") {
       if (header_attr != "") print standard_indent header_attr;
@@ -110,10 +108,14 @@ find Assets -name "*.cs" | while read -r file; do
       header_attr = "";
       in_attr = 0;
     }
+
+    if (last_type == "field") print "";
+
     print $0;
+    last_type = ($0 ~ /^[[:space:]]*(public|private|protected|internal)?[[:space:]]*([a-zA-Z0-9_<>]+\s+)+[a-zA-Z0-9_]+\s*\(.*\)/) ? "method" : "other";
     skip_next_blank = 0;
   }
   ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 done
 
-echo "✅ Attributes sorted and spaced. Headers above. All fields cleanly formatted."
+echo "✅ Spacing between groups done. Fields and methods are now beautifully grouped."
