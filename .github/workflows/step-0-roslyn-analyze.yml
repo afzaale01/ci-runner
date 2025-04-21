@@ -9,7 +9,7 @@ on:
         default: false
         type: boolean
       allowFailure:
-        description: "Whether formatting issues should fail the job"
+        description: "Whether failed formatting should be allowed"
         required: false
         default: false
         type: boolean
