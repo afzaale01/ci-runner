@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class CapsuleRGBController : MonoBehaviour
 {
-    [SerializeField]
+    [SerializeField] 
     private MeshRenderer capsule;
 
-    [SerializeField]
+    [SerializeField] 
     private float speed = 0.2f;
 
     private Material capsuleMaterial;
