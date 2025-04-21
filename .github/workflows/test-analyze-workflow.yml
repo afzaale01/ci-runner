@@ -20,6 +20,10 @@ on:
           - 'true'
           - 'false'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   test-analyze:
     name: Analyze with Roslynator
