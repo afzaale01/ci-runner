@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🔧 Unity-style post-processing: one-line fields, Header above, 4-space indent enforced..."
+echo "🔧 Unity-style post-processing: one-line fields, Header above, 4-space indent, sorted attributes..."
 
 find Assets -name "*.cs" | while read -r file; do
   awk '
@@ -10,7 +10,7 @@ find Assets -name "*.cs" | while read -r file; do
     header_attr = "";
     in_attr = 0;
     skip_next_blank = 0;
-    standard_indent = "    "; # 4 spaces
+    standard_indent = "    ";
   }
 
   function trim(s) {
@@ -19,12 +19,39 @@ find Assets -name "*.cs" | while read -r file; do
     return s;
   }
 
+  function sort_attrs(attrs_raw) {
+    n = split(attrs_raw, parts, /\]\[/)
+    delete attrs
+    hasSerializeField = 0
+    for (i = 1; i <= n; i++) {
+      a = parts[i]
+      gsub(/^\[|\]$/, "", a)
+      if (a == "SerializeField") {
+        hasSerializeField = 1
+      } else {
+        attrs[a] = a
+      }
+    }
+    asorti(attrs, sorted)
+
+    line = ""
+    if (hasSerializeField) {
+      line = "[SerializeField]"
+    }
+    for (i = 1; i <= length(sorted); i++) {
+      line = line "[" attrs[sorted[i]] "]"
+    }
+    return line
+  }
+
   /^[[:space:]]*\[/ {
     attr = trim($0);
     if (attr ~ /^\[Header\(/) {
       header_attr = attr;
     } else {
       in_attr = 1;
+      gsub(/^[ \t]+/, "", attr)
+      attr = gensub(/\][ \t]*\[/, "][", "g", attr)
       attr_block = attr_block attr;
     }
     next;
@@ -35,6 +62,8 @@ find Assets -name "*.cs" | while read -r file; do
     if (attr ~ /^\[Header\(/) {
       header_attr = attr;
     } else {
+      gsub(/^[ \t]+/, "", attr)
+      attr = gensub(/\][ \t]*\[/, "][", "g", attr)
       attr_block = attr_block attr;
     }
     next;
@@ -45,7 +74,8 @@ find Assets -name "*.cs" | while read -r file; do
     if (header_attr != "") {
       print standard_indent header_attr;
     }
-    print standard_indent attr_block trim($0);
+    sorted_attrs = sort_attrs(attr_block);
+    print standard_indent sorted_attrs trim($0);
     attr_block = "";
     header_attr = "";
     in_attr = 0;
@@ -60,7 +90,6 @@ find Assets -name "*.cs" | while read -r file; do
     next;
   }
 
-  # Skip blank lines after fields
   /^[[:space:]]*$/ {
     if (skip_next_blank) {
       skip_next_blank = 0;
@@ -71,10 +100,12 @@ find Assets -name "*.cs" | while read -r file; do
   }
 
   {
-    # Orphaned attribute blocks (shouldn’t happen, but just in case)
     if (attr_block != "" || header_attr != "") {
       if (header_attr != "") print standard_indent header_attr;
-      if (attr_block != "") print standard_indent attr_block;
+      if (attr_block != "") {
+        sorted_attrs = sort_attrs(attr_block);
+        print standard_indent sorted_attrs;
+      }
       attr_block = "";
       header_attr = "";
       in_attr = 0;
@@ -85,4 +116,4 @@ find Assets -name "*.cs" | while read -r file; do
   ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 done
 
-echo "✅ All fields now start with 4-space indent, Header above fields, no blank lines remain."
+echo "✅ All fields now sorted with SerializeField first, Header above, 4-space indent enforced."
