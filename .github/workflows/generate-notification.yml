@@ -90,7 +90,7 @@ jobs:
               STATUS="failure"
             fi
             [[ -n "$TRACE" ]] && MESSAGE="$MESSAGE\n$TRACE"
-            MESSAGE="$MESSAGE\n[View Release]($RELEASE_URL)"
+            MESSAGE="$MESSAGE\n📦 [View Release]($RELEASE_URL)"
           else
             TITLE="❌ Release Failed - $VERSION"
             if [[ -n "$ERROR" ]]; then
@@ -100,7 +100,7 @@ jobs:
             fi
             STATUS="failure"
             [[ -n "$TRACE" ]] && MESSAGE="$MESSAGE\n$TRACE"
-            MESSAGE="$MESSAGE\n[View Pipeline]($RUN_URL)"
+            MESSAGE="$MESSAGE\n🔗 [View Pipeline]($RUN_URL)"
           fi
 
           echo "TITLE=$TITLE" >> $GITHUB_ENV
