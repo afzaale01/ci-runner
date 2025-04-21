@@ -27,34 +27,24 @@ find Assets -name '*.cs' | while read -r file; do
       attribute_block = ""
     }
 
-    # Capture Header and hold it
     /^\s*\[Header\(.*\)\]\s*$/ {
       header_line = $0
       in_header = 1
       next
     }
 
-    # Capture lines with attributes
     /^\s*\[[^]]+\]/ {
-      if (attribute_block != "") {
-        attribute_block = attribute_block " " trim($0)
-      } else {
-        attribute_block = trim($0)
-      }
+      attribute_block = attribute_block == "" ? trim($0) : attribute_block " " trim($0)
       next
     }
 
-    # When we hit the field
     /^\s*(public|private|protected|internal)[^;]+;/ {
-      access_line = $0
-
-      # Separate attributes into individual parts
-      split(attribute_block, raw_attrs, /\]\s*\[/)
-      attr_clean = ""
+      access_line = trim($0)
       serialize_present = 0
       attr_list = ""
 
-      for (i in raw_attrs) {
+      n = split(attribute_block, raw_attrs, /\]\s*\[/)
+      for (i = 1; i <= n; i++) {
         attr = raw_attrs[i]
         gsub(/\[|\]/, "", attr)
         attr = trim(attr)
@@ -69,22 +59,20 @@ find Assets -name '*.cs' | while read -r file; do
 
       if (in_header) {
         print header_line
-        print ""
+        print ""   # exactly one blank line after header
         in_header = 0
       }
 
       if (serialize_present) {
         if (sorted_attrs != "") {
-          print "    [SerializeField, " sorted_attrs "] " trim(access_line)
+          print "    [SerializeField, " sorted_attrs "] " access_line
         } else {
-          print "    [SerializeField] " trim(access_line)
+          print "    [SerializeField] " access_line
         }
+      } else if (sorted_attrs != "") {
+        print "    [" sorted_attrs "] " access_line
       } else {
-        if (sorted_attrs != "") {
-          print "    [" sorted_attrs "] " trim(access_line)
-        } else {
-          print "    " trim(access_line)
-        }
+        print "    " access_line
       }
 
       attribute_block = ""
@@ -115,4 +103,4 @@ find Assets -name '*.cs' | while read -r file; do
   fi
 done
 
-echo "✅ Unity attribute style applied: headers spaced, serialize first, others sorted inline."
+echo "✅ Unity-style format applied: headers spaced, no extra blank lines."
