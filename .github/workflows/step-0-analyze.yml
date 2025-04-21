@@ -77,13 +77,17 @@ jobs:
 
       - name: Add analysis summary
         if: always()
+        env:
+          FOUND_SOLUTION: ${{ steps.sln_check.outputs.found }}
+          FORMAT_OUTCOME: ${{ steps.formatter.outcome }}
         run: |
           echo "### Static Analysis Summary" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ steps.sln_check.outputs.found }}" == "true" ]]; then
-            if [[ "${{ steps.formatter.outcome }}" == "success" ]]; then
+          if [[ "$FOUND_SOLUTION" == "true" ]]; then
+            if [[ "$FORMAT_OUTCOME" == "success" ]]; then
               echo "✅ dotnet format passed." >> $GITHUB_STEP_SUMMARY
             else
               echo "❌ dotnet format failed." >> $GITHUB_STEP_SUMMARY
             fi
           else
             echo "ℹ️ No .sln file found — skipped dotnet format." >> $GITHUB_STEP_SUMMARY
+      
