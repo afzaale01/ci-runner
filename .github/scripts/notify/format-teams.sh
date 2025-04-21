@@ -1,14 +1,25 @@
 #!/bin/bash
 MESSAGE="$1"
+RUN_URL="$2"
+RELEASE_URL="$3"
 
 SUMMARY=""
 if ls deploy-results/*.json 1> /dev/null 2>&1; then
-  for file in deploy-results/*.json; do
+  SUMMARY+="\n\n\`\`\`\n"
+  SUMMARY+="Target      | Status | Details\n"
+  SUMMARY+="------------|--------|----------------------\n"
+  while IFS= read -r file; do
     TARGET=$(basename "$file" .json)
     STATUS=$(jq -r '.status' "$file")
     NOTE=$(jq -r '.note' "$file")
-    SUMMARY+="- **$TARGET**: $STATUS – $NOTE\n"
-  done
+    printf -v ROW "%-11s | %-6s | %s\n" "$TARGET" "$STATUS" "$NOTE"
+    SUMMARY+="$ROW"
+  done < <(find deploy-results -type f -name "*.json" | sort)
+  SUMMARY+="\n\`\`\`"
 fi
 
-echo -e "$MESSAGE\n\n**Deploy Targets:**\n$SUMMARY"
+FINAL="$MESSAGE$SUMMARY"
+FINAL=$(echo "$FINAL" | sed -E "s#\[View Release\]\([^)]+\)#[View Release]($RELEASE_URL)#g")
+FINAL=$(echo "$FINAL" | sed -E "s#\[View Pipeline\]\([^)]+\)#[View Pipeline]($RUN_URL)#g")
+
+echo "$FINAL"
