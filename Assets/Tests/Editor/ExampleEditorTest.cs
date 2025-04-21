@@ -8,4 +8,3 @@ public class ExampleEditorTest
         Assert.AreEqual(1 + 1, 2);
     }
 }
-
