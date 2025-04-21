@@ -18,9 +18,21 @@ if ls deploy-results/*.json 1> /dev/null 2>&1; then
   SUMMARY+="\n\`\`\`"
 fi
 
+# --- 🔗 Shorten URLs to suppress Discord embeds ---
+shorten_url() {
+  curl -s "https://tinyurl.com/api-create.php?url=$1"
+}
+
+RELEASE_SHORT=$(shorten_url "$RELEASE_URL")
+RUN_SHORT=$(shorten_url "$RUN_URL")
+
+# --- 🔔 Append formatted link line to the message ---
+MESSAGE="$MESSAGE\n📦 [View Release](<$RELEASE_SHORT>)   ·   🔗 [View Pipeline](<$RUN_SHORT>)"
+
+# --- 🧾 Combine everything ---
 FINAL="$MESSAGE$SUMMARY"
 
-# Convert Markdown links to Discord format: [text](url) → <url>
+# You can keep this sed just in case any leftover [text](url) exists, though it may be redundant now
 FINAL=$(echo "$FINAL" | sed -E 's/\[([^\]]+)\]\(([^)]+)\)/[\1](<\2>)/g')
 
 echo "$FINAL"
