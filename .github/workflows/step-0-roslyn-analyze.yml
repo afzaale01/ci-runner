@@ -16,6 +16,8 @@ jobs:
         run: |
           echo "📂 Installing & Scanning Assets..."
           dotnet tool install -g csharpier
-          ~/.dotnet/tools/csharpier --check Assets
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet csharpier --check Assets
+
 
 
