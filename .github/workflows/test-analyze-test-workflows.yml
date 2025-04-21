@@ -12,7 +12,7 @@ on:
           - 'true'
           - 'false'
       allowFailure:
-        description: "Whether lint errors should fail the pipeline"
+        description: "Whether failed formatting should be allowed"
         required: false
         default: 'true'
         type: choice
