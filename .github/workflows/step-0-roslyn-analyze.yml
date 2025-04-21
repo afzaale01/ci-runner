@@ -17,5 +17,5 @@ jobs:
 
       - name: Run Roslynator on Unity code
         run: |
-          echo "📂 Scanning ${{ inputs.sourceDirectory }}..."
-          roslynator analyze ${{ inputs.sourceDirectory }} --msbuild-path /usr/lib/mono/msbuild
+          echo "📂 Scanning Assets..."
+          roslynator analyze Assets --msbuild-path /usr/lib/mono/msbuild
