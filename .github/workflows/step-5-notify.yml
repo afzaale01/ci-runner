@@ -73,34 +73,17 @@ jobs:
         if: ${{ env.DISCORD_WEBHOOK != '' }}
         continue-on-error: true
         run: |
-          case "${{ needs.generate-notification.outputs.status }}" in
-            success) COLOR=3066993 ;;
-            failure) COLOR=15158332 ;;
-            *) COLOR=9807270 ;;
-          esac
-
-          # Safely construct payload using jq to avoid shell escaping issues
+          # Interpret literal newlines correctly
+          TEXT=$'${{ needs.generate-notification.outputs.discordMessage }}'
+      
           PAYLOAD=$(jq -n \
-            --arg username "GitHub CI" \
-            --arg title "${{ needs.generate-notification.outputs.title }}" \
-            --arg description "${{ needs.generate-notification.outputs.discordMessage }}" \
-            --argjson color "$COLOR" \
-            '{
-              username: $username,
-              embeds: [{
-                title: $title,
-                description: $description,
-                color: $color
-              }]
-            }')
-
-          # Send the notification
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "Content-Type: application/json" \
-            -d "$PAYLOAD" \
-            "$DISCORD_WEBHOOK")
-
-          # Set status based on response
+            --arg content "$TEXT" \
+            '{ content: $content }'
+          )
+      
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" \
+            -d "$PAYLOAD" "$DISCORD_WEBHOOK")
+      
           if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
             echo "DISCORD_STATUS=✅ Notification sent" >> $GITHUB_ENV
           else

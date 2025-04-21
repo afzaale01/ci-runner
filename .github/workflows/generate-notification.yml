@@ -78,28 +78,30 @@ jobs:
           if [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
               TITLE="✅ Release & Deploy Succeeded - $VERSION"
-              MESSAGE="Release \`$VERSION\` completed successfully.\n[View Release]($RELEASE_URL)"
+              MESSAGE="Release \`$VERSION\` completed successfully."
               STATUS="success"
             elif [[ "$DEPLOY" == "skipped" ]]; then
               TITLE="✅ Release Succeeded (No Deploy) - $VERSION"
-              MESSAGE="Release \`$VERSION\` completed successfully. No deployment targets set.\n[View Release]($RELEASE_URL)"
+              MESSAGE="Release \`$VERSION\` completed successfully. No deployment targets set."
               STATUS="neutral"
             else
               TITLE="⚠️ Release Succeeded, Deploy Failed - $VERSION"
-              MESSAGE="Release \`$VERSION\` succeeded, but deployment failed.\n[View Release]($RELEASE_URL)"
+              MESSAGE="Release \`$VERSION\` succeeded, but deployment failed."
               STATUS="failure"
             fi
+            [[ -n "$TRACE" ]] && MESSAGE="$MESSAGE\n$TRACE"
+            MESSAGE="$MESSAGE\n[View Release]($RELEASE_URL)"
           else
             TITLE="❌ Release Failed - $VERSION"
             if [[ -n "$ERROR" ]]; then
-              MESSAGE="Release \`$VERSION\` failed: \`$ERROR\`.\n[View Pipeline]($RUN_URL)"
+              MESSAGE="Release \`$VERSION\` failed: \`$ERROR\`."
             else
-              MESSAGE="Release \`$VERSION\` failed.\n[View Pipeline]($RUN_URL) for details."
+              MESSAGE="Release \`$VERSION\` failed."
             fi
             STATUS="failure"
+            [[ -n "$TRACE" ]] && MESSAGE="$MESSAGE\n$TRACE"
+            MESSAGE="$MESSAGE\n[View Pipeline]($RUN_URL)"
           fi
-
-          [[ -n "$TRACE" ]] && MESSAGE="$MESSAGE\n$TRACE"
 
           echo "TITLE=$TITLE" >> $GITHUB_ENV
           echo "MESSAGE=$MESSAGE" >> $GITHUB_ENV
@@ -118,8 +120,8 @@ jobs:
           chmod +x .github/scripts/notify/*.sh
 
           SLACK_MESSAGE=$(bash .github/scripts/notify/format-slack.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
-          DISCORD_MESSAGE=$(BRANCH="$BRANCH" COMMIT="$COMMIT" bash .github/scripts/notify/format-discord.sh "$MESSAGE")
-          TEAMS_MESSAGE=$(bash .github/scripts/notify/format-teams.sh "$MESSAGE")
+          DISCORD_MESSAGE=$(bash .github/scripts/notify/format-discord.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
+          TEAMS_MESSAGE=$(bash .github/scripts/notify/format-teams.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"

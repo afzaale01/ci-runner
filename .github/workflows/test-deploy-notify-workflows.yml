@@ -29,6 +29,7 @@ permissions:
 
 jobs:
   test-deploy:
+    name: Test Deploy
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
@@ -39,6 +40,7 @@ jobs:
     secrets: inherit
 
   test-notify:
+    name: Test Notify
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     if: >
       always() &&
