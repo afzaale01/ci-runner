@@ -3,55 +3,55 @@ set -e
 
 echo "🔧 Running CSharpier post-fix: Flattening Unity field attributes..."
 
-# This script rewrites C# files to move all attributes for each field onto the same line.
-
-# Find all C# files in Assets/
 find Assets -name "*.cs" | while read -r file; do
   awk '
   BEGIN {
-    in_attr_block = 0;
-    attr_line = "";
+    attr_block = "";
+    in_attr = 0;
   }
 
-  function flush_attr_and_line(line) {
-    if (attr_line != "") {
-      print attr_line line;
-      attr_line = "";
-    } else {
-      print line;
+  function trim(s) {
+    sub(/^[ \t\r\n]+/, "", s);
+    sub(/[ \t\r\n]+$/, "", s);
+    return s;
+  }
+
+  function flush_attr() {
+    if (attr_block != "") {
+      print attr_block;
+      attr_block = "";
     }
   }
 
-  /^\s*\[/ {
-    # Start collecting attributes
-    in_attr_block = 1;
-    attr_line = attr_line $0;
+  /^[[:space:]]*\[/ {
+    in_attr = 1;
+    attr_block = attr_block trim($0);
     next;
   }
 
-  in_attr_block && /^\s*\[/ {
-    # Continued attribute block
-    attr_line = attr_line $0;
+  in_attr && /^[[:space:]]*\[/ {
+    attr_block = attr_block trim($0);
     next;
   }
 
-  in_attr_block && /^\s*(public|private|protected|internal)/ {
-    # Attribute block ends and field declaration starts
-    flush_attr_and_line($0);
-    in_attr_block = 0;
+  in_attr && /^[[:space:]]*(public|private|protected|internal)[^=]*;[[:space:]]*$/ {
+    # Field detected after attributes
+    print attr_block trim($0);
+    attr_block = "";
+    in_attr = 0;
     next;
   }
 
   {
-    if (in_attr_block) {
-      # Unexpected line in attribute block (likely malformed), just flush and reset
-      print attr_line;
-      attr_line = "";
-      in_attr_block = 0;
+    if (in_attr) {
+      # If the line isn't a field, flush and reset
+      print attr_block;
+      attr_block = "";
+      in_attr = 0;
     }
     print $0;
   }
   ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
 done
 
-echo "✅ Attribute flattening complete."
+echo "✅ Fields flattened to single lines."
