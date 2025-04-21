@@ -40,6 +40,7 @@ jobs:
   test-run-tests:
     name: Test Run Tests
     if: ${{ inputs.shouldRunTests == 'true' }}
+    needs: [ test-analyze ]
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
