@@ -4,7 +4,8 @@ using UnityEngine.TestTools;
 
 public class ExamplePlayModeTest
 {
-    [UnityTest]    public IEnumerator ThisTestAlsoPasses()
+    [UnityTest]
+    public IEnumerator ThisTestAlsoPasses()
     {
         yield return null;
         Assert.IsTrue(true);
