@@ -95,6 +95,7 @@ jobs:
             fi
           else
             echo "ℹ️ No .sln file found — skipped dotnet format." >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Fail job if formatting failed and allowFail is true
         if: steps.formatter.outcome == 'failure' && fromJSON(inputs.allowFail)
