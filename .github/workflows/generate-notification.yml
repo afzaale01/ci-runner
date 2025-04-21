@@ -90,7 +90,7 @@ jobs:
               STATUS="failure"
             fi
             [[ -n "$TRACE" ]] && MESSAGE="$MESSAGE\n$TRACE"
-            MESSAGE="$MESSAGE\n📦 [View Release]($RELEASE_URL)"
+            MESSAGE="$MESSAGE\n📦 [View Release]($RELEASE_URL) · 🔗 [View Pipeline]($RUN_URL)"
           else
             TITLE="❌ Release Failed - $VERSION"
             if [[ -n "$ERROR" ]]; then
