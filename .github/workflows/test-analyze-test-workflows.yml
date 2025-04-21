@@ -33,6 +33,11 @@ permissions:
   pull-requests: write
 
 jobs:
+   test-analyze:
+    name: Analyze with Roslynator
+    if: github.event_name != 'schedule'
+    uses: avalin/unity-ci-templates/.github/workflows/step-0-roslyn-analyze.yml@main
+
   test-run-tests:
     name: Test Run Tests
     if: ${{ inputs.shouldRunTests == 'true' }}

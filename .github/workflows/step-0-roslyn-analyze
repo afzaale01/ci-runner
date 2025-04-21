@@ -1,0 +1,21 @@
+# .github/workflows/step-0-roslyn-analyze.yml
+name: 🧠 Step 0 - Roslyn Analyze
+
+on:
+  workflow_call:
+
+jobs:
+  roslyn-analyze:
+    name: 🧠 Roslyn Analyzer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install Roslynator CLI
+        run: dotnet tool install -g roslynator.dotnet.cli
+
+      - name: Run Roslynator on Unity code
+        run: |
+          echo "📂 Scanning ${{ inputs.sourceDirectory }}..."
+          roslynator analyze ${{ inputs.sourceDirectory }} --msbuild-path /usr/lib/mono/msbuild
