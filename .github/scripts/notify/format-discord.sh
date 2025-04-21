@@ -23,18 +23,15 @@ shorten_url() {
   curl -s "https://tinyurl.com/api-create.php?url=$1"
 }
 
-RELEASE_SHORT=$(shorten_url "$RELEASE_URL")
-RUN_SHORT=$(shorten_url "$RUN_URL")
+SHORT_RELEASE_URL=$(shorten_url "$RELEASE_URL")
+SHORT_RUN_URL=$(shorten_url "$RUN_URL")
 
-# --- 🔔 Modify formatted link line to include the shortened URL ---
-FINAL=$(echo "$MESSAGE" | \
-  sed -E "s#\[View Release\]\([^)]+\)#[View Release](<${SHORT_RELEASE_URL})#g" | \
-  sed -E "s#\[View Pipeline\]\([^)]+\)#[View Pipeline](<${SHORT_RUN_URL})#g")
-
-# --- 🧾 Combine everything ---
+# --- 💬 Combine message and summary first ---
 FINAL="$MESSAGE$SUMMARY"
 
-# You can keep this sed just in case any leftover [text](url) exists, though it may be redundant now
-FINAL=$(echo "$FINAL" | sed -E 's/\[([^\]]+)\]\(([^)]+)\)/[\1](<\2>)/g')
+# --- 🪄 Replace long GitHub links with shortened + wrapped ones ---
+FINAL=$(echo "$FINAL" | \
+  sed -E "s#\[View Release\]\([^)]+\)#[View Release](<${SHORT_RELEASE_URL})#g" | \
+  sed -E "s#\[View Pipeline\]\([^)]+\)#[View Pipeline](<${SHORT_RUN_URL})#g")
 
 echo "$FINAL"
