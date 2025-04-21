@@ -5,53 +5,67 @@ echo "🔧 Running Unity-style CSharpier Addon Fixer..."
 
 find Assets -name '*.cs' | while read -r file; do
   tmp_file="${file}.tmp"
-  in_header=0
-  header_line=""
 
   awk '
     function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
     function sort_attrs(attrs,   n, a, i, j, tmp) {
       n = split(attrs, a, ",")
-      # Simple bubble sort since n is usually 1-3
       for (i = 1; i <= n; i++) a[i] = trim(a[i])
       for (i = 1; i <= n; i++) {
         for (j = i + 1; j <= n; j++) {
-          if (a[i] > a[j]) {
-            tmp = a[i]; a[i] = a[j]; a[j] = tmp
-          }
+          if (a[i] > a[j]) { tmp = a[i]; a[i] = a[j]; a[j] = tmp }
         }
       }
-      return a[1] (n > 1 ? ", " a[2] : "") (n > 2 ? ", " a[3] : "")
+      out = a[1]
+      for (i = 2; i <= n; i++) out = out ", " a[i]
+      return out
     }
 
-    BEGIN { in_header = 0 }
+    BEGIN {
+      in_header = 0
+      header_line = ""
+      attribute_block = ""
+    }
 
-    # Match: [Header("Some Text")]
+    # Capture Header and hold it
     /^\s*\[Header\(.*\)\]\s*$/ {
       header_line = $0
       in_header = 1
       next
     }
 
-    # Match: lines with SerializeField and possibly others
-    /^\s*(\[.*\])+\s*private/ {
-      orig = $0
-      matches = ""
-      field = orig
+    # Capture lines with attributes
+    /^\s*\[[^]]+\]/ {
+      if (attribute_block != "") {
+        attribute_block = attribute_block " " trim($0)
+      } else {
+        attribute_block = trim($0)
+      }
+      next
+    }
 
-      # Extract all [] attributes
-      while (match(field, /\[[^]]*\]/)) {
-        attr = substr(field, RSTART + 1, RLENGTH - 2)
-        if (attr ~ /^SerializeField$/) {
-          has_serialize = 1
-        } else {
-          matches = matches == "" ? attr : matches ", " attr
+    # When we hit the field
+    /^\s*(public|private|protected|internal)[^;]+;/ {
+      access_line = $0
+
+      # Separate attributes into individual parts
+      split(attribute_block, raw_attrs, /\]\s*\[/)
+      attr_clean = ""
+      serialize_present = 0
+      attr_list = ""
+
+      for (i in raw_attrs) {
+        attr = raw_attrs[i]
+        gsub(/\[|\]/, "", attr)
+        attr = trim(attr)
+        if (attr == "SerializeField") {
+          serialize_present = 1
+        } else if (attr != "") {
+          attr_list = attr_list == "" ? attr : attr_list ", " attr
         }
-        field = substr(field, RSTART + RLENGTH)
       }
 
-      # Sort non-SerializeField attributes
-      sorted = matches == "" ? "" : sort_attrs(matches)
+      sorted_attrs = sort_attrs(attr_list)
 
       if (in_header) {
         print header_line
@@ -59,7 +73,21 @@ find Assets -name '*.cs' | while read -r file; do
         in_header = 0
       }
 
-      print "    [SerializeField" (sorted != "" ? ", " sorted : "") "] " substr(orig, match(orig, /private/))
+      if (serialize_present) {
+        if (sorted_attrs != "") {
+          print "    [SerializeField, " sorted_attrs "] " trim(access_line)
+        } else {
+          print "    [SerializeField] " trim(access_line)
+        }
+      } else {
+        if (sorted_attrs != "") {
+          print "    [" sorted_attrs "] " trim(access_line)
+        } else {
+          print "    " trim(access_line)
+        }
+      }
+
+      attribute_block = ""
       next
     }
 
@@ -69,6 +97,12 @@ find Assets -name '*.cs' | while read -r file; do
         print ""
         in_header = 0
       }
+
+      if (attribute_block != "") {
+        print attribute_block
+        attribute_block = ""
+      }
+
       print $0
     }
   ' "$file" > "$tmp_file"
@@ -81,4 +115,4 @@ find Assets -name '*.cs' | while read -r file; do
   fi
 done
 
-echo "✅ Unity-style attribute layout enforced with header spacing and sorted attributes."
+echo "✅ Unity attribute style applied: headers spaced, serialize first, others sorted inline."
