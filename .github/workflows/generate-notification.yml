@@ -28,9 +28,6 @@ on:
       discordMessage:
         description: 'Discord-formatted message'
         value: ${{ jobs.generate.outputs.discordMessage }}
-      teamsMessage:
-        description: 'Teams-formatted message'
-        value: ${{ jobs.generate.outputs.teamsMessage }}
       status:
         description: 'Status for use in color codes (success, failure, etc)'
         value: ${{ jobs.generate.outputs.status }}
@@ -43,7 +40,6 @@ jobs:
       message: ${{ steps.set-outputs.outputs.message }}
       slackMessage: ${{ steps.set-outputs.outputs.slackMessage }}
       discordMessage: ${{ steps.set-outputs.outputs.discordMessage }}
-      teamsMessage: ${{ steps.set-outputs.outputs.teamsMessage }}
       status: ${{ steps.set-outputs.outputs.status }}
     steps:
       - name: 📥 Checkout repository
@@ -121,7 +117,6 @@ jobs:
 
           SLACK_MESSAGE=$(bash .github/scripts/notify/format-slack.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
           DISCORD_MESSAGE=$(bash .github/scripts/notify/format-discord.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
-          TEAMS_MESSAGE=$(bash .github/scripts/notify/format-teams.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
 
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
@@ -136,8 +131,4 @@ jobs:
 
           echo "discordMessage<<EOF" >> "$GITHUB_OUTPUT"
           echo "$DISCORD_MESSAGE" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-          echo "teamsMessage<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$TEAMS_MESSAGE" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"

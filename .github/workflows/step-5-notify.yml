@@ -32,7 +32,6 @@ jobs:
     env:
       SLACK_STATUS: "⚠️ Webhook not configured"
       DISCORD_STATUS: "⚠️ Webhook not configured"
-      TEAMS_STATUS: "⚠️ Webhook not configured"
     steps:
       # ───── Slack ─────
       - name: 📢 Send Slack Notification (if configured)
@@ -92,36 +91,6 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
-      # ───── Microsoft Teams ─────
-      - name: 📢 Notify Microsoft Teams (if configured)
-        if: ${{ env.MSTEAMS_WEBHOOK != '' }}
-        continue-on-error: true
-        run: |
-          case "${{ needs.generate-notification.outputs.status }}" in
-            success) COLOR="00FF00" ;;
-            failure) COLOR="FF0000" ;;
-            *) COLOR="999999" ;;
-          esac
-
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "Content-Type: application/json" \
-            -d "{
-                  \"@type\": \"MessageCard\",
-                  \"@context\": \"http://schema.org/extensions\",
-                  \"summary\": \"CI/CD Notification\",
-                  \"themeColor\": \"$COLOR\",
-                  \"title\": \"${{ needs.generate-notification.outputs.title }}\",
-                  \"text\": \"${{ needs.generate-notification.outputs.teamsMessage }}\"
-                }" \
-            $MSTEAMS_WEBHOOK)
-
-          if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
-            echo "TEAMS_STATUS=✅ Notification sent" >> $GITHUB_ENV
-          else
-            echo "TEAMS_STATUS=❌ Failed to send (HTTP $RESPONSE)" >> $GITHUB_ENV
-          fi
-        env:
-          MSTEAMS_WEBHOOK: ${{ secrets.MSTEAMS_WEBHOOK }}
-
       # ───── Summary ─────
       - name: 📄 Notification Summary
         if: always()
@@ -132,4 +101,3 @@ jobs:
           echo "|---------|--------|---------|" >> $GITHUB_STEP_SUMMARY
           echo "| Slack   | ${SLACK_STATUS%% *} | ${SLACK_STATUS#* } |" >> $GITHUB_STEP_SUMMARY
           echo "| Discord | ${DISCORD_STATUS%% *} | ${DISCORD_STATUS#* } |" >> $GITHUB_STEP_SUMMARY
-          echo "| Teams   | ${TEAMS_STATUS%% *} | ${TEAMS_STATUS#* } |" >> $GITHUB_STEP_SUMMARY
