@@ -33,11 +33,7 @@ public class FunkyModelRotator : MonoBehaviour
         else
         {
             // Apply damping to the rotation velocity
-            rotationVelocity = Vector3.Lerp(
-                rotationVelocity,
-                Vector3.zero,
-                Time.deltaTime * momentumDamping
-            );
+            rotationVelocity = Vector3.Lerp(rotationVelocity, Vector3.zero, Time.deltaTime * momentumDamping);
         }
 
         // Rotate object based on velocity
