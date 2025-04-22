@@ -34,11 +34,17 @@ permissions:
   pull-requests: write
 
 jobs:
+  add-prerequisites:
+    name: Add Prerequisites
+    uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
+    secrets: inherit
+
   # ─────────────────────────────────────────────────────────────────────────────
   # 1. Run Tests
   # ─────────────────────────────────────────────────────────────────────────────
   run-tests:
     name: Run Tests
+    needs: [ add-prerequisites ]
     if: ${{ 
        (
         (vars.EXCLUDE_UNITY_TESTS || 'false') == 'false' &&
