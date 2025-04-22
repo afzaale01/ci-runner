@@ -117,7 +117,6 @@ They can be found under:
 | `COMBINE_ARTIFACTS`         | Combine all builds into one artifact (e.g. for internal QA or archiving) |
 | `DEPLOY_TARGETS`            | Deployment targets (JSON array) |
 | `EXCLUDE_UNITY_TESTS`       | Exclude tests from pipeline (`true`/`false`) |
-| `LICENSE_ARTIFACT_NAME`     | Artifact name for uploaded license |
 | `PROJECT_NAME`              | Name of the Unity project |
 | `RETENTION_DAYS_PREVIEW`    | Days to retain preview builds |
 | `RETENTION_DAYS_RELEASE`    | Days to retain release builds |
