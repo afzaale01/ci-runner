@@ -2,7 +2,11 @@ name: ⏳ CI/CD Prerequisites
 
 on:
   workflow_call:
-
+    inputs:
+      excludesUnityTests:
+        description: "Whether unity tests are excluded"
+        type: string
+        required: true
 jobs:
   validate-vars:
     name: Validate GitHub Variables
