@@ -29,7 +29,6 @@ jobs:
 
   upload-license:
     name: 📥️ Upload Unity License
-    if: ${{ (vars.EXCLUDE_UNITY_TESTS || 'false') == 'false'}}
     uses: ./.github/workflows/unity-license-uploader.yml
     with:
       artifactName: ${{ vars.LICENSE_ARTIFACT_NAME }}
