@@ -8,8 +8,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  add-prerequisites:
-    name: Add Prerequisites
+  setup-prerequisites:
+    name: Setup Prerequisites
     uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
     with:
       excludesUnityTests: "false"
@@ -17,7 +17,7 @@ jobs:
 
   test-run-tests:
     name: Test Run Tests
-    needs: [ add-prerequisites ]
+    needs: [ setup-prerequisites ]
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION || 'auto' }}
