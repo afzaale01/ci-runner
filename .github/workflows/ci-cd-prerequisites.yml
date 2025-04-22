@@ -21,9 +21,7 @@ jobs:
           "RETENTION_DAYS_PREVIEW",
           "RETENTION_DAYS_RELEASE",
           "TARGET_PLATFORMS_PREVIEW",
-          "TARGET_PLATFORMS_RELEASE",
-          "UNITY_VERSION",
-          "USE_GIT_LFS"
+          "TARGET_PLATFORMS_RELEASE"
         ]
 
   upload-license:
