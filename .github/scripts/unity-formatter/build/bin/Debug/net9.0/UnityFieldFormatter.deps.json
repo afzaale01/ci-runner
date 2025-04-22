@@ -6,12 +6,12 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v9.0": {
-      "UnityFieldFixer/1.0.0": {
+      "UnityFieldFormatter/1.0.0": {
         "dependencies": {
           "Microsoft.CodeAnalysis.CSharp.Workspaces": "4.9.2"
         },
         "runtime": {
-          "UnityFieldFixer.dll": {}
+          "UnityFieldFormatter.dll": {}
         }
       },
       "Humanizer.Core/2.14.1": {
@@ -313,7 +313,7 @@
     }
   },
   "libraries": {
-    "UnityFieldFixer/1.0.0": {
+    "UnityFieldFormatter/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
