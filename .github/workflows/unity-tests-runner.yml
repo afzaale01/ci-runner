@@ -19,11 +19,28 @@ on:
         description: "Timeout for each build job in minutes"
         type: number
         required: true
-
+    outputs:
+      total:
+        description: "Total number of tests"
+        value: ${{ jobs.run-tests.outputs.total }}
+      passed:
+        description: "Number of passed tests"
+        value: ${{ jobs.run-tests.outputs.passed }}
+      result:
+        description: "Overall result (Passed, Failed, etc.)"
+        value: ${{ jobs.run-tests.outputs.result }}
+      durationSeconds:
+        description: "Test duration in seconds"
+        value: ${{ jobs.run-tests.outputs.durationSeconds }}
 jobs:
   run-tests:
     name: Run ${{ inputs.testMode }} Tests
     runs-on: ubuntu-latest
+    outputs:
+      total: ${{ steps.summary.outputs.total }}
+      passed: ${{ steps.summary.outputs.passed }}
+      result: ${{ steps.summary.outputs.result }}
+      durationSeconds: ${{ steps.summary.outputs.durationSeconds }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -99,4 +116,27 @@ jobs:
             echo "⚠️ No test results found. Maybe test step was skipped or failed early."
           else
             echo "✅ Test results located at: ${{ steps.run-tests.outputs.artifactsPath }}"
+          fi
+
+      - name: Extract Test Summary
+        id: summary
+        run: |
+          XML=$(find "${{ steps.run-tests.outputs.artifactsPath }}" -name '*.xml' | head -n 1)
+
+          if [[ -f "$XML" ]]; then
+            TOTAL=$(xmllint --xpath 'string(/test-run/@total)' "$XML")
+            PASSED=$(xmllint --xpath 'string(/test-run/@passed)' "$XML")
+            RESULT=$(xmllint --xpath 'string(/test-run/@result)' "$XML")
+            RAW_DURATION=$(xmllint --xpath 'string(/test-run/@duration)' "$XML")
+            SECONDS=$(printf "%.0f" "$(echo "$RAW_DURATION" | awk '{print $1 * 1}')" )
+
+            echo "total=$TOTAL" >> $GITHUB_OUTPUT
+            echo "passed=$PASSED" >> $GITHUB_OUTPUT
+            echo "result=$RESULT" >> $GITHUB_OUTPUT
+            echo "durationSeconds=$SECONDS" >> $GITHUB_OUTPUT
+          else
+            echo "total=0" >> $GITHUB_OUTPUT
+            echo "passed=0" >> $GITHUB_OUTPUT
+            echo "result=Skipped" >> $GITHUB_OUTPUT
+            echo "durationSeconds=0" >> $GITHUB_OUTPUT
           fi
