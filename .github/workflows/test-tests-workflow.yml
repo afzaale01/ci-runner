@@ -12,7 +12,7 @@ jobs:
     name: Add Prerequisites
     uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
     with:
-      excludesUnityTests: ${{ vars.EXCLUDE_UNITY_TESTS }}
+      excludesUnityTests: false
     secrets: inherit
 
   test-run-tests:
