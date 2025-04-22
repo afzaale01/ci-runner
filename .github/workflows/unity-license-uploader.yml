@@ -2,12 +2,6 @@ name: 📥️ Upload Unity License
 
 on:
   workflow_call:
-    inputs:
-      artifactName:
-        description: "Name of the uploaded license artifact"
-        required: false
-        default: 'unity-license'
-        type: string
 
 jobs:
   activate-license:
@@ -39,6 +33,6 @@ jobs:
       - name: Upload License Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.artifactName }}
+          name: unity-license
           path: license/Unity_lic.ulf
           retention-days: 3

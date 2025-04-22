@@ -57,7 +57,6 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
-      licenseArtifactName: ${{ vars.LICENSE_ARTIFACT_NAME }}
       useGitLfs: ${{ vars.USE_GIT_LFS }}
       editModePath: ${{ vars.UNITY_TESTS_EDITMODE_PATH }}
       playModePath: ${{ vars.UNITY_TESTS_PLAYMODE_PATH }}

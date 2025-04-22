@@ -17,7 +17,6 @@ jobs:
           "COMBINE_ARTIFACTS",
           "DEPLOY_TARGETS",
           "EXCLUDE_UNITY_TESTS",
-          "LICENSE_ARTIFACT_NAME",
           "PROJECT_NAME",
           "RETENTION_DAYS_PREVIEW",
           "RETENTION_DAYS_RELEASE",
@@ -35,6 +34,4 @@ jobs:
     name: 📥️ Upload Unity License
     if: ${{ inputs.excludesUnityTests == 'false' }}
     uses: ./.github/workflows/unity-license-uploader.yml
-    with:
-      artifactName: ${{ vars.LICENSE_ARTIFACT_NAME }}
     secrets: inherit
