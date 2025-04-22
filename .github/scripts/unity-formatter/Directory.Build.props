@@ -1,0 +1,19 @@
+<Project>
+  <PropertyGroup>
+    <!--––– Put *all* obj‐style bits (restore, NuGet g.props/g.targets, compiler g.cs, PDBs, auto‑AssemblyInfo) here –––-->
+    <BaseIntermediateOutputPath>build/obj/</BaseIntermediateOutputPath>
+    <AppendTargetFrameworkToIntermediateOutputPath>false</AppendTargetFrameworkToIntermediateOutputPath>
+    <AppendRuntimeIdentifierToIntermediateOutputPath>false</AppendRuntimeIdentifierToIntermediateOutputPath>
+
+    <!--––– Make NuGet/MSBuild use the same “obj” folder for project.assets.json, nuget.g.props/targets, etc. –––-->
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+
+    <!--––– Put your EXE under build/bin –––-->
+    <BaseOutputPath>build/bin/</BaseOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+
+    <!--––– Turn off the SDK‑style auto‑AssemblyInfo so you don’t get CS0579 duplicates –––-->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+</Project>

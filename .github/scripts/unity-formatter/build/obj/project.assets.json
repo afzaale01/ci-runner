@@ -1635,7 +1635,7 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
-      "Microsoft.CodeAnalysis.CSharp.Workspaces >= 4.9.0"
+      "Microsoft.CodeAnalysis.CSharp.Workspaces >= 4.9.2"
     ]
   },
   "packageFolders": {
@@ -1648,7 +1648,7 @@
       "projectName": "UnityFieldFormatter",
       "projectPath": "C:\\Users\\Avalin\\Documents\\Github\\Unity-CI-Templates\\.github\\scripts\\unity-formatter\\UnityFieldFormatter.csproj",
       "packagesPath": "C:\\Users\\Avalin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Avalin\\Documents\\Github\\Unity-CI-Templates\\.github\\scripts\\unity-formatter\\obj\\",
+      "outputPath": "C:\\Users\\Avalin\\Documents\\Github\\Unity-CI-Templates\\.github\\scripts\\unity-formatter\\build/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Avalin\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -1683,7 +1683,7 @@
         "dependencies": {
           "Microsoft.CodeAnalysis.CSharp.Workspaces": {
             "target": "Package",
-            "version": "[4.9.0, )"
+            "version": "[4.9.2, )"
           }
         },
         "imports": [
@@ -1705,17 +1705,5 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "UnityFieldFormatter depends on Microsoft.CodeAnalysis.CSharp.Workspaces (>= 4.9.0) but Microsoft.CodeAnalysis.CSharp.Workspaces 4.9.0 was not found. Microsoft.CodeAnalysis.CSharp.Workspaces 4.9.2 was resolved instead.",
-      "libraryId": "Microsoft.CodeAnalysis.CSharp.Workspaces",
-      "targetGraphs": [
-        "net9.0"
-      ]
-    }
-  ]
+  }
 }
