@@ -51,7 +51,6 @@ jobs:
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
       testMode: EditMode
-      licenseArtifactName: unity-license
       unityVersion: ${{ inputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLfs }}
       timeoutMinutes: ${{ inputs.timeoutMinutes }}
@@ -64,7 +63,6 @@ jobs:
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
       testMode: PlayMode
-      licenseArtifactName: unity-license
       unityVersion: ${{ inputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLfs }}
       timeoutMinutes: ${{ inputs.timeoutMinutes }}

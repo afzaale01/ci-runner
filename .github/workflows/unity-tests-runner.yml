@@ -15,10 +15,6 @@ on:
         description: "Whether to use Git LFS (true/false)"
         required: true
         type: string
-      licenseArtifactName:
-        description: "Name of uploaded license artifact"
-        required: true
-        type: string
       timeoutMinutes:
         description: "Timeout for each build job in minutes"
         type: number
@@ -52,7 +48,7 @@ jobs:
       - name: Download Unity License Artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.licenseArtifactName }}
+          name: unity-license
           path: ~/.local/share/unity3d/Unity
 
       - name: Cache Unity Packages
