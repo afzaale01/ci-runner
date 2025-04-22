@@ -110,22 +110,22 @@ They can be found under:
 
 `Settings → Secrets and variables → Actions → Variables`
 
-| Variable Name               | Required | Description |
-|-----------------------------|-------------|
-| `COMBINE_ARTIFACTS`         | ✅ | Combine all builds into one artifact (e.g. for internal QA or archiving) |
-| `DEPLOY_TARGETS`            | ✅ | Deployment targets (JSON array) |
-| `EXCLUDE_UNITY_TESTS`       | ❌ | Exclude tests from pipeline (`true`/`false`) |
-| `PROJECT_NAME`              | ✅ | Name of the Unity project |
-| `RETENTION_DAYS_PREVIEW`    | ✅ | Days to retain preview builds |
-| `RETENTION_DAYS_RELEASE`    | ✅ | Days to retain release builds |
-| `TARGET_PLATFORMS_PREVIEW`  | ✅ | Preview build platforms (JSON) |
-| `TARGET_PLATFORMS_RELEASE`  | ✅ | Release build platforms (JSON) |
-| `TIMEOUT_TESTS_IN_MINUTES`  | ❌ | Test timeout per job in minutes (default is `15`) |
-| `TIMEOUT_BUILD_IN_MINUTES`  | ❌ | Build timeout per job in minutes (default is `30`) |
-| `UNITY_TESTS_EDITMODE_PATH` | ❌ | Path to EditMode tests |
-| `UNITY_TESTS_PLAYMODE_PATH` | ❌ | Path to PlayMode tests |
-| `UNITY_VERSION`             | ❌ | Unity version (e.g. `auto` or `2022.3.13f1`) |
-| `USE_GIT_LFS`               | ❌ | Use Git LFS (`true`/`false`) |
+| Variable Name               | Required | Description                                                              |
+|----------------------------|----------|--------------------------------------------------------------------------|
+| `COMBINE_ARTIFACTS`         | ✅        | Combine all builds into one artifact (e.g. for internal QA or archiving) |
+| `DEPLOY_TARGETS`            | ✅        | Deployment targets (JSON array)                                          |
+| `EXCLUDE_UNITY_TESTS`       | ❌        | Exclude tests from pipeline (`true`/`false`)                             |
+| `PROJECT_NAME`              | ✅        | Name of the Unity project                                                |
+| `RETENTION_DAYS_PREVIEW`    | ✅        | Days to retain preview builds                                            |
+| `RETENTION_DAYS_RELEASE`    | ✅        | Days to retain release builds                                            |
+| `TARGET_PLATFORMS_PREVIEW`  | ✅        | Preview build platforms (JSON)                                           |
+| `TARGET_PLATFORMS_RELEASE`  | ✅        | Release build platforms (JSON)                                           |
+| `TIMEOUT_TESTS_IN_MINUTES`  | ❌        | Test timeout per job in minutes (default is `15`)                        |
+| `TIMEOUT_BUILD_IN_MINUTES`  | ❌        | Build timeout per job in minutes (default is `30`)                       |
+| `UNITY_TESTS_EDITMODE_PATH` | ❌        | Path to EditMode tests                                                   |
+| `UNITY_TESTS_PLAYMODE_PATH` | ❌        | Path to PlayMode tests                                                   |
+| `UNITY_VERSION`             | ❌        | Unity version (e.g. `auto` or `2022.3.13f1`)                             |
+| `USE_GIT_LFS`               | ❌        | Use Git LFS (`true`/`false`)                                             |
 
 #### ⚙️ Repository JSON Variable Examples
 
