@@ -28,6 +28,7 @@ jobs:
       buildType: ${{ inputs.buildType }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
+      deployTargets: ${{ vars.DEPLOY_TARGETS }}
     secrets: inherit
 
   release:
@@ -40,4 +41,5 @@ jobs:
       version: ${{ needs.build.outputs.version }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
+      deployTargets: ${{ vars.DEPLOY_TARGETS }}
     secrets: inherit

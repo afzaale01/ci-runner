@@ -17,6 +17,11 @@ on:
         type: string
         default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
         required: false
+      deployTargets:
+        description: "JSON array of deploy targets (e.g. ['itch.io','appcenter','firebase','s3','gh-pages'])"
+        type: string
+        default: '[]'
+        required: false
       timeoutMinutes:
         description: "Timeout for each build job in minutes"
         type: number
