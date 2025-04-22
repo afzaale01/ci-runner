@@ -177,7 +177,7 @@ jobs:
         if: ${{ steps.platform_count.outputs.platform_count > 1 }}
         run: |
           VERSION="${{ needs.determine_version.outputs.version }}"
-          PROJECT="${{ vars.PROJECT_NAME }}"
+          PROJECT="${{ inputs.projectName }}"
           COMBINED_DIR="${PROJECT}-${VERSION}"
           mkdir -p "$COMBINED_DIR"
 
@@ -197,9 +197,9 @@ jobs:
       - name: 📦 Upload Combined Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ vars.PROJECT_NAME }}-${{ needs.determine_version.outputs.version }}
-          path: ${{ vars.PROJECT_NAME }}-${{ needs.determine_version.outputs.version }}
-          retention-days: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && fromJson(vars.RETENTION_DAYS_RELEASE) || fromJson(vars.RETENTION_DAYS_PREVIEW) }}
+          name: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}
+          path: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}
+          retention-days: ${{ inputs.retentionDays }}
 
   confirm_builds:
     name: 📄 Summarize Build Results
@@ -216,7 +216,7 @@ jobs:
         if: ${{ vars.COMBINE_ARTIFACTS == 'true' }}
         uses: actions/download-artifact@v4
         with:
-          name: ${{ vars.PROJECT_NAME }}-${{ needs.determine_version.outputs.version }}
+          name: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}
           path: combined-artifact
 
       - name: 📘 Write Build Summary
