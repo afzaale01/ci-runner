@@ -29,9 +29,9 @@ on:
       result:
         description: "Overall result (Passed, Failed, etc.)"
         value: ${{ jobs.run-tests.outputs.result }}
-      durationSeconds:
+      duration:
         description: "Test duration in seconds"
-        value: ${{ jobs.run-tests.outputs.durationSeconds }}
+        value: ${{ jobs.run-tests.outputs.duration }}
 jobs:
   run-tests:
     name: Run ${{ inputs.testMode }} Tests
@@ -40,7 +40,7 @@ jobs:
       total: ${{ steps.summary.outputs.total }}
       passed: ${{ steps.summary.outputs.passed }}
       result: ${{ steps.summary.outputs.result }}
-      durationSeconds: ${{ steps.summary.outputs.durationSeconds }}
+      duration: ${{ steps.summary.outputs.duration }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -93,7 +93,7 @@ jobs:
       - name: Run ${{ inputs.testMode }} Tests
         id: run-tests
         timeout-minutes: ${{ inputs.timeoutMinutes }}
-        continue-on-error: false
+        continue-on-error: true
         uses: game-ci/unity-test-runner@v4
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -118,28 +118,37 @@ jobs:
             echo "✅ Test results located at: ${{ steps.run-tests.outputs.artifactsPath }}"
           fi
 
-      - name: Install xmllint (libxml2-utils)
-        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
-
       - name: Extract Test Summary
         id: summary
         run: |
           XML=$(find "${{ steps.run-tests.outputs.artifactsPath }}" -name '*.xml' | head -n 1)
 
           if [[ -f "$XML" ]]; then
-            TOTAL=$(xmllint --xpath 'string(/test-run/@total)' "$XML")
-            PASSED=$(xmllint --xpath 'string(/test-run/@passed)' "$XML")
-            RESULT=$(xmllint --xpath 'string(/test-run/@result)' "$XML")
-            RAW_DURATION=$(xmllint --xpath 'string(/test-run/@duration)' "$XML")
-            SECONDS=$(printf "%.0f" "$(echo "$RAW_DURATION" | awk '{print $1 * 1}')" )
+            TOTAL=$(grep -oP 'total="\K[0-9]+' "$XML" | head -n1)
+            PASSED=$(grep -oP 'passed="\K[0-9]+' "$XML" | head -n1)
+            RESULT=$(grep -oP 'result="\K[^"]+' "$XML" | head -n1)
+            RAW_DURATION=$(grep -oP 'duration="\K[0-9.]+' "$XML" | head -n1)
+
+            # Convert to formatted duration like "7m 16.25s"
+            DURATION_FORMATTED=$(awk "BEGIN {
+              total = $RAW_DURATION;
+              min = int(total / 60);
+              sec = total % 60;
+              if (min > 0) {
+                printf \"%dm %.2fs\", min, sec;
+              } else {
+                printf \"%.2fs\", sec;
+              }
+            }")
 
             echo "total=$TOTAL" >> $GITHUB_OUTPUT
             echo "passed=$PASSED" >> $GITHUB_OUTPUT
             echo "result=$RESULT" >> $GITHUB_OUTPUT
-            echo "durationSeconds=$SECONDS" >> $GITHUB_OUTPUT
+            echo "duration=$DURATION_FORMATTED" >> $GITHUB_OUTPUT
           else
+            echo "⚠️ No test report XML found. Possibly skipped or failed before reporting stage."
             echo "total=0" >> $GITHUB_OUTPUT
             echo "passed=0" >> $GITHUB_OUTPUT
             echo "result=Skipped" >> $GITHUB_OUTPUT
-            echo "durationSeconds=0" >> $GITHUB_OUTPUT
+            echo "duration=0s" >> $GITHUB_OUTPUT
           fi

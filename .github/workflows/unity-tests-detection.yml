@@ -23,6 +23,7 @@ on:
 
 jobs:
   detect:
+    name: Find Tests At Paths
     runs-on: ubuntu-latest
     outputs:
       has_editmode: ${{ steps.edit.outputs.found }}

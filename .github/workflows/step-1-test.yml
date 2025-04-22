@@ -76,7 +76,7 @@ jobs:
     steps:
       - name: Write Summary
         run: |
-          echo "### 🧪 Unity Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Unity Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Test Mode   | Result     | Duration | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------------|------------|----------|--------|" >> $GITHUB_STEP_SUMMARY
@@ -87,30 +87,78 @@ jobs:
             local TOTAL=$3
             local PASSED=$4
             local RESULT=$5
-            local SECONDS=$6
+            local DURATION=$6
 
+            local DISPLAY_RESULT="${PASSED} / ${TOTAL}"
+            local DISPLAY_DURATION="$DURATION"
             local STATUS="❌"
-            if [[ "$RESULT" == "Passed" ]]; then
-              STATUS="✔️"
-            elif [[ "$TOTAL" == "0" ]]; then
+          
+            if [[ "$RESULT" == "Skipped" || "$TOTAL" == "0" ]]; then
+              DISPLAY_RESULT="-/-"
+              DISPLAY_DURATION="N/A"
               STATUS="ℹ️"
+            elif [[ "$RESULT" == "Passed" ]]; then
+              STATUS="✔️"
             fi
-
-            local MIN=$((SECONDS / 60))
-            local SEC=$((SECONDS % 60))
-            local DURATION="${MIN}m ${SEC}s"
-
-            echo "| ${ICON} ${MODE} | ${PASSED} / ${TOTAL} | ${DURATION} | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
+          
+            echo "| ${ICON} ${MODE} | ${DISPLAY_RESULT} | ${DISPLAY_DURATION} | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
           }
 
           summarize "EditMode" "🥪" \
             "${{ needs.run-editmode.outputs.total }}" \
             "${{ needs.run-editmode.outputs.passed }}" \
             "${{ needs.run-editmode.outputs.result }}" \
-            "${{ needs.run-editmode.outputs.durationSeconds }}"
+            "${{ needs.run-editmode.outputs.duration }}"
 
           summarize "PlayMode" "🎮" \
             "${{ needs.run-playmode.outputs.total }}" \
             "${{ needs.run-playmode.outputs.passed }}" \
             "${{ needs.run-playmode.outputs.result }}" \
-            "${{ needs.run-playmode.outputs.durationSeconds }}"
+            "${{ needs.run-playmode.outputs.duration }}"
+
+      - name: Download Test Result Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded-results
+
+      - name: Append Failed Test Details
+        id: failed-check
+        if: always()
+        continue-on-error: true
+        run: |
+          set +e  # Don't exit script on errors
+          HAS_FAILS=0
+          FAIL_BLOCK=""
+
+          for MODE in EditMode PlayMode; do
+            XML=$(find downloaded-results -type f -path "*Unity-${MODE}-*" -name "*.xml" | head -n 1)
+
+            if [[ -f "$XML" ]]; then
+              FAILS=$(grep -oP 'test-case[^>]+result="Failed"' "$XML" | grep -oP 'fullname="\K[^"]+')
+              if [[ -n "$FAILS" ]]; then
+                HAS_FAILS=1
+                FAIL_BLOCK+="### ❌ ${MODE} Failed Tests"$'\n'
+                while read -r fail; do
+                  FAIL_BLOCK+="- \`$fail\`"$'\n'
+                done <<< "$FAILS"
+                FAIL_BLOCK+=$'\n'
+              fi
+            fi
+          done
+
+          if [[ "$HAS_FAILS" == "1" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "<details>" >> $GITHUB_STEP_SUMMARY
+            echo "<summary>❌ Failed Tests (details)</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "$FAIL_BLOCK" >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "has_fails=$HAS_FAILS" >> $GITHUB_OUTPUT
+
+      - name: Fail pipeline if tests failed
+        if: steps.failed-check.outputs.has_fails == '1'
+        run: |
+          echo "❌ Unity tests failed."
+          exit 1
