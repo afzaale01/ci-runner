@@ -57,7 +57,7 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION || 'auto' }}
-      useGitLfs: ${{ vars.USE_GIT_LFS || 'true' }}
+      useGitLfs: ${{ vars.USE_GIT_LFS || 'false' }}
       editModePath: ${{ vars.UNITY_TESTS_EDITMODE_PATH || 'Assets/Tests/Editor' }}
       playModePath: ${{ vars.UNITY_TESTS_PLAYMODE_PATH || 'Assets/Tests/PlayMode' }}
       timeoutMinutes: ${{ fromJson(vars.TIMEOUT_TESTS_IN_MINUTES || '15') }}
