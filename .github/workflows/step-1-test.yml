@@ -49,18 +49,9 @@ jobs:
       editModePath: ${{ inputs.editModePath }}
       playModePath: ${{ inputs.playModePath }}
 
-  upload-license:
-    name: 📥️ Upload Unity License
-    needs: detect-tests
-    if: needs.detect-tests.outputs.has_editmode == 'true' || needs.detect-tests.outputs.has_playmode == 'true'
-    uses: ./.github/workflows/unity-license-uploader.yml
-    with:
-      artifactName: ${{ inputs.licenseArtifactName }}
-    secrets: inherit
-
   run-editmode:
     name: 🥪 EditMode Tests
-    needs: [detect-tests, upload-license]
+    needs: [detect-tests]
     if: needs.detect-tests.outputs.has_editmode == 'true'
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
@@ -73,7 +64,7 @@ jobs:
 
   run-playmode:
     name: 🎮 PlayMode Tests
-    needs: [detect-tests, upload-license]
+    needs: [detect-tests]
     if: needs.detect-tests.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
