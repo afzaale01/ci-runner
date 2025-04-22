@@ -86,16 +86,14 @@ jobs:
         with:
           testMode: ${{ inputs.testMode }}
 
-      - name: Upload ${{ inputs.testMode }} Test Results (if tests failed)
-        if: failure() && steps.run-tests.outputs.artifactsPath != ''
+      - name: Upload ${{ inputs.testMode }} Test Results
         uses: actions/upload-artifact@v4
         with:
           name: Unity-${{ inputs.testMode }}-${{ github.sha }}
           path: ${{ steps.run-tests.outputs.artifactsPath }}
           retention-days: 7
 
-      - name: Log Result Path (if tests failed)
-        if: failure()
+      - name: Log Result Path
         run: |
           if [ -z "${{ steps.run-tests.outputs.artifactsPath }}" ]; then
             echo "⚠️ No test results found. Maybe test step was skipped or failed early."
