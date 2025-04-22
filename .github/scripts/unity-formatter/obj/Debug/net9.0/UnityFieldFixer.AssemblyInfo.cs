@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UnityFieldFixer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+918b023b2016eac3c34d68eeaab945ebe08c512e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8b522f689a230ced47617a2216be47da6a0c69fe")]
 [assembly: System.Reflection.AssemblyProductAttribute("UnityFieldFixer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UnityFieldFixer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

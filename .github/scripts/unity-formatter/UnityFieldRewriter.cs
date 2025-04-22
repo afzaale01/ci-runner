@@ -1,24 +1,27 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.CodeAnalysis.Options;
+using Microsoft.CodeAnalysis.Text;
 
 public class UnityFieldRewriter : CSharpSyntaxRewriter
 {
-    public override SyntaxNode? VisitFieldDeclaration(FieldDeclarationSyntax node)
-    {
-        // Visit only fields in MonoBehaviours — but do nothing for now
-        if (!IsInMonoBehaviour(node)) return node;
+    private readonly AdhocWorkspace _workspace;
+    private readonly OptionSet _options;
 
-        // No-op — return the original node unchanged
-        return node;
+    public UnityFieldRewriter()
+    {
+        _workspace = new AdhocWorkspace();
+        _options = _workspace.Options
+            .WithChangedOption(FormattingOptions.UseTabs, LanguageNames.CSharp, false)
+            .WithChangedOption(FormattingOptions.IndentationSize, LanguageNames.CSharp, 4)
+            .WithChangedOption(FormattingOptions.TabSize, LanguageNames.CSharp, 4);
     }
 
-    private bool IsInMonoBehaviour(SyntaxNode node)
+    public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
     {
-        var classNode = node.Ancestors().OfType<ClassDeclarationSyntax>().FirstOrDefault();
-        if (classNode == null) return false;
-
-        return classNode.BaseList?.Types.Any(baseType =>
-            baseType.ToString().Contains("MonoBehaviour")) == true;
+        var formatted = Formatter.Format(node, _workspace, _options);
+        return formatted;
     }
 }
