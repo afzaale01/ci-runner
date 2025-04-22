@@ -22,8 +22,6 @@ jobs:
           "RETENTION_DAYS_RELEASE",
           "TARGET_PLATFORMS_PREVIEW",
           "TARGET_PLATFORMS_RELEASE",
-          "TIMEOUT_BUILD_IN_MINUTES",
-          "TIMEOUT_TESTS_IN_MINUTES",
           "UNITY_VERSION",
           "USE_GIT_LFS"
         ]
