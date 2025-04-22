@@ -1,11 +1,27 @@
 {
-    "testflight": "macos-latest",
-    "gh-pages": "ubuntu-latest",
-    "firebase": "ubuntu-latest",
-    "appcenter": "ubuntu-latest",
-    "itch.io": "ubuntu-latest",
-    "s3": "ubuntu-latest",
-    "steam": "ubuntu-latest",
-    "discord": "ubuntu-latest",
-    "custom-server": "ubuntu-latest"
-}
+    "gh-pages": {
+      "os": "ubuntu-latest",
+      "requiresCombinedArtifact": false
+    },
+    "itch.io": {
+      "os": "ubuntu-latest",
+      "requiresCombinedArtifact": false
+    },
+    "s3": {
+      "os": "ubuntu-latest",
+      "requiresCombinedArtifact": true
+    },
+    "custom-server": {
+      "os": "ubuntu-latest",
+      "requiresCombinedArtifact": true
+    },
+    "steam": {
+      "os": "ubuntu-latest",
+      "requiresCombinedArtifact": true
+    },
+    "testflight": {
+      "os": "macos-latest",
+      "requiresCombinedArtifact": false
+    }
+  }
+  
