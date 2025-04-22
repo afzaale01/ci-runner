@@ -1,4 +1,4 @@
-name: 🧠 Step 0 - Roslyn Lint (CSharpier)
+name: 📈 Step 0 - Roslyn Lint (CSharpier)
 
 on:
   workflow_call:
