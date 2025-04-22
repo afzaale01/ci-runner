@@ -4,148 +4,143 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using UnityReorder.Helpers;
+using static UnityReorder.UnityFieldFormatter;
 
 namespace UnityReorder.Extensions
 {
     public static class MemberBucketsExtensions
     {
         // ── ENUMS
-        public static IEnumerable<EnumDeclarationSyntax> PublicEnums(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<EnumDeclarationSyntax>()
-             .Where(e => e.Modifiers.Any(SyntaxKind.PublicKeyword))
-             .OrderBy(e => e.Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> PublicEnums(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is EnumDeclarationSyntax e &&
+                         e.Modifiers.Any(SyntaxKind.PublicKeyword))
+             .OrderBy(x => ((EnumDeclarationSyntax)x.Member).Identifier.ValueText);
 
-        public static IEnumerable<EnumDeclarationSyntax> PrivateEnums(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<EnumDeclarationSyntax>()
-             .Where(e => e.Modifiers.Any(SyntaxKind.PrivateKeyword))
-             .OrderBy(e => e.Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> PrivateEnums(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is EnumDeclarationSyntax e &&
+                         e.Modifiers.Any(SyntaxKind.PrivateKeyword))
+             .OrderBy(x => ((EnumDeclarationSyntax)x.Member).Identifier.ValueText);
 
         // ── CONSTANTS
-        public static IEnumerable<FieldDeclarationSyntax> PublicConsts(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<FieldDeclarationSyntax>()
-             .Where(f => f.Modifiers.Any(SyntaxKind.ConstKeyword) && f.Modifiers.Any(SyntaxKind.PublicKeyword))
-             .OrderBy(f => f.Declaration.Variables.First().Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> PublicConsts(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is FieldDeclarationSyntax f &&
+                         f.Modifiers.Any(SyntaxKind.ConstKeyword) &&
+                         f.Modifiers.Any(SyntaxKind.PublicKeyword))
+             .OrderBy(x => ((FieldDeclarationSyntax)x.Member).Declaration.Variables.First().Identifier.ValueText);
 
-        public static IEnumerable<FieldDeclarationSyntax> PrivateConsts(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<FieldDeclarationSyntax>()
-             .Where(f => f.Modifiers.Any(SyntaxKind.ConstKeyword) && f.Modifiers.Any(SyntaxKind.PrivateKeyword))
-             .OrderBy(f => f.Declaration.Variables.First().Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> PrivateConsts(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is FieldDeclarationSyntax f &&
+                         f.Modifiers.Any(SyntaxKind.ConstKeyword) &&
+                         f.Modifiers.Any(SyntaxKind.PrivateKeyword))
+             .OrderBy(x => ((FieldDeclarationSyntax)x.Member).Declaration.Variables.First().Identifier.ValueText);
 
         // ── STATIC EVENTS
-        public static IEnumerable<EventFieldDeclarationSyntax> StaticEvents(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<EventFieldDeclarationSyntax>()
-             .Where(f => f.Modifiers.Any(SyntaxKind.StaticKeyword))
-             .OrderBy(f => SortingHelpers.GetEventOutputRank(f))
-             .ThenBy(f => f.Declaration.Variables.First().Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> StaticEvents(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is EventFieldDeclarationSyntax f &&
+                         f.Modifiers.Any(SyntaxKind.StaticKeyword))
+             .OrderBy(x => SortingHelpers.GetEventOutputRank((EventFieldDeclarationSyntax)x.Member))
+             .ThenBy(x => ((EventFieldDeclarationSyntax)x.Member).Declaration.Variables.First().Identifier.ValueText);
 
-        // ── STATIC FIELDS (non‑const, non‑readonly)
-        public static IEnumerable<FieldDeclarationSyntax> StaticFields(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<FieldDeclarationSyntax>()
-             .Where(f =>
-                 f.Modifiers.Any(SyntaxKind.StaticKeyword) &&
-                 !f.Modifiers.Any(SyntaxKind.ConstKeyword) &&
-                 !f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword))
-             .OrderBy(f => SortingHelpers.GetTypeRank(f.Declaration.Type))
-             .ThenBy(f => f.Declaration.Variables.First().Identifier.ValueText);
+        // ── STATIC FIELDS (non-const, non-readonly)
+        public static IEnumerable<MemberWithTrivia> StaticFields(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is FieldDeclarationSyntax f &&
+                         f.Modifiers.Any(SyntaxKind.StaticKeyword) &&
+                         !f.Modifiers.Any(SyntaxKind.ConstKeyword) &&
+                         !f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword))
+             .OrderBy(x => SortingHelpers.GetTypeRank(((FieldDeclarationSyntax)x.Member).Declaration.Type))
+             .ThenBy(x => ((FieldDeclarationSyntax)x.Member).Declaration.Variables.First().Identifier.ValueText);
 
-        // ── STATIC READONLY
-        public static IEnumerable<FieldDeclarationSyntax> StaticReadonlyFields(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<FieldDeclarationSyntax>()
-             .Where(f =>
-                 f.Modifiers.Any(SyntaxKind.StaticKeyword) &&
-                 f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword))
-             .OrderBy(f => SortingHelpers.GetTypeRank(f.Declaration.Type))
-             .ThenBy(f => f.Declaration.Variables.First().Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> StaticReadonlyFields(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is FieldDeclarationSyntax f &&
+                         f.Modifiers.Any(SyntaxKind.StaticKeyword) &&
+                         f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword))
+             .OrderBy(x => SortingHelpers.GetTypeRank(((FieldDeclarationSyntax)x.Member).Declaration.Type))
+             .ThenBy(x => ((FieldDeclarationSyntax)x.Member).Declaration.Variables.First().Identifier.ValueText);
 
-        // ── INSTANCE READONLY
-        public static IEnumerable<FieldDeclarationSyntax> InstanceReadonlyFields(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<FieldDeclarationSyntax>()
-             .Where(f =>
-                 f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword) &&
-                 !f.Modifiers.Any(SyntaxKind.StaticKeyword))
-             .OrderBy(f => SortingHelpers.GetTypeRank(f.Declaration.Type))
-             .ThenBy(f => f.Declaration.Variables.First().Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> InstanceReadonlyFields(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is FieldDeclarationSyntax f &&
+                         f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword) &&
+                         !f.Modifiers.Any(SyntaxKind.StaticKeyword))
+             .OrderBy(x => SortingHelpers.GetTypeRank(((FieldDeclarationSyntax)x.Member).Declaration.Type))
+             .ThenBy(x => ((FieldDeclarationSyntax)x.Member).Declaration.Variables.First().Identifier.ValueText);
 
         // ── INSTANCE EVENTS
-        public static IEnumerable<EventFieldDeclarationSyntax> InstanceEvents(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<EventFieldDeclarationSyntax>()
-             .Where(f => !f.Modifiers.Any(SyntaxKind.StaticKeyword))
-             .OrderBy(f => SortingHelpers.GetEventOutputRank(f))
-             .ThenBy(f => f.Declaration.Variables.First().Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> InstanceEvents(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is EventFieldDeclarationSyntax f &&
+                         !f.Modifiers.Any(SyntaxKind.StaticKeyword))
+             .OrderBy(x => SortingHelpers.GetEventOutputRank((EventFieldDeclarationSyntax)x.Member))
+             .ThenBy(x => ((EventFieldDeclarationSyntax)x.Member).Declaration.Variables.First().Identifier.ValueText);
 
-        // ── SERIALIZED FIELDS (grouped by [Header])
-        public static IEnumerable<FieldDeclarationSyntax> SerializedFieldsByHeader(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<FieldDeclarationSyntax>()
-             .Where(MemberHelpers.HasSerializeField)
-             .Where(MemberHelpers.HasHeader)
-             .GroupBy(MemberHelpers.GetHeaderName)
+        // ── SERIALIZED FIELDS (with [Header])
+        public static IEnumerable<MemberWithTrivia> SerializedFieldsByHeader(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is FieldDeclarationSyntax f &&
+                         MemberHelpers.HasSerializeField(f) &&
+                         MemberHelpers.HasHeader(f))
+             .GroupBy(x => MemberHelpers.GetHeaderName((FieldDeclarationSyntax)x.Member))
              .SelectMany(g => g
-                 .OrderBy(f => SortingHelpers.GetTypeRank(f.Declaration.Type))
-                 .ThenBy(f => f.Declaration.Variables.First().Identifier.ValueText));
+                 .OrderBy(x => SortingHelpers.GetTypeRank(((FieldDeclarationSyntax)x.Member).Declaration.Type))
+                 .ThenBy(x => ((FieldDeclarationSyntax)x.Member).Declaration.Variables.First().Identifier.ValueText));
 
-        public static IEnumerable<FieldDeclarationSyntax> SerializedFieldsWithoutHeader(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<FieldDeclarationSyntax>()
-             .Where(MemberHelpers.HasSerializeField)
-             .Where(f => !MemberHelpers.HasHeader(f))
-             .OrderBy(f => SortingHelpers.GetTypeRank(f.Declaration.Type))
-             .ThenBy(f => f.Declaration.Variables.First().Identifier.ValueText);
+        // ── SERIALIZED FIELDS (no [Header])
+        public static IEnumerable<MemberWithTrivia> SerializedFieldsWithoutHeader(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is FieldDeclarationSyntax f &&
+                         MemberHelpers.HasSerializeField(f) &&
+                         !MemberHelpers.HasHeader(f))
+             .OrderBy(x => SortingHelpers.GetTypeRank(((FieldDeclarationSyntax)x.Member).Declaration.Type))
+             .ThenBy(x => ((FieldDeclarationSyntax)x.Member).Declaration.Variables.First().Identifier.ValueText);
 
         // ── NON‑SERIALIZED FIELDS
-        public static IEnumerable<FieldDeclarationSyntax> NonSerializedPublicFields(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<FieldDeclarationSyntax>()
-             .Where(f =>
-                 !MemberHelpers.HasSerializeField(f) &&
-                 !f.Modifiers.Any(SyntaxKind.StaticKeyword) &&
-                 !f.Modifiers.Any(SyntaxKind.ConstKeyword) &&
-                 !f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword) &&
-                 f.Modifiers.Any(SyntaxKind.PublicKeyword))
-             .OrderBy(f => SortingHelpers.GetTypeRank(f.Declaration.Type))
-             .ThenBy(f => f.Declaration.Variables.First().Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> NonSerializedPublicFields(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is FieldDeclarationSyntax f &&
+                         !MemberHelpers.HasSerializeField(f) &&
+                         !f.Modifiers.Any(SyntaxKind.StaticKeyword) &&
+                         !f.Modifiers.Any(SyntaxKind.ConstKeyword) &&
+                         !f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword) &&
+                         f.Modifiers.Any(SyntaxKind.PublicKeyword))
+             .OrderBy(x => SortingHelpers.GetTypeRank(((FieldDeclarationSyntax)x.Member).Declaration.Type))
+             .ThenBy(x => ((FieldDeclarationSyntax)x.Member).Declaration.Variables.First().Identifier.ValueText);
 
-        public static IEnumerable<FieldDeclarationSyntax> NonSerializedPrivateFields(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<FieldDeclarationSyntax>()
-             .Where(f =>
-                 !MemberHelpers.HasSerializeField(f) &&
-                 !f.Modifiers.Any(SyntaxKind.StaticKeyword) &&
-                 !f.Modifiers.Any(SyntaxKind.ConstKeyword) &&
-                 !f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword) &&
-                 !f.Modifiers.Any(SyntaxKind.PublicKeyword))
-             .OrderBy(f => SortingHelpers.GetTypeRank(f.Declaration.Type))
-             .ThenBy(f => f.Declaration.Variables.First().Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> NonSerializedPrivateFields(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is FieldDeclarationSyntax f &&
+                         !MemberHelpers.HasSerializeField(f) &&
+                         !f.Modifiers.Any(SyntaxKind.StaticKeyword) &&
+                         !f.Modifiers.Any(SyntaxKind.ConstKeyword) &&
+                         !f.Modifiers.Any(SyntaxKind.ReadOnlyKeyword) &&
+                         !f.Modifiers.Any(SyntaxKind.PublicKeyword))
+             .OrderBy(x => SortingHelpers.GetTypeRank(((FieldDeclarationSyntax)x.Member).Declaration.Type))
+             .ThenBy(x => ((FieldDeclarationSyntax)x.Member).Declaration.Variables.First().Identifier.ValueText);
 
         // ── PROPERTIES
-        public static IEnumerable<PropertyDeclarationSyntax> Properties(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<PropertyDeclarationSyntax>()
-             .OrderBy(p => p.Modifiers.Any(SyntaxKind.PublicKeyword) ? 0 : 1)
-             .ThenBy(p => p.Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> Properties(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is PropertyDeclarationSyntax)
+             .OrderBy(x => ((PropertyDeclarationSyntax)x.Member).Modifiers.Any(SyntaxKind.PublicKeyword) ? 0 : 1)
+             .ThenBy(x => ((PropertyDeclarationSyntax)x.Member).Identifier.ValueText);
 
         // ── UNITY EVENT METHODS
-        public static IEnumerable<MethodDeclarationSyntax> UnityCallbacks(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<MethodDeclarationSyntax>()
-             .Where(MemberHelpers.IsUnityCallback)
-             .OrderBy(md => SortingHelpers.GetUnityCallbackOrder(md.Identifier.ValueText));
+        public static IEnumerable<MemberWithTrivia> UnityCallbacks(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is MethodDeclarationSyntax md && MemberHelpers.IsUnityCallback(md))
+             .OrderBy(x => SortingHelpers.GetUnityCallbackOrder(((MethodDeclarationSyntax)x.Member).Identifier.ValueText));
 
         // ── STATIC METHODS
-        public static IEnumerable<MethodDeclarationSyntax> StaticMethods(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<MethodDeclarationSyntax>()
-             .Where(md => md.Modifiers.Any(SyntaxKind.StaticKeyword) && !MemberHelpers.IsUnityCallback(md))
-             .OrderBy(md => md.Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> StaticMethods(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is MethodDeclarationSyntax md &&
+                         md.Modifiers.Any(SyntaxKind.StaticKeyword) &&
+                         !MemberHelpers.IsUnityCallback(md))
+             .OrderBy(x => ((MethodDeclarationSyntax)x.Member).Identifier.ValueText);
 
-        // ── INSTANCE METHODS (public / private)
-        public static IEnumerable<MethodDeclarationSyntax> PublicInstanceMethods(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<MethodDeclarationSyntax>()
-             .Where(md =>
-                 !md.Modifiers.Any(SyntaxKind.StaticKeyword) &&
-                 !MemberHelpers.IsUnityCallback(md) &&
-                 md.Modifiers.Any(SyntaxKind.PublicKeyword))
-             .OrderBy(md => md.Identifier.ValueText);
+        // ── INSTANCE METHODS
+        public static IEnumerable<MemberWithTrivia> PublicInstanceMethods(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is MethodDeclarationSyntax md &&
+                         !md.Modifiers.Any(SyntaxKind.StaticKeyword) &&
+                         !MemberHelpers.IsUnityCallback(md) &&
+                         md.Modifiers.Any(SyntaxKind.PublicKeyword))
+             .OrderBy(x => ((MethodDeclarationSyntax)x.Member).Identifier.ValueText);
 
-        public static IEnumerable<MethodDeclarationSyntax> PrivateInstanceMethods(this SyntaxList<MemberDeclarationSyntax> m) =>
-            m.OfType<MethodDeclarationSyntax>()
-             .Where(md =>
-                 !md.Modifiers.Any(SyntaxKind.StaticKeyword) &&
-                 !MemberHelpers.IsUnityCallback(md) &&
-                 !md.Modifiers.Any(SyntaxKind.PublicKeyword))
-             .OrderBy(md => md.Identifier.ValueText);
+        public static IEnumerable<MemberWithTrivia> PrivateInstanceMethods(this IEnumerable<MemberWithTrivia> m) =>
+            m.Where(x => x.Member is MethodDeclarationSyntax md &&
+                         !md.Modifiers.Any(SyntaxKind.StaticKeyword) &&
+                         !MemberHelpers.IsUnityCallback(md) &&
+                         !md.Modifiers.Any(SyntaxKind.PublicKeyword))
+             .OrderBy(x => ((MethodDeclarationSyntax)x.Member).Identifier.ValueText);
     }
 }
