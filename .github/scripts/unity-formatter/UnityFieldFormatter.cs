@@ -39,7 +39,13 @@ namespace UnityReorder
 
             // Restore trivia to each reordered node
             var finalMembers = ordered
-                .Select(item => item.Member.WithLeadingTrivia(item.Trivia))
+                .Select(item =>
+                {
+                    if (item.Member is FieldDeclarationSyntax field)
+                        return InlineFieldWithAttributes(field);
+
+                    return item.Member.WithLeadingTrivia(item.Trivia);
+                })
                 .ToList();
 
             return node.WithMembers(SyntaxFactory.List(finalMembers));
@@ -48,6 +54,26 @@ namespace UnityReorder
         public record MemberWithTrivia(MemberDeclarationSyntax Member)
         {
             public SyntaxTriviaList Trivia { get; init; } = Member.GetLeadingTrivia();
+        }
+
+        private static FieldDeclarationSyntax InlineFieldWithAttributes(FieldDeclarationSyntax field)
+        {
+            // Preserve trailing semicolon and restore newline after field
+            var singleLine = field
+                .WithLeadingTrivia()  // remove trivia *before* the attributes
+                .WithTrailingTrivia(); // remove trivia after (we'll add newline manually)
+
+            var flatText = singleLine.ToFullString()
+                .Replace("\r", "")
+                .Replace("\n", " ")
+                .Replace("  ", " ")
+                .Trim();
+
+            // Parse back into a field
+            var newField = (FieldDeclarationSyntax)SyntaxFactory.ParseMemberDeclaration(flatText)!;
+
+            // Add a newline after the field so it doesn't glue to the next one
+            return newField.WithTrailingTrivia(SyntaxFactory.ElasticCarriageReturnLineFeed);
         }
     }
 }
