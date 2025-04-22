@@ -8,6 +8,11 @@ permissions:
   pull-requests: write
 
 jobs:
+  add-prerequisites:
+    name: Add Prerequisites
+    uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
+    secrets: inherit
+
   test-run-tests:
     name: Test Run Tests
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
