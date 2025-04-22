@@ -28,8 +28,7 @@ namespace UnityReorder
 
             var rewriter = new UnityFieldFormatter();
 
-            foreach (var file in Directory
-                         .EnumerateFiles(args[0], "*.cs", SearchOption.AllDirectories))
+            foreach (var file in Directory.EnumerateFiles(args[0], "*.cs", SearchOption.AllDirectories))
             {
                 var src = await File.ReadAllTextAsync(file);
                 var tree = CSharpSyntaxTree.ParseText(src);
@@ -42,7 +41,10 @@ namespace UnityReorder
                 var formattedRoot = (CompilationUnitSyntax)Formatter.Format(visited, workspace, options);
                 var newText = formattedRoot.ToFullString();
 
-                // 3) compare text (not IsEquivalentTo) so we pick up whitespace-only changes
+                // ✅ 3) collapse 3+ newlines down to 2
+                newText = System.Text.RegularExpressions.Regex.Replace(newText, @"(\r?\n){3,}", "\n\n");
+
+                // 4) compare text (not IsEquivalentTo) so we pick up whitespace-only changes
                 if (newText != src)
                 {
                     Console.WriteLine($"✏️  Formatting: {file}");
