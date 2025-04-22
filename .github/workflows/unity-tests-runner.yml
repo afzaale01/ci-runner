@@ -19,6 +19,11 @@ on:
         description: "Timeout for each build job in minutes"
         type: number
         required: true
+      quietMode:
+        description: "Enable quiet mode to suppress uploads/logs unless tests fail"
+        required: false
+        default: "false"
+        type: string
     outputs:
       total:
         description: "Total number of tests"
@@ -32,6 +37,11 @@ on:
       duration:
         description: "Test duration in seconds"
         value: ${{ jobs.run-tests.outputs.duration }}
+      failed:
+        description: "Whether the test job failed"
+        value: ${{ jobs.run-tests.outputs.failed }}
+
+
 jobs:
   run-tests:
     name: Run ${{ inputs.testMode }} Tests
@@ -41,6 +51,7 @@ jobs:
       passed: ${{ steps.summary.outputs.passed }}
       result: ${{ steps.summary.outputs.result }}
       duration: ${{ steps.summary.outputs.duration }}
+      failed: ${{ steps.test-outcome.outputs.failed }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -87,8 +98,9 @@ jobs:
       - name: Print Unity Version & Selected Test Mode
         shell: bash
         run: |
-          echo "🛠 Using Unity version: ${{ inputs.unityVersion }}"
-          echo "🧪 Running tests: ${{ inputs.testMode }}"
+          echo "🛠 Unity Version:   ${{ inputs.unityVersion }}"
+          echo "🧪 Test Mode:       ${{ inputs.testMode }}"
+          echo "🔕 Quiet Mode:      ${{ inputs.quietMode }}"
 
       - name: Run ${{ inputs.testMode }} Tests
         id: run-tests
@@ -103,7 +115,12 @@ jobs:
         with:
           testMode: ${{ inputs.testMode }}
 
+      - name: Determine Test Outcome
+        id: test-outcome
+        run: echo "failed=${{ steps.run-tests.outcome != 'success' }}" >> $GITHUB_OUTPUT
+
       - name: Upload ${{ inputs.testMode }} Test Results
+        if: steps.test-outcome.outputs.failed == 'true' || inputs.quietMode != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: Unity-${{ inputs.testMode }}-${{ github.sha }}
@@ -111,6 +128,7 @@ jobs:
           retention-days: 7
 
       - name: Log Result Path
+        if: inputs.quietMode == 'false' || steps.test-outcome.outputs.failed == 'true'
         run: |
           if [ -z "${{ steps.run-tests.outputs.artifactsPath }}" ]; then
             echo "⚠️ No test results found. Maybe test step was skipped or failed early."
@@ -119,6 +137,7 @@ jobs:
           fi
 
       - name: Extract Test Summary
+        if: inputs.quietMode == 'false' || steps.test-outcome.outputs.failed == 'true'
         id: summary
         run: |
           XML=$(find "${{ steps.run-tests.outputs.artifactsPath }}" -name '*.xml' | head -n 1)
@@ -129,7 +148,6 @@ jobs:
             RESULT=$(grep -oP 'result="\K[^"]+' "$XML" | head -n1)
             RAW_DURATION=$(grep -oP 'duration="\K[0-9.]+' "$XML" | head -n1)
 
-            # Convert to formatted duration like "7m 16.25s"
             DURATION_FORMATTED=$(awk "BEGIN {
               total = $RAW_DURATION;
               min = int(total / 60);

@@ -2,6 +2,15 @@ name: 🧪 Test Tests Workflow
 
 on:
   workflow_dispatch:
+    inputs:
+      quietMode:
+        description: "Enable quiet mode to suppress uploads/logs unless tests fail"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
 
 permissions:
   contents: write
@@ -25,6 +34,7 @@ jobs:
       editModePath: ${{ vars.UNITY_TESTS_EDITMODE_PATH || 'Assets/Tests/Editor' }}
       playModePath: ${{ vars.UNITY_TESTS_PLAYMODE_PATH || 'Assets/Tests/PlayMode' }}
       timeoutMinutes: ${{ fromJson(vars.TIMEOUT_TESTS_IN_MINUTES || '15') }}
+      quietMode: ${{ inputs.quietMode }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
