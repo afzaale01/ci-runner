@@ -118,6 +118,9 @@ jobs:
             echo "✅ Test results located at: ${{ steps.run-tests.outputs.artifactsPath }}"
           fi
 
+      - name: Install xmllint (libxml2-utils)
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
       - name: Extract Test Summary
         id: summary
         run: |
