@@ -23,24 +23,11 @@ on:
         description: "Timeout for each build job in minutes"
         type: number
         required: true
-    outputs:
-      artifactsPath:
-        description: "Path to test artifacts"
-        value: ${{ jobs.run-tests.outputs.artifactsPath }}
-      resultSummary:
-        description: "Summary of passed/total tests"
-        value: ${{ jobs.run-tests.outputs.resultSummary }}
-      durationMinutes:
-        description: "Total test duration in minutes"
-        value: ${{ jobs.run-tests.outputs.durationMinutes }}
+
 jobs:
   run-tests:
     name: Run ${{ inputs.testMode }} Tests
     runs-on: ubuntu-latest
-    outputs:
-      artifactsPath: ${{ steps.run-tests.outputs.artifactsPath }}
-      resultSummary: ${{ steps.extract-stats.outputs.resultSummary }}
-      durationMinutes: ${{ steps.extract-stats.outputs.durationMinutes }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -102,25 +89,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           testMode: ${{ inputs.testMode }}
-
-      - name: Extract Test Stats & Duration
-        if: always()
-        id: extract-stats
-        run: |
-          FILE=$(find . -type f -name "TestResults.xml" | head -n 1)
-
-          if [ -f "$FILE" ]; then
-            TOTAL=$(xmllint --xpath "string(count(//test-case))" "$FILE")
-            PASSED=$(xmllint --xpath "string(count(//test-case[@result='Passed']))" "$FILE")
-            DURATION=$(xmllint --xpath "string(sum(//test-case/@duration))" "$FILE")
-            DURATION_MIN=$(awk "BEGIN {printf \"%.2f\", $DURATION}")
-
-            echo "resultSummary=$PASSED / $TOTAL" >> $GITHUB_OUTPUT
-            echo "durationMinutes=$DURATION_MIN" >> $GITHUB_OUTPUT
-          else
-            echo "resultSummary=Unavailable" >> $GITHUB_OUTPUT
-            echo "durationMinutes=Unavailable" >> $GITHUB_OUTPUT
-          fi
 
       - name: Upload ${{ inputs.testMode }} Test Results (if tests failed)
         if: failure() && steps.run-tests.outputs.artifactsPath != ''

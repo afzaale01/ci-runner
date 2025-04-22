@@ -89,11 +89,6 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     needs: [run-editmode, run-playmode]
-    env:
-      EDIT_DURATION: ${{ needs.run-editmode.outputs.durationMinutes }}
-      EDIT_SUMMARY: ${{ needs.run-editmode.outputs.resultSummary }}
-      PLAY_DURATION: ${{ needs.run-playmode.outputs.durationMinutes }}
-      PLAY_SUMMARY: ${{ needs.run-playmode.outputs.resultSummary }}
     steps:
       - name: Write Summary
         run: |
@@ -108,21 +103,10 @@ jobs:
             exit 0
           fi
 
-          echo "| Mode | Result | Duration (min) | Passed / Total |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|----------------|----------------|" >> $GITHUB_STEP_SUMMARY
-
           if [[ "$HAS_EDITMODE" == "true" ]]; then
-            EDIT_RESULT="${{ needs.run-editmode.result }}"
-            EDIT_ICON=$([[ "$EDIT_RESULT" == "success" ]] && echo "✅ Passed" || echo "❌ Failed")
-            EDIT_DURATION="${{ needs.run-editmode.outputs.durationMinutes }}"
-            EDIT_SUMMARY="${{ needs.run-editmode.outputs.resultSummary }}"
-            echo "| 🥪 EditMode | $EDIT_ICON | $EDIT_DURATION | $EDIT_SUMMARY |" >> $GITHUB_STEP_SUMMARY
+            echo "- 🥪 EditMode: ${{ needs.run-editmode.result == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
           fi
 
           if [[ "$HAS_PLAYMODE" == "true" ]]; then
-            PLAY_RESULT="${{ needs.run-playmode.result }}"
-            PLAY_ICON=$([[ "$PLAY_RESULT" == "success" ]] && echo "✅ Passed" || echo "❌ Failed")
-            PLAY_DURATION="${{ needs.run-playmode.outputs.durationMinutes }}"
-            PLAY_SUMMARY="${{ needs.run-playmode.outputs.resultSummary }}"
-            echo "| 🎮 PlayMode | $PLAY_ICON | $PLAY_DURATION | $PLAY_SUMMARY |" >> $GITHUB_STEP_SUMMARY
+            echo "- 🎮 PlayMode: ${{ needs.run-playmode.result == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
           fi
