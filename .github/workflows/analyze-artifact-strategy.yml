@@ -1,4 +1,4 @@
-name: 🔍 Analyze Artifact Strategy
+name: ⚖️ Analyze Artifact Strategy
 
 on:
   workflow_call:
@@ -84,3 +84,9 @@ jobs:
             echo "skipPerPlatform=false" >> $GITHUB_OUTPUT
           fi
 
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "⚖️ Artifact Strategy Analysis Summary"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🔸 requiresCombined : $requires_combined"
+          echo "🔸 skipPerPlatform  : $skip_per_platform"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
