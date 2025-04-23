@@ -118,6 +118,8 @@ jobs:
       version: ${{ needs.build.outputs.version }}
       projectName: ${{ vars.PROJECT_NAME }}
       targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
+      combineArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact }}
+      skipPerPlatformArtifacts: ${{ needs.setup-prerequisites.outputs.skipPerPlatformArtifacts }}
     secrets: inherit
 
   # ─────────────────────────────────────────────────────────────────────────────

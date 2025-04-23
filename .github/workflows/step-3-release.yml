@@ -19,6 +19,16 @@ on:
         description: "JSON array of platforms to expect artifacts for"
         type: string
         required: true
+      combineArtifacts:
+        description: "Whether to upload the combined artifact to the release"
+        type: boolean
+        default: false
+        required: false
+      skipPerPlatformArtifacts:
+        description: "Whether to skip uploading per-platform artifacts"
+        type: boolean
+        default: false
+        required: false      
     outputs:
       releaseErrorMessage:
         description: "Error message if release failed"
@@ -79,6 +89,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: 🧮 Upload Per-Platform Artifacts
+        if: ${{ inputs.skipPerPlatformArtifacts != true }}
         run: |
           RELEASE_ID=$(grep release_id .release-meta | cut -d= -f2)
           .github/scripts/release/upload-artifacts.sh \
@@ -92,6 +103,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: 🧮 Upload Combined Artifact
+        if: ${{ inputs.combineArtifacts == true }}
         run: |
           VERSION="${{ inputs.version }}"
           PROJECT="${{ inputs.projectName }}"

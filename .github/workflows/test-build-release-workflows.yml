@@ -47,11 +47,13 @@ jobs:
   release:
     name: 📦 Trigger GitHub Release (Step 3)
     if: ${{ inputs.buildType == 'release' }}
-    needs: build
+    needs: [ setup-prerequisites, build ]
     uses: ./.github/workflows/step-3-release.yml
     with:
       buildType: ${{ inputs.buildType }}
       version: ${{ needs.build.outputs.version }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
+      combineArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact }}
+      skipPerPlatformArtifacts: ${{ needs.setup-prerequisites.outputs.skipPerPlatformArtifacts }}
     secrets: inherit
