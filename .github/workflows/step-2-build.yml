@@ -27,6 +27,11 @@ on:
         type: number
         default: 7
         required: false
+      combineArtifacts:
+        description: "Whether to combine all platform builds into a versioned folder"
+        type: boolean
+        default: false
+        required: false
     outputs:
       version:
         description: "The resolved version string used in the build"
@@ -157,7 +162,7 @@ jobs:
 
   combine_builds:
     name: 📦 Combine All Platform Builds
-    if: ${{ vars.COMBINE_ARTIFACTS == 'true' }}
+    if: ${{ inputs.combineArtifacts == true }}
     runs-on: ubuntu-latest
     needs: [build_platforms, determine_version]
     steps:
@@ -213,7 +218,7 @@ jobs:
           path: all-artifacts
 
       - name: 📥 Download Combined Artifact
-        if: ${{ vars.COMBINE_ARTIFACTS == 'true' }}
+        if: ${{ inputs.combineArtifacts == true }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}
@@ -248,7 +253,7 @@ jobs:
 
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [[ "${{ vars.COMBINE_ARTIFACTS }}" == "true" ]]; then
+          if [[ "${{ inputs.combineArtifacts }}" == "true" ]]; then
             echo "### 📦 Combined Artifact" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
 

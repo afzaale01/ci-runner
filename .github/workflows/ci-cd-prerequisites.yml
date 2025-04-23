@@ -12,6 +12,11 @@ on:
         type: string
         default: '[]'
         required: false
+    outputs:
+      requiresCombinedArtifact:
+        description: "Whether any deploy target requires a combined artifact"
+        value: ${{ jobs.determine-combined-artifact-requirement.outputs.requiresCombinedArtifact }}
+
 jobs:
   validate-vars:
     name: Validate GitHub Variables

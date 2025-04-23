@@ -16,7 +16,7 @@ on:
         required: true
         default: "Unity_CI_Templates"
       targetPlatforms:
-        description: "JSON array of platforms to build (quoted)"
+        description: "JSON array of platforms to build"
         required: true
         default: '["WebGL", "StandaloneWindows64"]'
       deployTargets:
@@ -42,6 +42,7 @@ jobs:
       buildType: ${{ inputs.buildType }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
+      combineArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact }}
     secrets: inherit
 
   release:
