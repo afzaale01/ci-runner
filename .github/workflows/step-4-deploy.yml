@@ -46,17 +46,11 @@ on:
       DISCORD_WEBHOOK: { required: false }
 
 jobs:
-  validate-deploy-targets:
-    uses: ./.github/workflows/validate-deploy-targets.yml
-    with:
-      deployTargets: ${{ inputs.deployTargets }}
-
   resolve-deploy-matrix:
     uses: ./.github/workflows/resolve-deploy-matrix.yml
-    needs: validate-deploy-targets
-    if: ${{ needs.validate-deploy-targets.outputs.validTargets != '[]' }}
+    if: ${{ inputs.deployTargets != '[]' }}
     with:
-      validTargets: ${{ needs.validate-deploy-targets.outputs.validTargets }}
+      validTargets: ${{ inputs.deployTargets }}
 
   deploy:
     name: 🚀 Deploy ${{ matrix.target }} on ${{ matrix.os }}

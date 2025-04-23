@@ -36,14 +36,23 @@ permissions:
   pull-requests: write
 
 jobs:
+  setup-prerequisites:
+    name: ⏳ Setup Prerequisites
+    uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
+    with:
+      excludesUnityTests: "true"
+      deployTargets: ${{ inputs.deployTargets }}
+    secrets: inherit
+
   test-deploy:
     name: Test Deploy
+    needs: [ setup-prerequisites ]
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
       version: ${{ inputs.version }}
       projectName: ${{ inputs.projectName }}
-      deployTargets: ${{ inputs.deployTargets }}
+      deployTargets: ${{ needs.setup-prerequisites.outputs.validDeployTargets }}
       artifactSource: release
     secrets: inherit
 
