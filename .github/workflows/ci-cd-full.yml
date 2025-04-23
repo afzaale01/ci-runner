@@ -125,7 +125,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy
-    needs: [ build, release ]
+    needs: [ setup-prerequisites, build, release ]
     if: > 
       always() &&
       needs.release.result == 'success' &&
@@ -135,7 +135,7 @@ jobs:
       buildType: release
       version: ${{ needs.build.outputs.version }}
       projectName: ${{ vars.PROJECT_NAME }}
-      deployTargets: ${{ vars.DEPLOY_TARGETS }}
+      deployTargets: ${{ needs.setup-prerequisites.outputs.validDeployTargets }}
       artifactSource: build
     secrets: inherit
 
