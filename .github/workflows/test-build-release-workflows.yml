@@ -19,10 +19,24 @@ on:
         description: "JSON array of platforms to build (quoted)"
         required: true
         default: '["WebGL", "StandaloneWindows64"]'
+      deployTargets:
+        description: "JSON array of deploy targets (e.g. ['itch.io','appcenter','firebase','s3','gh-pages'])"
+        type: string
+        default: '[]'
+        required: false
 
 jobs:
+  setup-prerequisites:
+    name: Setup Prerequisites
+    uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
+    with:
+      excludesUnityTests: "true"
+      deployTargets: ${{ inputs.deployTargets }}
+    secrets: inherit
+
   build:
     name: 🧩 Trigger Unity Build (Step 2)
+    needs: setup-prerequisites    
     uses: ./.github/workflows/step-2-build.yml
     with:
       buildType: ${{ inputs.buildType }}
