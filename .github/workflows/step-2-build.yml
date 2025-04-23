@@ -263,5 +263,5 @@ jobs:
               echo "- ❌ Combined artifact was expected but is missing!" >> $GITHUB_STEP_SUMMARY
             fi
           else
-            echo "ℹ️ Combined artifacts were not requested (COMBINE_ARTIFACTS is false)." >> $GITHUB_STEP_SUMMARY
+            echo "ℹ️ Combined artifacts were not requested." >> $GITHUB_STEP_SUMMARY
           fi
