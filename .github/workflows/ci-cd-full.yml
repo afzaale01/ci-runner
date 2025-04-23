@@ -39,6 +39,7 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
     with:
       excludesUnityTests: ${{ vars.EXCLUDE_UNITY_TESTS }}
+      deployTargets: ${{ vars.DEPLOY_TARGETS }}
     secrets: inherit
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -135,7 +136,7 @@ jobs:
       version: ${{ needs.build.outputs.version }}
       projectName: ${{ vars.PROJECT_NAME }}
       deployTargets: ${{ vars.DEPLOY_TARGETS }}
-      artifactSource: build      
+      artifactSource: build
     secrets: inherit
 
   # ─────────────────────────────────────────────────────────────────────────────

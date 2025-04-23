@@ -1,0 +1,51 @@
+name: 🔍 Determine Combined Artifact Requirement
+
+on:
+  workflow_call:
+    inputs:
+      deployTargets:
+        description: "JSON array of deploy targets (e.g. ['itch.io','s3'])"
+        type: string
+        default: '[]'
+        required: false
+    outputs:
+      requiresCombinedArtifact:
+        value: ${{ jobs.determine.outputs.requiresCombinedArtifact }}
+
+jobs:
+  determine:
+    name: 🔍 Check Deploy Targets for Combined Artifact Need
+    runs-on: ubuntu-latest
+    outputs:
+      requiresCombinedArtifact: ${{ steps.result.outputs.requiresCombinedArtifact }}
+    steps:
+      - name: 📁 Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: 🧠 Analyze Deploy Targets
+        id: result
+        run: |
+          CONFIG_FILE=".github/config/deploy-targets.json"
+          DEPLOY_TARGETS='${{ inputs.deployTargets }}'
+
+          if [ ! -f "$CONFIG_FILE" ]; then
+            echo "⚠️ Config file not found, assuming no combined artifact needed."
+            echo "requiresCombinedArtifact=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if ! echo "$DEPLOY_TARGETS" | jq empty 2>/dev/null; then
+            echo "⚠️ Invalid JSON in deployTargets"
+            echo "requiresCombinedArtifact=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          NEEDS_COMBINED=false
+          for target in $(echo "$DEPLOY_TARGETS" | jq -r '.[]'); do
+            if jq -r --arg t "$target" '.[$t].requiresCombinedArtifact // false' "$CONFIG_FILE" | grep -q true; then
+              NEEDS_COMBINED=true
+              break
+            fi
+          done
+
+          echo "requiresCombinedArtifact=$NEEDS_COMBINED" >> $GITHUB_OUTPUT

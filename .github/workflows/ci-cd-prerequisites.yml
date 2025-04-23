@@ -7,6 +7,11 @@ on:
         description: "Whether unity tests are excluded"
         type: string
         required: true
+      deployTargets:
+        description: "JSON array of deploy targets (e.g. ['itch.io','appcenter','firebase','s3','gh-pages'])"
+        type: string
+        default: '[]'
+        required: false
 jobs:
   validate-vars:
     name: Validate GitHub Variables
@@ -29,3 +34,9 @@ jobs:
     if: ${{ inputs.excludesUnityTests == 'false' }}
     uses: ./.github/workflows/unity-license-uploader.yml
     secrets: inherit
+
+  determine-combined-artifact-requirement:
+    name: 🔍 Determine Combined Artifact Requirement
+    uses: ./.github/workflows/determine-combined-artifact-requirement.yml
+    with:
+      deployTargets: ${{ inputs.deployTargets }}
