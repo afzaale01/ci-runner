@@ -226,7 +226,7 @@ jobs:
 
       - name: 📘 Write Build Summary
         run: |
-          echo "### ✅ Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### 🧩 Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
