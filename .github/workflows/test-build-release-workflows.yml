@@ -54,6 +54,6 @@ jobs:
       version: ${{ needs.build.outputs.version }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
-      combineArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact }}
-      skipPerPlatformArtifacts: ${{ needs.setup-prerequisites.outputs.skipPerPlatformArtifacts }}
+      combineArtifacts: ${{ fromJSON(needs.setup-prerequisites.outputs.requiresCombinedArtifact) }}
+      skipPerPlatformArtifacts: ${{ fromJSON(needs.setup-prerequisites.outputs.skipPerPlatformArtifacts) }}
     secrets: inherit
