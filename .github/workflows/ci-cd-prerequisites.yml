@@ -12,10 +12,18 @@ on:
         type: string
         default: '[]'
         required: false
+      artifactSource:
+        description: "Where we get our artifacts from"
+        type: string
+        default: 'build'
+        required: false
     outputs:
       requiresCombinedArtifact:
         description: "Whether any deploy target requires a combined artifact"
-        value: ${{ jobs.determine-combined-artifact-requirement.outputs.requiresCombinedArtifact }}
+        value: ${{ jobs.analyze-artifact-strategy.outputs.requiresCombined }}
+      skipPerPlatform:
+        description: "Whether per-platform artifacts can be skipped"
+        value: ${{ jobs.analyze-artifact-strategy.outputs.skipPerPlatform }}
 
 jobs:
   validate-vars:
@@ -40,9 +48,10 @@ jobs:
     uses: ./.github/workflows/unity-license-uploader.yml
     secrets: inherit
 
-  determine-combined-artifact-requirement:
-    name: 🔍 Determine Combined Artifact Requirement
-    uses: ./.github/workflows/determine-artifact-requirements.yml
+  analyze-artifact-strategy:
+    name: 🔍 Analyze Artifact Strategy
+    uses: ./.github/workflows/analyze-artifact-strategy.yml
     with:
+      artifactSource: ${{ inputs.artifactSource }}
       deployTargets: ${{ inputs.deployTargets }}
       
