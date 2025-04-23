@@ -49,3 +49,9 @@ jobs:
           done
 
           echo "requiresCombinedArtifact=$NEEDS_COMBINED" >> $GITHUB_OUTPUT
+
+          if [ "$NEEDS_COMBINED" = true ]; then
+            echo "🔁 Combined artifact is necessary and will be created."
+          else
+            echo "➡️ No need for a combined artifact."
+          fi
