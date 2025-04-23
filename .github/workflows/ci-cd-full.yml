@@ -107,7 +107,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   release:
     name: Release
-    needs: [ build ]
+    needs: [ setup-prerequisites, build ]
     if: > 
       always() && 
       needs.build.result == 'success' && 
