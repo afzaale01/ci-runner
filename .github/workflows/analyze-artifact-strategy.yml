@@ -80,8 +80,10 @@ jobs:
           if [ "$any_target" = "true" ] && [ "$all_require_combined" = "true" ] && [ "$ARTIFACT_SOURCE" = "release" ]; then
             echo "🔹 All deploy targets use combined artifacts and pull from release."
             echo "skipPerPlatform=true" >> $GITHUB_OUTPUT
+            skip_per_platform=true
           else
             echo "skipPerPlatform=false" >> $GITHUB_OUTPUT
+            skip_per_platform=false
           fi
 
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
