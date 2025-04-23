@@ -190,7 +190,7 @@ jobs:
 
           for DIR in all-artifacts/*; do
             ARTIFACT_NAME=$(basename "$DIR")
-            PLATFORM="${ARTIFACT_NAME##*-}"
+            PLATFORM=$(echo "$ARTIFACT_NAME" | sed -E 's/^.*-([^-]+)$/\1/')
             DEST="$COMBINED_DIR/$PLATFORM"
 
             echo "→ Merging platform: $PLATFORM into $DEST"
