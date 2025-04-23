@@ -1,4 +1,4 @@
-name: 🔍 Determine Combined Artifact Requirement
+name: 🔍 Determine Artifact Requirements
 
 on:
   workflow_call:

@@ -42,7 +42,7 @@ jobs:
 
   determine-combined-artifact-requirement:
     name: 🔍 Determine Combined Artifact Requirement
-    uses: ./.github/workflows/determine-combined-artifact-requirement.yml
+    uses: ./.github/workflows/determine-artifact-requirements.yml
     with:
       deployTargets: ${{ inputs.deployTargets }}
       
