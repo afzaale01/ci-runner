@@ -18,6 +18,9 @@ on:
         default: 'build'
         required: false
     outputs:
+      validDeployTargets:
+        description: "JSON array of filtered and validated deploy targets"
+        value: ${{ jobs.validate-deploy-targets.outputs.validTargets }}
       requiresCombinedArtifact:
         description: "Whether any deploy target requires a combined artifact"
         value: ${{ jobs.analyze-artifact-strategy.outputs.requiresCombined }}
@@ -42,16 +45,22 @@ jobs:
           "TARGET_PLATFORMS_RELEASE"
         ]
 
+  validate-deploy-targets:
+    uses: ./.github/workflows/validate-deploy-targets.yml
+    with:
+      deployTargets: ${{ inputs.deployTargets }}
+
+  analyze-artifact-strategy:
+    name: 🔍 Analyze Artifact Strategy
+    needs: validate-deploy-targets
+    uses: ./.github/workflows/analyze-artifact-strategy.yml
+    with:
+      artifactSource: ${{ inputs.artifactSource }}
+      deployTargets: ${{ needs.validate-deploy-targets.outputs.validTargets }}
+  
   upload-license:
     name: 📥️ Upload Unity License
     if: ${{ inputs.excludesUnityTests == 'false' }}
     uses: ./.github/workflows/unity-license-uploader.yml
     secrets: inherit
-
-  analyze-artifact-strategy:
-    name: 🔍 Analyze Artifact Strategy
-    uses: ./.github/workflows/analyze-artifact-strategy.yml
-    with:
-      artifactSource: ${{ inputs.artifactSource }}
-      deployTargets: ${{ inputs.deployTargets }}
       
