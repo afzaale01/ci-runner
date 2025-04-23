@@ -26,8 +26,10 @@ jobs:
       - name: Determine Version
         id: get_version
         shell: bash
+        env:
+          BUILD_TYPE: ${{ inputs.buildType }}
         run: |
-          if [ "${{ inputs.buildType }}" = "release" ]; then
+          if [ "$BUILD_TYPE" = "release" ]; then
             VERSION=$(echo "${GITHUB_REF}" | sed 's#refs/tags/##')
 
             # 🔒 Validate tag format (v1.2.3 or v1.2.3-beta)
