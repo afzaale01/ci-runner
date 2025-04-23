@@ -153,7 +153,7 @@ jobs:
           # ⛔ Remove Burst debug artifacts that shouldn't be shipped
           find "$DEST" -name '*BurstDebugInformation_DoNotShip*' -exec rm -rf {} +
 
-      - name: Upload Per-Platform Artifact
+      - name: Upload ${{ matrix.targetPlatform }}-Platform Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.projectName }}-${{ needs.determine_version.outputs.version }}-${{ matrix.targetPlatform }}
