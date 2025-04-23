@@ -45,3 +45,4 @@ jobs:
     uses: ./.github/workflows/determine-combined-artifact-requirement.yml
     with:
       deployTargets: ${{ inputs.deployTargets }}
+      

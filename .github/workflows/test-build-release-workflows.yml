@@ -20,14 +20,13 @@ on:
         required: true
         default: '["WebGL", "StandaloneWindows64"]'
       deployTargets:
-        description: "JSON array of deploy targets (e.g. ['itch.io','appcenter','firebase','s3','gh-pages'])"
-        type: string
-        default: '[]'
+        description: "JSON array of deploy targets (e.g. ['itch.io','s3'])"
         required: false
+        default: '[]'
 
 jobs:
   setup-prerequisites:
-    name: Setup Prerequisites
+    name: ⏳ Setup Prerequisites
     uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
     with:
       excludesUnityTests: "true"
@@ -36,13 +35,13 @@ jobs:
 
   build:
     name: 🧩 Trigger Unity Build (Step 2)
-    needs: setup-prerequisites    
+    needs: setup-prerequisites
     uses: ./.github/workflows/step-2-build.yml
     with:
       buildType: ${{ inputs.buildType }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
-      combineArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact }}
+      combineArtifacts: ${{ fromJSON(needs.setup-prerequisites.outputs.requiresCombinedArtifact) }}
     secrets: inherit
 
   release:
