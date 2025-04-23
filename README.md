@@ -112,9 +112,9 @@ They can be found under:
 
 | Variable Name               | Required | Description                                                              |
 |----------------------------|----------|--------------------------------------------------------------------------|
-| `COMBINE_ARTIFACTS`         | ✅        | Combine all builds into one artifact (e.g. for internal QA or archiving) |
 | `DEPLOY_TARGETS`            | ✅        | Deployment targets (JSON array)                                          |
 | `EXCLUDE_UNITY_TESTS`       | ❌        | Exclude tests from pipeline (`true`/`false`)                             |
+| `FORCE_COMBINE_ARTIFACTS`   | ❌        | Combine all builds into one artifact (e.g. for internal QA or archiving) |
 | `PROJECT_NAME`              | ✅        | Name of the Unity project                                                |
 | `RETENTION_DAYS_PREVIEW`    | ✅        | Days to retain preview builds                                            |
 | `RETENTION_DAYS_RELEASE`    | ✅        | Days to retain release builds                                            |
