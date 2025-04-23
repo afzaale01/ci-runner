@@ -19,11 +19,6 @@ on:
         description: "JSON array of platforms to expect artifacts for"
         type: string
         required: true
-      deployTargets:
-        description: "JSON array of deploy targets (e.g. ['itch.io','appcenter','firebase','s3','gh-pages'])"
-        type: string
-        default: '[]'
-        required: false
     outputs:
       releaseErrorMessage:
         description: "Error message if release failed"
