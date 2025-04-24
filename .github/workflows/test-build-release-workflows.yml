@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       buildType:
-        description: "Build type: 'preview' for manual/dev builds, 'release_candidate' for staging (e.g., v1.2.3-rc.1), 'release' for production (e.g., v1.2.3)"
+        description: "Build type: 'preview' | 'release_candidate' | 'release'"
         required: true
         default: "preview"
         type: choice

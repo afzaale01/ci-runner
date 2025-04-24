@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       buildType:
-        description: "Should be 'release' to trigger publishing"
+        description: "Build type: 'preview' | 'release_candidate' | 'release'"
         type: string
         required: true
       version:
@@ -84,15 +84,19 @@ jobs:
         id: create_release
         run: |
           VERSION="${{ needs.tag.outputs.version }}"
-          IS_PRERELEASE=$([[ "$VERSION" == *-* ]] && echo true || echo false)
+          BUILD_TYPE="${{ inputs.buildType }}"
 
-          echo "📝 Creating GitHub release for tag: $VERSION (prerelease: $IS_PRERELEASE)"
+          IS_PRERELEASE=$([[ "$VERSION" == *-* ]] && echo true || echo false)
+          IS_DRAFT=$([[ "$BUILD_TYPE" == "release_candidate" ]] && echo true || echo false)
+
+          echo "📝 Creating GitHub release for tag: $VERSION (prerelease: $IS_PRERELEASE, draft: $IS_DRAFT)"
 
           PAYLOAD=$(jq -n \
             --arg tag_name "$VERSION" \
             --arg name "Release $VERSION" \
             --argjson prerelease "$IS_PRERELEASE" \
-            '{ tag_name: $tag_name, name: $name, draft: false, prerelease: $prerelease }')
+            --argjson draft "$IS_DRAFT" \
+            '{ tag_name: $tag_name, name: $name, draft: $draft, prerelease: $prerelease }')
 
           RESPONSE=$(curl -s -X POST \
             -H "Authorization: Bearer ${{ github.token }}" \
