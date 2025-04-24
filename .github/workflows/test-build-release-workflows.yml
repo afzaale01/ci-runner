@@ -4,12 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       buildType:
-        description: "preview = manual/development build | release = only via Git tag (v1.2.3)"
+        description: "Build type: 'preview' for manual/dev builds, 'release_candidate' for staging (e.g., v1.2.3-rc.1), 'release' for production (e.g., v1.2.3)"
         required: true
         default: "preview"
         type: choice
         options:
           - preview
+          - release_candidate
           - release
       version:
         description: "Version string (e.g. v0.1.2 or v0.1.2-preview)"
