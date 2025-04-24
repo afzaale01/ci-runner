@@ -20,6 +20,9 @@ jobs:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
 
+      - name: 🧰 Setup Helper Scripts
+        run: chmod +x .github/scripts/release/*.sh
+
       - name: Check if Tag Exists
         id: check
         run: .github/scripts/release/check-tag-exists.sh "${{ inputs.version }}" "${{ github.repository }}"
