@@ -125,4 +125,5 @@ jobs:
             echo "────────────────────────────"
             echo "⚠️ Invalid Platforms (ignored):"
             for p in $INVALID_PLATFORMS; do echo "   • $p"; done
+            echo "────────────────────────────"
           fi
