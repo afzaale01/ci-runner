@@ -119,16 +119,15 @@ jobs:
       - name: 🧮 Upload Per-Platform Artifacts
         if: ${{ inputs.skipPerPlatformArtifacts != true }}
         run: |
-          RELEASE_ID=$(grep release_id .release-meta | cut -d= -f2)
+          VERSION="${{ steps.resolve_version.outputs.version }}"
+          RELEASE_ID="${{ steps.check_release.outputs.release_id || steps.create_release.outputs.release_id }}"
           .github/scripts/release/upload-artifacts.sh \
             "${{ inputs.projectName }}" \
-            "${{ steps.resolve_version.outputs.version }}" \
-            "${RELEASE_ID}" \
+            "$VERSION" \
+            "$RELEASE_ID" \
             "${{ github.repository }}" \
             "${{ github.token }}" \
             '${{ inputs.targetPlatforms }}'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
 
       - name: 🧮 Upload Combined Artifact
         if: ${{ inputs.combineArtifacts == true }}
@@ -170,4 +169,4 @@ jobs:
             ERROR_MESSAGE="One or more upload steps failed"
           fi
 
-          echo "releaseErrorMessage=$ERROR_MESSAGE" >> $GITHUB_OUTPUT
+          echo "releaseErrorMessage=$ERROR_MESSAGE" >> "$GITHUB_OUTPUT"

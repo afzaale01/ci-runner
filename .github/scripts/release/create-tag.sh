@@ -1,19 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
-INPUT_VERSION="${1:-}"
+VERSION="${1:-}"
 SHA="${2:-$(git rev-parse HEAD)}"
-REPO="${GITHUB_REPOSITORY:-your-org/your-repo}"
+REPO="${GITHUB_REPOSITORY:?}"
 
-# Determine fallback version if input is empty, null, or just whitespace
-if [[ -z "${INPUT_VERSION// }" ]]; then
-  BRANCH=$(git rev-parse --abbrev-ref HEAD)
-  TIMESTAMP=$(date +'%Y%m%dT%H%M')
-  VERSION="manual-${BRANCH}-${TIMESTAMP}"
-  echo "⚠️ No valid version provided — falling back to '$VERSION'"
-else
-  VERSION="$INPUT_VERSION"
-  echo "ℹ️ Using provided version: '$VERSION'"
+if [[ -z "${VERSION// }" ]]; then
+  echo "❌ Error: version must be provided explicitly."
+  exit 1
 fi
 
 echo "🧪 Creating tag '$VERSION' at commit $SHA in $REPO"
@@ -33,9 +27,10 @@ BODY=$(echo "$RESPONSE" | head -n -1)
 STATUS=$(echo "$RESPONSE" | tail -n1)
 
 if [[ "$STATUS" -ne 201 ]]; then
-  echo "❌ Failed to create tag: $BODY"
+  echo "❌ Failed to create tag. GitHub API response:"
+  echo "$BODY"
   exit 1
 fi
 
 echo "✅ Created tag: $VERSION"
-echo "version=\"$VERSION\"" >> "$GITHUB_OUTPUT"
+echo "version=$VERSION" >> "$GITHUB_OUTPUT"
