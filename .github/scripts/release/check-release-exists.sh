@@ -1,15 +1,30 @@
 #!/bin/bash
-set -e
+set -euo pipefail
+
 VERSION="$1"
-API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/$VERSION"
+REPO="$2"
+TOKEN="$3"
+API_URL="https://api.github.com/repos/${REPO}/releases/tags/$VERSION"
 
-RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
-  -H "Authorization: Bearer $GITHUB_TOKEN" \
-  -H "Accept: application/vnd.github+json" "$API_URL")
+TMPFILE=$(mktemp)
+STATUS=$(curl -s -w "%{http_code}" -o "$TMPFILE" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Accept: application/vnd.github+json" \
+  "$API_URL")
 
-if [ "$RESPONSE" -eq 200 ]; then
-  echo "exists=true"
-  echo "release_id=$(jq -r '.id' response.json)"
+if [ "$STATUS" -eq 200 ]; then
+  RELEASE_ID=$(jq -e -r '.id // empty' "$TMPFILE" || echo "")
+  if [[ -n "$RELEASE_ID" ]]; then
+    echo "ℹ️  Release found for tag '$VERSION' (ID: $RELEASE_ID)"
+    echo "exists=true" >> "$GITHUB_OUTPUT"
+    echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
+  else
+    echo "ℹ️  Tag '$VERSION' found, but no release ID could be extracted"
+    echo "exists=false" >> "$GITHUB_OUTPUT"
+  fi
 else
-  echo "exists=false"
+  echo "ℹ️  No release found for tag '$VERSION' (HTTP status: $STATUS)"
+  echo "exists=false" >> "$GITHUB_OUTPUT"
 fi
+
+rm -f "$TMPFILE"

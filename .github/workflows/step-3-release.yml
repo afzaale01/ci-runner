@@ -56,19 +56,16 @@ jobs:
 
       - name: 📝 Check if Release Already Exists
         id: check_release
-        run: |
-          RESULT=$(.github/scripts/release/check-release-exists.sh "${{ inputs.version }}" "${{ github.repository }}" "${{ github.token }}")
-          echo "$RESULT" >> $GITHUB_OUTPUT
-          echo "$RESULT" > .release-meta
+        run: .github/scripts/release/check-release-exists.sh "${{ inputs.version }}" "${{ github.repository }}" "${{ github.token }}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: 📝 Create GitHub Release
-        if: steps.check_release.outputs.exists != 'true'
+        if: ${{ steps.check_release.outputs.exists != 'true' }}
         id: create_release
         run: |
           VERSION="${{ inputs.version }}"
-          IS_PRERELEASE=$(echo "$VERSION" | grep -q '-' && echo true || echo false)
+          IS_PRERELEASE=$([[ "$VERSION" == *-* ]] && echo true || echo false)
 
           PAYLOAD=$(jq -n \
             --arg tag_name "$VERSION" \
