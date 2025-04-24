@@ -107,7 +107,7 @@ jobs:
             echo "✅ Valid Targets:"
             for v in $VALID_TARGETS; do echo "  - $v"; done
           else
-            echo "⚠️ No valid deploy targets found."
+            echo "ℹ️ No valid deploy targets found."
           fi
 
           if [ -n "$INVALID_TARGETS" ]; then
