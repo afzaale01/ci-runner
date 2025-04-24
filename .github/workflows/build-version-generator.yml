@@ -4,12 +4,16 @@ on:
   workflow_call:
     inputs:
       buildType:
-        description: "Build type (preview or release)"
+        description: "Build type: preview | release_candidate | release"
         required: true
+        type: string
+      version:
+        description: "Optional version override from workflow input"
+        required: false
         type: string
     outputs:
       version:
-        description: "The generated build version"
+        description: "The resolved build version string"
         value: ${{ jobs.determine.outputs.version }}
 
 jobs:
@@ -29,16 +33,23 @@ jobs:
         run: |
           REF="${GITHUB_REF}"
           EVENT="${GITHUB_EVENT_NAME}"
+          INPUT_VERSION="${{ inputs.version }}"
+          BUILD_TYPE="${{ inputs.buildType }}"
 
-          if [[ "$REF" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
-            # --- Pull Request build
+          # Use the manually supplied version if provided and not a final release
+          if [[ "$BUILD_TYPE" != "release" && -n "$INPUT_VERSION" ]]; then
+            VERSION="$INPUT_VERSION"
+
+          # For releases, use the Git tag (mandatory for release builds)
+          elif [[ "$REF" =~ ^refs/tags/(v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.\-]+)?)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+
+          # Pull Request
+          elif [[ "$REF" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
             PR_NUMBER=$(printf "%04d" "${BASH_REMATCH[1]}")
             VERSION="PR-${PR_NUMBER}"
 
-          elif [[ "$REF" =~ ^refs/tags/(v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.-]+)?)$ ]]; then
-            # --- Tag build (accepts both v1.2.3 and 1.2.3)
-            VERSION="${BASH_REMATCH[1]}"
-
+          # Branch-based manual or CI build
           elif [[ "$REF" =~ ^refs/heads/(.+)$ ]]; then
             BRANCH_NAME=$(echo "${BASH_REMATCH[1]}" | tr '/' '-')
             if [[ "$EVENT" == "workflow_dispatch" ]]; then
@@ -46,8 +57,9 @@ jobs:
             else
               VERSION="${BRANCH_NAME}"
             fi
+
+          # Detached HEAD or fallback
           else
-            # Fallback for weird cases like detached HEAD
             SHORT_SHA=$(git rev-parse --short HEAD)
             VERSION="commit-${SHORT_SHA}"
           fi
