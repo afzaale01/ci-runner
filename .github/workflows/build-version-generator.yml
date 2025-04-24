@@ -27,26 +27,33 @@ jobs:
         id: get_version
         shell: bash
         run: |
-          if [ "${{ inputs.buildType }}" = "release" ]; then
-            VERSION=$(echo "${GITHUB_REF}" | sed 's#refs/tags/##')
+          REF="${GITHUB_REF}"
 
-            # 🔒 Validate tag format (v1.2.3 or v1.2.3-beta)
-            if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.-]+)?$ ]]; then
-              echo "❌ Invalid tag format: $VERSION"
-              exit 1
+          if [[ "$REF" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
+            # --- PR build
+            PR_NUMBER=$(printf "%04d" "${BASH_REMATCH[1]}")
+            VERSION="PR-${PR_NUMBER}"
+
+          elif [[ "$REF" =~ ^refs/tags/v([0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.-]+)?)$ ]]; then
+            # --- Tag build
+            VERSION="v${BASH_REMATCH[1]}"
+
+          elif [[ "$REF" =~ ^refs/heads/(.+)$ ]]; then
+            # --- Branch build
+            BRANCH_NAME=$(echo "${BASH_REMATCH[1]}" | tr '/' '-')
+            # --- Manual/Workflow Dispatch
+            if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+              VERSION="manual-${BRANCH_NAME}"
+            else
+            # --- Default to Branch Name
+              VERSION="${BRANCH_NAME}"
             fi
           else
-            # 🕵️ Detect PR number from GITHUB_REF
-            if [[ "$GITHUB_REF" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
-              PR_NUMBER=$(printf "%04d" "${BASH_REMATCH[1]}")  # Pad PR number to 4 digits
-              VERSION="PR-${PR_NUMBER}"
-            # 🕵️ Detect branch name as fallback
-            else
-              BRANCH_NAME=$(echo "${GITHUB_REF##refs/heads/}" | tr '/' '-')
-              VERSION="manual-${BRANCH_NAME}"
-            fi
+            echo "❌ Unrecognized GITHUB_REF format: $REF"
+            exit 1
           fi
 
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "📦 Determined version: $VERSION"
+          echo "🏷️ Determined version: $VERSION"
+
