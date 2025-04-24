@@ -53,6 +53,7 @@ jobs:
   analyze-artifact-strategy:
     name: 🔍 Analyze Artifact Strategy
     needs: validate-deploy-targets
+    if: needs.validate-deploy-targets.outputs.skipAnalysis != 'true'
     uses: ./.github/workflows/analyze-artifact-strategy.yml
     with:
       artifactSource: ${{ inputs.artifactSource }}

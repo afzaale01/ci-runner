@@ -8,14 +8,17 @@ on:
         required: true
     outputs:
       validTargets:
-        value: ${{ jobs.validate.outputs.valid }}
+        value: ${{ jobs.validate.outputs.validTargets }}
+      skipAnalysis:
+        value: ${{ jobs.validate.outputs.skipAnalysis }}
 
 jobs:
   validate:
     name: ✅ Validate Deploy Targets
     runs-on: ubuntu-latest
     outputs:
-      valid: ${{ steps.filter.outputs.validTargets }}
+      validTargets: ${{ steps.filter.outputs.validTargets }}
+      skipAnalysis: ${{ steps.early-check.outputs.skipRest }}
 
     steps:
       - name: 🔍 Inspect Input
