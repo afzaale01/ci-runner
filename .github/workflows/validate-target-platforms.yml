@@ -101,29 +101,14 @@ jobs:
       - name: 📋 Summary of Platform Validation
         if: always()
         run: |
-          VALID_PLATFORMS="${VALID_PLATFORMS:-}"
           INVALID_PLATFORMS="${INVALID_PLATFORMS:-}"
           GROUPED_FILE="grouped.json"
 
           echo ""
           echo "📋 Target Platform Validation Summary"
-          echo "────────────────────────────────────────"
-
-          if [ -n "$VALID_PLATFORMS" ]; then
-            echo "✅ Valid Platforms:"
-            for p in $VALID_PLATFORMS; do echo "   • $p"; done
-          else
-            echo "ℹ️ No valid platforms provided."
-          fi
-
-          if [ -n "$INVALID_PLATFORMS" ]; then
-            echo ""
-            echo "⚠️ Invalid Platforms (ignored):"
-            for p in $INVALID_PLATFORMS; do echo "   • $p"; done
-          fi
+          echo "──────────────────────────────────────"
 
           if [ -f "$GROUPED_FILE" ]; then
-            echo ""
             echo "📋 Grouped Platforms by OS"
             echo "────────────────────────────"
 
@@ -133,6 +118,11 @@ jobs:
               (.value | map("   • " + .) | join("\n"))
             ' "$GROUPED_FILE"
           else
-            echo ""
             echo "⚠️ No grouped platform data available."
+          fi
+
+          if [ -n "$INVALID_PLATFORMS" ]; then
+            echo "────────────────────────────"
+            echo "⚠️ Invalid Platforms (ignored):"
+            for p in $INVALID_PLATFORMS; do echo "   • $p"; done
           fi
