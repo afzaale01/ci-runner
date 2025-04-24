@@ -1,0 +1,23 @@
+{
+  "Android": {
+    "os": "ubuntu-latest"
+  },
+  "WebGL": {
+    "os": "ubuntu-latest"
+  },
+  "StandaloneLinux64": {
+    "os": "ubuntu-latest"
+  },
+  "StandaloneWindows": {
+    "os": "ubuntu-latest"
+  },
+  "StandaloneWindows64": {
+    "os": "ubuntu-latest"
+  },
+  "StandaloneOSX": {
+    "os": "macos-latest"
+  },
+  "iOS": {
+    "os": "macos-latest"
+  }
+}
