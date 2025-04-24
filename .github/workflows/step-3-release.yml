@@ -46,7 +46,7 @@ jobs:
     secrets: inherit
 
   publish:
-    if: ${{ inputs.buildType == 'release' || inputs.buildType == 'release-candidate' }}
+    if: ${{ inputs.buildType == 'release' || inputs.buildType == 'release_candidate' }}
     name: 📤 Publish GitHub Release
     needs: tag
     runs-on: ubuntu-latest
