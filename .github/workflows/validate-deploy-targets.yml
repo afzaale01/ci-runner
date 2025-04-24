@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       valid: ${{ steps.filter.outputs.validTargets }}
-      requiresCombinedArtifact: ${{ steps.filter.outputs.requiresCombinedArtifact }}  
+
     steps:
       - name: 📁 Checkout repo
         uses: actions/checkout@v4
@@ -43,7 +43,13 @@ jobs:
           if ! echo "$RAW_INPUT" | jq empty 2>/dev/null; then
             echo "❌ Invalid JSON in deployTargets input!"
             echo "validTargets=[]" >> $GITHUB_OUTPUT
-            echo "requiresCombinedArtifact=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Check for empty input array
+          if [ "$(echo "$RAW_INPUT" | jq 'length')" -eq 0 ]; then
+            echo "ℹ️ No deploy targets provided (empty array). Skipping validation."
+            echo "validTargets=[]" >> $GITHUB_OUTPUT
             exit 0
           fi
 
@@ -53,17 +59,10 @@ jobs:
           INPUTS=$(echo "$RAW_INPUT" | jq -r '.[]')
           VALID=()
           INVALID=()
-          NEEDS_COMBINED=false
 
           for TARGET in $INPUTS; do
             if echo "$VALID_TARGETS" | grep -qx "$TARGET"; then
               VALID+=("$TARGET")
-
-              # Check if this target requires combined artifact
-              COMBINED=$(jq -r --arg t "$TARGET" '.[$t].requiresCombinedArtifact // false' "$CONFIG_FILE")
-              if [ "$COMBINED" = "true" ]; then
-                NEEDS_COMBINED=true
-              fi
             else
               INVALID+=("$TARGET")
             fi
@@ -79,6 +78,3 @@ jobs:
           echo "validTargets<<EOF" >> $GITHUB_OUTPUT
           echo "$json" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-
-          # Output whether a combined artifact is required
-          echo "requiresCombinedArtifact=$NEEDS_COMBINED" >> $GITHUB_OUTPUT
