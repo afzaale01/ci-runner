@@ -1,4 +1,4 @@
-name: ✅ Validate Deploy Targets
+name: 📚 Validate Deploy Targets
 
 on:
   workflow_call:
@@ -18,6 +18,33 @@ jobs:
       valid: ${{ steps.filter.outputs.validTargets }}
 
     steps:
+      - name: 🔍 Inspect Input
+        id: early-check
+        run: |
+          RAW_INPUT='${{ inputs.deployTargets }}'
+
+          echo "🔍 Raw deployTargets input: $RAW_INPUT"
+
+          # Validate JSON format
+          if ! echo "$RAW_INPUT" | jq empty 2>/dev/null; then
+            echo "❌ Invalid JSON in deployTargets input!"
+            echo "validTargets=[]" >> $GITHUB_OUTPUT
+            echo "VALID_TARGETS=" >> $GITHUB_ENV
+            echo "INVALID_TARGETS=" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          # Check for empty array
+          if [ "$(echo "$RAW_INPUT" | jq 'length')" -eq 0 ]; then
+            echo "ℹ️ No deploy targets provided (empty array). Skipping validation."
+            echo "validTargets=[]" >> $GITHUB_OUTPUT
+            echo "VALID_TARGETS=" >> $GITHUB_ENV
+            echo "INVALID_TARGETS=" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          echo "✅ Input is non-empty and valid JSON. Proceeding to full validation..."
+
       - name: 📁 Checkout repo
         uses: actions/checkout@v4
 
@@ -28,8 +55,6 @@ jobs:
           CONFIG_FILE=".github/config/deploy-targets.json"
           FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
 
-          echo "🔍 Raw deployTargets input: $RAW_INPUT"
-
           echo "🔍 Checking for local config file..."
           if [ -f "$CONFIG_FILE" ]; then
             echo "✅ Found local config file: $CONFIG_FILE"
@@ -37,24 +62,6 @@ jobs:
             echo "⚠️ Not found. Downloading from: $FALLBACK_URL"
             mkdir -p "$(dirname "$CONFIG_FILE")"
             curl -sSL "$FALLBACK_URL" -o "$CONFIG_FILE"
-          fi
-
-          # Validate input JSON
-          if ! echo "$RAW_INPUT" | jq empty 2>/dev/null; then
-            echo "❌ Invalid JSON in deployTargets input!"
-            echo "validTargets=[]" >> $GITHUB_OUTPUT
-            echo "VALID_TARGETS=" >> $GITHUB_ENV
-            echo "INVALID_TARGETS=" >> $GITHUB_ENV
-            exit 0
-          fi
-
-          # Check for empty input array
-          if [ "$(echo "$RAW_INPUT" | jq 'length')" -eq 0 ]; then
-            echo "ℹ️ No deploy targets provided (empty array). Skipping validation."
-            echo "validTargets=[]" >> $GITHUB_OUTPUT
-            echo "VALID_TARGETS=" >> $GITHUB_ENV
-            echo "INVALID_TARGETS=" >> $GITHUB_ENV
-            exit 0
           fi
 
           VALID_KEYS=$(jq -r 'keys[]' "$CONFIG_FILE")
@@ -81,14 +88,14 @@ jobs:
           echo "$json" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-          # Export valid/invalid targets as space-separated strings for summary
+          # Export for summary step
           echo "VALID_TARGETS=${VALID[*]}" >> $GITHUB_ENV
           echo "INVALID_TARGETS=${INVALID[*]}" >> $GITHUB_ENV
 
       - name: 📋 Summary of Target Validation
         run: |
           echo ""
-          echo "🧪 Deploy Target Validation Summary"
+          echo "📚 Deploy Target Validation Summary"
           echo "────────────────────────────────────"
           if [ -n "$VALID_TARGETS" ]; then
             echo "✅ Valid Targets:"
