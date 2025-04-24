@@ -31,7 +31,7 @@ jobs:
             echo "validTargets=[]" >> $GITHUB_OUTPUT
             echo "VALID_TARGETS=" >> $GITHUB_ENV
             echo "INVALID_TARGETS=" >> $GITHUB_ENV
-            echo "SKIP_REST=true" >> $GITHUB_ENV
+            echo "skipRest=true" >> $GITHUB_OUTPUT
             exit 0
           fi
 
@@ -41,20 +41,20 @@ jobs:
             echo "validTargets=[]" >> $GITHUB_OUTPUT
             echo "VALID_TARGETS=" >> $GITHUB_ENV
             echo "INVALID_TARGETS=" >> $GITHUB_ENV
-            echo "SKIP_REST=true" >> $GITHUB_ENV
+            echo "skipRest=true" >> $GITHUB_OUTPUT
             exit 0
           fi
 
           echo "✅ Input is non-empty and valid JSON. Proceeding..."
-          echo "SKIP_REST=false" >> $GITHUB_ENV
+          echo "skipRest=false" >> $GITHUB_OUTPUT
 
       - name: 📁 Checkout repo
-        if: env.SKIP_REST != 'true'
+        if: steps.early-check.outputs.skipRest != 'true'
         uses: actions/checkout@v4
 
       - name: ⚙️ Filter Valid Targets
         id: filter
-        if: env.SKIP_REST != 'true'
+        if: steps.early-check.outputs.skipRest != 'true'
         run: |
           RAW_INPUT='${{ inputs.deployTargets }}'
           CONFIG_FILE=".github/config/deploy-targets.json"
