@@ -43,7 +43,6 @@ on:
       CUSTOM_SERVER_HOST: { required: false }
       CUSTOM_SERVER_USER: { required: false }
       CUSTOM_SERVER_KEY: { required: false }
-      DISCORD_WEBHOOK: { required: false }
 
 jobs:
   resolve-deploy-matrix:
@@ -276,21 +275,6 @@ jobs:
 
           echo "🔑 Logging into Steam and triggering build..."
           ./steamcmd.sh +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" +run_app_build "$VDF_PATH" +quit
-
-      # ───── Discord ─────
-      - name: 🤖 Deploy to Discord
-        if: matrix.target == 'discord'
-        run: |
-          if [ -z "${{ secrets.DISCORD_WEBHOOK }}" ]; then
-            echo "⚠️ Missing Discord webhook."; 
-            exit 1;
-          fi
-
-          FILE=$(find "$DEPLOY_DIR" -type f \( -name "*.apk" -o -name "*.ipa" -o -name "*.zip" \) | head -n 1)
-          if [ -z "$FILE" ]; then echo "❌ No artifact found to upload to Discord."; exit 1; fi
-
-          echo "📤 Uploading $FILE to Discord..."
-          curl -F "file=@$FILE" "${{ secrets.DISCORD_WEBHOOK }}"
 
       # ───── Custom Server ─────
       - name: 🖥️ Deploy to Custom Server (via SCP or Rsync)

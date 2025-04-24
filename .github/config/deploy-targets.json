@@ -1,27 +1,34 @@
 {
-    "gh-pages": {
-      "os": "ubuntu-latest",
-      "requiresCombinedArtifact": false
-    },
-    "itch.io": {
-      "os": "ubuntu-latest",
-      "requiresCombinedArtifact": false
-    },
-    "s3": {
-      "os": "ubuntu-latest",
-      "requiresCombinedArtifact": true
-    },
-    "custom-server": {
-      "os": "ubuntu-latest",
-      "requiresCombinedArtifact": true
-    },
-    "steam": {
-      "os": "ubuntu-latest",
-      "requiresCombinedArtifact": true
-    },
-    "testflight": {
-      "os": "macos-latest",
-      "requiresCombinedArtifact": false
-    }
+  "gh-pages": {
+    "os": "ubuntu-latest",
+    "requiresCombinedArtifact": false
+  },
+  "itch.io": {
+    "os": "ubuntu-latest",
+    "requiresCombinedArtifact": false
+  },
+  "s3": {
+    "os": "ubuntu-latest",
+    "requiresCombinedArtifact": true
+  },
+  "custom-server": {
+    "os": "ubuntu-latest",
+    "requiresCombinedArtifact": true
+  },
+  "steam": {
+    "os": "ubuntu-latest",
+    "requiresCombinedArtifact": true
+  },
+  "testflight": {
+    "os": "macos-latest",
+    "requiresCombinedArtifact": false
+  },
+  "appcenter": {
+    "os": "ubuntu-latest",
+    "requiresCombinedArtifact": true
+  },
+  "firebase": {
+    "os": "ubuntu-latest",
+    "requiresCombinedArtifact": true
   }
-  
+}
