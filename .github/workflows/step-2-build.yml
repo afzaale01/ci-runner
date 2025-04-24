@@ -69,15 +69,17 @@ jobs:
       - name: 🧮 Create Build Matrix from Grouped Platforms
         id: set-matrix
         run: |
-          grouped=${{ needs.filter_platforms.outputs.groupedPlatforms }}
+          grouped='${{ needs.filter_platforms.outputs.groupedPlatforms }}'
           echo "📦 Grouped platforms: $grouped"
-
+      
           matrix=$(echo "$grouped" | jq -c '
             to_entries
             | map(.value[] as $p | { os: .key, targetPlatform: $p })
           ')
-
-          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+      
+          echo "matrix<<EOF" >> $GITHUB_OUTPUT
+          echo "$matrix" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
   build_platforms:
     name: Build for ${{ matrix.targetPlatform }} on ${{ matrix.os }}
