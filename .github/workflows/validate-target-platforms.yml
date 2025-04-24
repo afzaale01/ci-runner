@@ -111,7 +111,7 @@ jobs:
 
           if [ -n "$VALID_PLATFORMS" ]; then
             echo "✅ Valid Platforms:"
-            for p in $VALID_PLATFORMS; do echo "  - $p"; done
+            for p in $VALID_PLATFORMS; do echo "   • $p"; done
           else
             echo "ℹ️ No valid platforms provided."
           fi
@@ -119,17 +119,20 @@ jobs:
           if [ -n "$INVALID_PLATFORMS" ]; then
             echo ""
             echo "⚠️ Invalid Platforms (ignored):"
-            for p in $INVALID_PLATFORMS; do echo "  - $p"; done
+            for p in $INVALID_PLATFORMS; do echo "   • $p"; done
           fi
 
           if [ -f "$GROUPED_FILE" ]; then
             echo ""
-            echo "📦 Grouped by OS:"
+            echo "📋 Grouped Platforms by OS"
+            echo "────────────────────────────"
+
             jq -r '
-              to_entries[] | 
-              "🖥️ \(.key):\n" + 
-              (.value | map("  - " + .) | join("\n"))
+              to_entries[] |
+              "🖥️  \(.key):\n" +
+              (.value | map("   • " + .) | join("\n"))
             ' "$GROUPED_FILE"
           else
-            echo "⚠️ No grouped data found."
+            echo ""
+            echo "⚠️ No grouped platform data available."
           fi
