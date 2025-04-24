@@ -49,8 +49,8 @@ jobs:
             echo "👀 Using latest base tag: $BASE_TAG"
 
             # Run RC generator script
-            chmod +x .github/scripts/release/version-generator-with-rc.sh
-            VERSION=$(./.github/scripts/release/version-generator-with-rc.sh "$BASE_TAG")
+            chmod +x .github/scripts/build/version-generator-for-rc.sh
+            VERSION=$(./.github/scripts/build/version-generator-for-rc.sh "$BASE_TAG")
 
           # Manual version override (not release)
           elif [[ "$BUILD_TYPE" != "release" && -n "$INPUT_VERSION" ]]; then
