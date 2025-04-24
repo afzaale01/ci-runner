@@ -89,4 +89,6 @@ jobs:
           echo "📦 Grouped platforms:"
           cat grouped.json
 
-          echo "groupedPlatforms=$(<grouped.json)" >> $GITHUB_OUTPUT
+          echo "groupedPlatforms<<EOF" >> $GITHUB_OUTPUT
+          cat grouped.json >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
