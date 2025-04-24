@@ -1,0 +1,39 @@
+name: 🏷️ Resolve & Create Tag
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+    outputs:
+      version:
+        value: ${{ jobs.tag.outputs.version }}
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set_version.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check if Tag Exists
+        id: check
+        run: .github/scripts/release/check-tag-exists.sh "${{ inputs.version }}" "${{ github.repository }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Tag if Missing
+        if: steps.check.outputs.exists != 'true'
+        id: create
+        run: .github/scripts/release/create-tag.sh "${{ inputs.version }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set Output Version
+        id: set_version
+        run: |
+          echo "version=${{ steps.create.outputs.version || inputs.version }}" >> "$GITHUB_OUTPUT"
