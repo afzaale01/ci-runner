@@ -51,7 +51,7 @@ jobs:
       version: ${{ inputs.version }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
-      combineArtifacts: ${{ fromJSON(needs.setup-prerequisites.outputs.requiresCombinedArtifact) }}
+      combineArtifacts: ${{ fromJSON(needs.setup-prerequisites.outputs.requiresCombinedArtifact || 'false') }}
     secrets: inherit
 
   release:
