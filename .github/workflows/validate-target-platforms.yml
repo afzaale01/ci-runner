@@ -101,7 +101,6 @@ jobs:
       - name: 📋 Summary of Platform Validation
         if: always()
         run: |
-          # Fallbacks
           VALID_PLATFORMS="${VALID_PLATFORMS:-}"
           INVALID_PLATFORMS="${INVALID_PLATFORMS:-}"
           GROUPED_FILE="grouped.json"
@@ -127,8 +126,9 @@ jobs:
             echo ""
             echo "📦 Grouped by OS:"
             jq -r '
-              to_entries[] |
-              "🖥️ \(.key):\n\(.value | map("  - \(.))" | join("\n"))"
+              to_entries[] | 
+              "🖥️ \(.key):\n" + 
+              (.value | map("  - " + .) | join("\n"))
             ' "$GROUPED_FILE"
           else
             echo "⚠️ No grouped data found."
