@@ -77,7 +77,7 @@ jobs:
           VERSION="${{ needs.tag.outputs.version }}"
           echo "📌 Resolved version from tag job: $VERSION"
           echo "### 🏷️ Release Version Used" >> $GITHUB_STEP_SUMMARY
-          echo "Resolved version from tag resolution step: \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
+          echo "Tagged version for release: \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
 
       - name: 📝 Create GitHub Release
         if: ${{ steps.check_release.outputs.exists != 'true' }}
