@@ -17,7 +17,7 @@ jobs:
       version: ${{ steps.set_version.outputs.version }}
 
     steps:
-      - name: Checkout
+      - name: 📁 Checkout Repository
         uses: actions/checkout@v4
 
       - name: Check if Tag Exists

@@ -60,7 +60,7 @@ jobs:
 
       - name: 🏷️ Ensure Git Tag Exists
         id: ensure_git_tag
-        uses: ./.github/workflows/resolve-and-create-tag.yml@main
+        uses: avalin/unity-ci-templates/.github/workflows/resolve-and-create-tag.yml@main
         with:
           version: ${{ inputs.version }}
 
