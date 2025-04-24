@@ -17,48 +17,79 @@ on:
 
 jobs:
   filter_platforms:
-    name: Filter Platforms
+    name: 🧮 Filter Platforms
     runs-on: ubuntu-latest
     outputs:
       macPlatforms: ${{ steps.filter.outputs.macPlatforms }}
       ubuntuPlatforms: ${{ steps.filter.outputs.ubuntuPlatforms }}
 
     steps:
-      - name: 🔍 Validate and Filter Platforms
+      - name: 📁 Checkout repo
+        uses: actions/checkout@v4
+
+      - name: 🔍 Validate Platforms and Load OS Mapping
         id: validate
         run: |
-          echo "🔍 Validating input: ${{ inputs.targetPlatforms }}"
-
-          KNOWN_PLATFORMS='["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
           INPUT_JSON='${{ inputs.targetPlatforms }}'
+          CONFIG_FILE=".github/config/target-platforms.json"
+          FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/target-platforms.json"
 
-          # Validate JSON syntax
+          echo "🔍 Validating input platforms: $INPUT_JSON"
+
+          # Check config exists or download fallback
+          if [ -f "$CONFIG_FILE" ]; then
+            echo "✅ Using config: $CONFIG_FILE"
+          else
+            echo "⚠️ Config not found. Downloading fallback..."
+            mkdir -p "$(dirname "$CONFIG_FILE")"
+            curl -sSL "$FALLBACK_URL" -o "$CONFIG_FILE"
+          fi
+
+          # Validate input JSON
           echo "$INPUT_JSON" | jq empty || {
             echo "❌ Input is not valid JSON."
             exit 1
           }
 
-          # Extract unknown platforms
-          UNKNOWN=$(echo "$INPUT_JSON" | jq -r --argjson known "$KNOWN_PLATFORMS" '.[] | select( . as $p | $known | index($p) | not )')
-          if [[ -n "$UNKNOWN" ]]; then
-            echo "⚠️ Warning: These platforms are not recognized and will be ignored:"
-            echo "$UNKNOWN" | sed 's/^/- /'
+          KNOWN_KEYS=$(jq -r 'keys[]' "$CONFIG_FILE")
+          echo "📚 Known platforms: $KNOWN_KEYS"
+
+          INPUTS=$(echo "$INPUT_JSON" | jq -r '.[]')
+          VALID=()
+          INVALID=()
+
+          for PLATFORM in $INPUTS; do
+            if echo "$KNOWN_KEYS" | grep -qx "$PLATFORM"; then
+              VALID+=("$PLATFORM")
+            else
+              INVALID+=("$PLATFORM")
+            fi
+          done
+
+          if [ "${#INVALID[@]}" -gt 0 ]; then
+            echo "⚠️ Unrecognized platforms (ignored):"
+            for p in "${INVALID[@]}"; do echo "  - $p"; done
           fi
 
-          # Filter valid platforms
-          VALID=$(echo "$INPUT_JSON" | jq -c --argjson known "$KNOWN_PLATFORMS" '[ .[] | select( . as $p | $known | index($p) ) ]')
-          echo "✅ Valid platforms: $VALID"
-
-          echo "validPlatforms=$VALID" >> $GITHUB_OUTPUT
+          # Output valid platforms
+          VALID_JSON=$(printf '%s\n' "${VALID[@]}" | jq -R . | jq -s .)
+          echo "validPlatforms<<EOF" >> $GITHUB_OUTPUT
+          echo "$VALID_JSON" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: 🧪 Split Platforms by OS
         id: filter
         run: |
-          VALID_PLATFORMS='${{ steps.validate.outputs.validPlatforms }}'
-          echo "📥 Using filtered valid platforms: $VALID_PLATFORMS"
-          
-          MAC_PLATFORMS=$(echo "$VALID_PLATFORMS" | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
-          UBUNTU_PLATFORMS=$(echo "$VALID_PLATFORMS" | jq -c '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
+          CONFIG_FILE=".github/config/target-platforms.json"
+          PLATFORMS='${{ steps.validate.outputs.validPlatforms }}'
+
+          echo "📥 Filtering platforms by OS: $PLATFORMS"
+
+          MAC_PLATFORMS=$(echo "$PLATFORMS" | jq -c --argfile cfg "$CONFIG_FILE" '
+            map(select($cfg[.] == "macos-latest"))')
+
+          UBUNTU_PLATFORMS=$(echo "$PLATFORMS" | jq -c --argfile cfg "$CONFIG_FILE" '
+            map(select($cfg[.] == "ubuntu-latest"))')
 
           echo "💻 Mac platforms: $MAC_PLATFORMS"
           echo "🐧 Ubuntu platforms: $UBUNTU_PLATFORMS"
