@@ -30,6 +30,7 @@ for PLATFORM in $PLATFORMS; do
     if [ "$RESPONSE" -ne 201 ]; then
       echo "❌ Upload failed for $ZIP_NAME (HTTP $RESPONSE)"
       cat /tmp/upload_response.json
+      exit 1
     else
       echo "✅ Uploaded $ZIP_NAME"
     fi
