@@ -1,33 +1,29 @@
-name: 🧮 Target Platforms Filter
+name: 🧮 Validate & Filter Platforms
 
 on:
   workflow_call:
     inputs:
       targetPlatforms:
-        description: "JSON array of platforms to validate and split"
+        description: "JSON array of platforms to validate and group by required OS"
         required: true
         type: string
     outputs:
-      macPlatforms:
-        description: "List of platforms requiring macOS runners"
-        value: ${{ jobs.filter_platforms.outputs.macPlatforms }}
-      ubuntuPlatforms:
-        description: "List of platforms compatible with Ubuntu runners"
-        value: ${{ jobs.filter_platforms.outputs.ubuntuPlatforms }}
+      groupedPlatforms:
+        description: "Map of OS runner label to list of platforms"
+        value: ${{ jobs.filter_platforms.outputs.groupedPlatforms }}
 
 jobs:
   filter_platforms:
     name: 🧮 Filter Platforms
     runs-on: ubuntu-latest
     outputs:
-      macPlatforms: ${{ steps.filter.outputs.macPlatforms }}
-      ubuntuPlatforms: ${{ steps.filter.outputs.ubuntuPlatforms }}
+      groupedPlatforms: ${{ steps.group.outputs.groupedPlatforms }}
 
     steps:
       - name: 📁 Checkout repo
         uses: actions/checkout@v4
 
-      - name: 🔍 Validate Platforms and Load OS Mapping
+      - name: 🔍 Validate Platforms and Load Config
         id: validate
         run: |
           INPUT_JSON='${{ inputs.targetPlatforms }}'
@@ -36,7 +32,6 @@ jobs:
 
           echo "🔍 Validating input platforms: $INPUT_JSON"
 
-          # Check config exists or download fallback
           if [ -f "$CONFIG_FILE" ]; then
             echo "✅ Using config: $CONFIG_FILE"
           else
@@ -45,21 +40,18 @@ jobs:
             curl -sSL "$FALLBACK_URL" -o "$CONFIG_FILE"
           fi
 
-          # Validate input JSON
           echo "$INPUT_JSON" | jq empty || {
             echo "❌ Input is not valid JSON."
             exit 1
           }
 
-          KNOWN_KEYS=$(jq -r 'keys[]' "$CONFIG_FILE")
-          echo "📚 Known platforms: $KNOWN_KEYS"
-
+          KNOWN=$(jq -r 'keys[]' "$CONFIG_FILE")
           INPUTS=$(echo "$INPUT_JSON" | jq -r '.[]')
           VALID=()
           INVALID=()
 
           for PLATFORM in $INPUTS; do
-            if echo "$KNOWN_KEYS" | grep -qx "$PLATFORM"; then
+            if echo "$KNOWN" | grep -qx "$PLATFORM"; then
               VALID+=("$PLATFORM")
             else
               INVALID+=("$PLATFORM")
@@ -71,28 +63,30 @@ jobs:
             for p in "${INVALID[@]}"; do echo "  - $p"; done
           fi
 
-          # Output valid platforms
           VALID_JSON=$(printf '%s\n' "${VALID[@]}" | jq -R . | jq -s .)
           echo "validPlatforms<<EOF" >> $GITHUB_OUTPUT
           echo "$VALID_JSON" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: 🧪 Split Platforms by OS
-        id: filter
+      - name: 🧪 Group Valid Platforms by OS
+        id: group
         run: |
           CONFIG_FILE=".github/config/target-platforms.json"
           PLATFORMS='${{ steps.validate.outputs.validPlatforms }}'
 
-          echo "📥 Filtering platforms by OS: $PLATFORMS"
+          echo "📥 Grouping platforms by OS..."
 
-          MAC_PLATFORMS=$(echo "$PLATFORMS" | jq -c --argfile cfg "$CONFIG_FILE" '
-            map(select($cfg[.] == "macos-latest"))')
+          jq -n \
+            --argjson platforms "$PLATFORMS" \
+            --slurpfile cfg "$CONFIG_FILE" '
+              $platforms
+              | map({ platform: ., os: ($cfg[0][.]?.os) })
+              | group_by(.os)
+              | map({ (.[0].os): map(.platform) })
+              | add
+            ' > grouped.json
 
-          UBUNTU_PLATFORMS=$(echo "$PLATFORMS" | jq -c --argfile cfg "$CONFIG_FILE" '
-            map(select($cfg[.] == "ubuntu-latest"))')
+          echo "📦 Grouped platforms:"
+          cat grouped.json
 
-          echo "💻 Mac platforms: $MAC_PLATFORMS"
-          echo "🐧 Ubuntu platforms: $UBUNTU_PLATFORMS"
-
-          echo "macPlatforms=$MAC_PLATFORMS" >> $GITHUB_OUTPUT
-          echo "ubuntuPlatforms=$UBUNTU_PLATFORMS" >> $GITHUB_OUTPUT
+          echo "groupedPlatforms=$(<grouped.json)" >> $GITHUB_OUTPUT

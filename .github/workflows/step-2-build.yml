@@ -50,7 +50,7 @@ concurrency:
 
 jobs:
   filter_platforms:
-    uses: avalin/unity-ci-templates/.github/workflows/target-platforms-filter.yml@main
+    uses: avalin/unity-ci-templates/.github/workflows/validate-target-platforms.yml@main
     with:
       targetPlatforms: ${{ inputs.targetPlatforms }}
 
@@ -62,24 +62,20 @@ jobs:
   generate_matrix:
     name: 🧮 Generate Build Matrix
     runs-on: ubuntu-latest
-    needs: [ filter_platforms, determine_version ]
+    needs: [filter_platforms, determine_version]
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: Combine macOS and Ubuntu platforms into matrix
+      - name: 🧮 Create Build Matrix from Grouped Platforms
         id: set-matrix
         run: |
-          mac=${{ toJson(needs.filter_platforms.outputs.macPlatforms) }}
-          ubuntu=${{ toJson(needs.filter_platforms.outputs.ubuntuPlatforms) }}
+          grouped=${{ needs.filter_platforms.outputs.groupedPlatforms }}
+          echo "📦 Grouped platforms: $grouped"
 
-          echo "🍏 Mac targets → $mac"
-          echo "🐧 Ubuntu targets → $ubuntu"
-
-          matrix=$(jq -c -n \
-            --argjson mac "$mac" \
-            --argjson ubuntu "$ubuntu" '
-            ($mac | map({ os: "macos-latest", targetPlatform: . })) +
-            ($ubuntu | map({ os: "ubuntu-latest", targetPlatform: . }))')
+          matrix=$(echo "$grouped" | jq -c '
+            to_entries
+            | map(.value[] as $p | { os: .key, targetPlatform: $p })
+          ')
 
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
@@ -228,16 +224,15 @@ jobs:
         run: |
           echo "### 🧩 Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-
           echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
 
           VERSION="${{ needs.determine_version.outputs.version }}"
           PROJECT="${{ inputs.projectName }}"
-          MAC_PLATFORMS=$(echo '${{ needs.filter_platforms.outputs.macPlatforms }}' | jq -r '.[]')
-          UBUNTU_PLATFORMS=$(echo '${{ needs.filter_platforms.outputs.ubuntuPlatforms }}' | jq -r '.[]')
+          GROUPED='${{ needs.filter_platforms.outputs.groupedPlatforms }}'
+          ALL_PLATFORMS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')
 
-          for platform in $MAC_PLATFORMS $UBUNTU_PLATFORMS; do
+          for platform in $ALL_PLATFORMS; do
             artifact_dir="all-artifacts/${PROJECT}-${VERSION}-${platform}"
 
             case "$platform" in
