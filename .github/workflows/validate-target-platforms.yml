@@ -63,6 +63,11 @@ jobs:
             for p in "${INVALID[@]}"; do echo "  - $p"; done
           fi
 
+          # Export for later steps
+          echo "VALID_PLATFORMS=${VALID[*]}" >> $GITHUB_ENV
+          echo "INVALID_PLATFORMS=${INVALID[*]}" >> $GITHUB_ENV
+
+          # Output valid platforms
           VALID_JSON=$(printf '%s\n' "${VALID[@]}" | jq -R . | jq -s .)
           echo "validPlatforms<<EOF" >> $GITHUB_OUTPUT
           echo "$VALID_JSON" >> $GITHUB_OUTPUT
@@ -92,3 +97,36 @@ jobs:
           echo "groupedPlatforms<<EOF" >> $GITHUB_OUTPUT
           cat grouped.json >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: 📋 Summary of Platform Validation
+        if: always()
+        run: |
+          # Fallbacks
+          VALID_PLATFORMS="${VALID_PLATFORMS:-}"
+          INVALID_PLATFORMS="${INVALID_PLATFORMS:-}"
+          GROUPED_FILE="grouped.json"
+
+          echo ""
+          echo "📋 Target Platform Validation Summary"
+          echo "────────────────────────────────────────"
+
+          if [ -n "$VALID_PLATFORMS" ]; then
+            echo "✅ Valid Platforms:"
+            for p in $VALID_PLATFORMS; do echo "  - $p"; done
+          else
+            echo "ℹ️ No valid platforms provided."
+          fi
+
+          if [ -n "$INVALID_PLATFORMS" ]; then
+            echo ""
+            echo "⚠️ Invalid Platforms (ignored):"
+            for p in $INVALID_PLATFORMS; do echo "  - $p"; done
+          fi
+
+          if [ -f "$GROUPED_FILE" ]; then
+            echo ""
+            echo "📦 Grouped by OS:"
+            jq -r 'to_entries[] | "🖥️ \(.key):\n\(.value[] | "  - \(.)")"' "$GROUPED_FILE"
+          else
+            echo "⚠️ No grouped data found."
+          fi
