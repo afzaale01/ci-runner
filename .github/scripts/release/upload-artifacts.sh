@@ -29,14 +29,11 @@ for PLATFORM in $PLATFORMS; do
 
     if [ "$HTTP_CODE" -ne 201 ]; then
       echo "❌ Upload failed for $ZIP_NAME (HTTP $HTTP_CODE)"
-      #echo "🔍 GitHub API response:"
-      #-- jq . /tmp/upload_response.json || cat /tmp/upload_response.json
-
-      # Extract and print validation error(s) if available
+      
       ERRORS=$(jq -r '.errors[]?.message // .errors[]? // empty' /tmp/upload_response.json)
       if [[ -n "$ERRORS" ]]; then
         echo ""
-        echo "🚫 Validation Errors:"
+        echo "🚫 Error(s):"
         echo "$ERRORS"
       fi
 
