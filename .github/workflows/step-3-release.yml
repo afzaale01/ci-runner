@@ -89,6 +89,8 @@ jobs:
           VERSION="${{ steps.resolve_version.outputs.version }}"
           IS_PRERELEASE=$([[ "$VERSION" == *-* ]] && echo true || echo false)
 
+          echo "📝 Creating GitHub release for tag: $VERSION (prerelease: $IS_PRERELEASE)"
+
           PAYLOAD=$(jq -n \
             --arg tag_name "$VERSION" \
             --arg name "Release $VERSION" \
@@ -101,7 +103,14 @@ jobs:
             -d "$PAYLOAD" \
             "https://api.github.com/repos/${{ github.repository }}/releases")
 
-          RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id')
+          RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id // empty')
+
+          if [[ -z "$RELEASE_ID" || "$RELEASE_ID" == "null" ]]; then
+            echo "❌ Failed to create release. Full response:"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
           echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
           echo "✅ Created release with ID: $RELEASE_ID"
         env:
