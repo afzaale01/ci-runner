@@ -12,14 +12,6 @@ PLATFORMS_JSON="$6"
 # ───── Parse Platforms ─────
 PLATFORMS=$(echo "$PLATFORMS_JSON" | jq -r '.[]')
 
-# ───── Summary Table Header ─────
-echo "### 📤 Upload Summary" >> "$GITHUB_STEP_SUMMARY"
-echo "" >> "$GITHUB_STEP_SUMMARY"
-echo "| Artifact | Status |" >> "$GITHUB_STEP_SUMMARY"
-echo "|----------|--------|" >> "$GITHUB_STEP_SUMMARY"
-
-STATUS=0
-
 for PLATFORM in $PLATFORMS; do
   ARTIFACT_PATH="${PROJECT}-${VERSION}-${PLATFORM}"
   ZIP_NAME="${ARTIFACT_PATH}.zip"
@@ -37,29 +29,22 @@ for PLATFORM in $PLATFORMS; do
 
     if [ "$HTTP_CODE" -ne 201 ]; then
       echo "❌ Upload failed for $ZIP_NAME (HTTP $HTTP_CODE)"
+      #echo "🔍 GitHub API response:"
+      #-- jq . /tmp/upload_response.json || cat /tmp/upload_response.json
 
-      ERRORS=$(jq -r '.errors[]?.message // .errors[]? // .message // empty' /tmp/upload_response.json)
+      # Extract and print validation error(s) if available
+      ERRORS=$(jq -r '.errors[]?.message // .errors[]? // empty' /tmp/upload_response.json)
       if [[ -n "$ERRORS" ]]; then
         echo ""
         echo "🚫 Validation Errors:"
         echo "$ERRORS"
-        SUMMARY_ERROR="$ERRORS"
-      else
-        echo "📄 No clear validation message found."
-        cat /tmp/upload_response.json
-        SUMMARY_ERROR="Upload failed (no error message)"
       fi
 
-      echo "| \`$ZIP_NAME\` | ❌ $SUMMARY_ERROR |" >> "$GITHUB_STEP_SUMMARY"
-      STATUS=1
+      exit 1
     else
       echo "✅ Uploaded $ZIP_NAME"
-      echo "| \`$ZIP_NAME\` | ✅ Uploaded successfully |" >> "$GITHUB_STEP_SUMMARY"
     fi
   else
     echo "⚠️ Skipping: $ARTIFACT_PATH not found"
-    echo "| \`$ZIP_NAME\` | ⚠️ Directory not found |" >> "$GITHUB_STEP_SUMMARY"
   fi
 done
-
-exit $STATUS
