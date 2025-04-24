@@ -25,5 +25,4 @@ fi
 
 NEXT_VERSION="v${STRIPPED}-rc.${NEXT_RC}"
 
-echo "✅ Next RC version: $NEXT_VERSION"
 echo "$NEXT_VERSION"

@@ -54,7 +54,7 @@ jobs:
 
             # Run RC generator script
             chmod +x .github/scripts/build/version-generator-for-rc.sh
-            VERSION=$(./.github/scripts/build/version-generator-for-rc.sh "$BASE_TAG")
+            VERSION=$(./.github/scripts/build/version-generator-for-rc.sh "$BASE_TAG" | tail -n 1)
 
           # Manual version override (not release)
           elif [[ "$BUILD_TYPE" != "release" && -n "$INPUT_VERSION" ]]; then
