@@ -33,6 +33,9 @@ on:
       releaseErrorMessage:
         description: "Error message if release failed"
         value: ${{ jobs.publish.outputs.releaseErrorMessage }}
+      versionUsed:
+        description: "The resolved version or tag used"
+        value: ${{ jobs.publish.outputs.versionUsed }}
 
 jobs:
   publish:
@@ -41,6 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       releaseErrorMessage: ${{ steps.error-handler.outputs.releaseErrorMessage }}
+      versionUsed: ${{ steps.resolve_version.outputs.version }}
 
     steps:
       - name: 📁 Checkout Repository
@@ -54,9 +58,27 @@ jobs:
       - name: 🧰 Setup Helper Scripts
         run: chmod +x .github/scripts/release/*.sh
 
+      - name: 🏷️ Check if Tag Exists
+        id: check_tag
+        run: .github/scripts/release/check-tag-exists.sh "${{ inputs.version }}" "${{ github.repository }}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: 🏷️ Create Git Tag
+        if: ${{ steps.check_tag.outputs.exists != 'true' }}
+        id: create_tag
+        run: .github/scripts/release/create-tag.sh "${{ inputs.version }}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: 🏷️ Resolve Final Version From Tag
+        id: resolve_version
+        run: |
+          echo "version=${{ steps.create_tag.outputs.version || inputs.version }}" >> "$GITHUB_OUTPUT"
+
       - name: 📝 Check if Release Already Exists
         id: check_release
-        run: .github/scripts/release/check-release-exists.sh "${{ inputs.version }}" "${{ github.repository }}" "${{ github.token }}"
+        run: .github/scripts/release/check-release-exists.sh "${{ steps.resolve_version.outputs.version }}" "${{ github.repository }}" "${{ github.token }}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -64,7 +86,7 @@ jobs:
         if: ${{ steps.check_release.outputs.exists != 'true' }}
         id: create_release
         run: |
-          VERSION="${{ inputs.version }}"
+          VERSION="${{ steps.resolve_version.outputs.version }}"
           IS_PRERELEASE=$([[ "$VERSION" == *-* ]] && echo true || echo false)
 
           PAYLOAD=$(jq -n \
@@ -91,7 +113,7 @@ jobs:
           RELEASE_ID=$(grep release_id .release-meta | cut -d= -f2)
           .github/scripts/release/upload-artifacts.sh \
             "${{ inputs.projectName }}" \
-            "${{ inputs.version }}" \
+            "${{ steps.resolve_version.outputs.version }}" \
             "${RELEASE_ID}" \
             "${{ github.repository }}" \
             "${{ github.token }}" \
@@ -102,7 +124,7 @@ jobs:
       - name: 🧮 Upload Combined Artifact
         if: ${{ inputs.combineArtifacts == true }}
         run: |
-          VERSION="${{ inputs.version }}"
+          VERSION="${{ steps.resolve_version.outputs.version }}"
           PROJECT="${{ inputs.projectName }}"
           COMBINED_PATH="${PROJECT}-${VERSION}"
           COMBINED_ZIP="${PROJECT}-${VERSION}-all-platforms.zip"
