@@ -13,6 +13,46 @@ on:
         required: false
         type: string
         default: "false"
+      editmodeFailed:
+        required: false
+        type: string
+        default: "false"
+      playmodeFailed:
+        required: false
+        type: string
+        default: "false"
+      editmodeTotal:
+        required: false
+        type: string
+        default: ""
+      editmodePassed:
+        required: false
+        type: string
+        default: ""
+      editmodeResult:
+        required: false
+        type: string
+        default: ""
+      editmodeDuration:
+        required: false
+        type: string
+        default: ""
+      playmodeTotal:
+        required: false
+        type: string
+        default: ""
+      playmodePassed:
+        required: false
+        type: string
+        default: ""
+      playmodeResult:
+        required: false
+        type: string
+        default: ""
+      playmodeDuration:
+        required: false
+        type: string
+        default: ""
     outputs:
       hasFails:
         description: "Whether any test failures occurred"
@@ -29,7 +69,7 @@ jobs:
           echo "### 📋 Unity Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Test Mode   | Result     | Duration | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------------|------------|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|------------|----------|--------|"
 
           summarize() {
             local MODE=$1
@@ -58,19 +98,19 @@ jobs:
           }
 
           summarize "EditMode" "🥪" \
-            "${{ needs.run-editmode.outputs.total }}" \
-            "${{ needs.run-editmode.outputs.passed }}" \
-            "${{ needs.run-editmode.outputs.result }}" \
-            "${{ needs.run-editmode.outputs.duration }}"
+            "${{ inputs.editmodeTotal }}" \
+            "${{ inputs.editmodePassed }}" \
+            "${{ inputs.editmodeResult }}" \
+            "${{ inputs.editmodeDuration }}"
 
           summarize "PlayMode" "🎮" \
-            "${{ needs.run-playmode.outputs.total }}" \
-            "${{ needs.run-playmode.outputs.passed }}" \
-            "${{ needs.run-playmode.outputs.result }}" \
-            "${{ needs.run-playmode.outputs.duration }}"
+            "${{ inputs.playmodeTotal }}" \
+            "${{ inputs.playmodePassed }}" \
+            "${{ inputs.playmodeResult }}" \
+            "${{ inputs.playmodeDuration }}"
 
       - name: 📃 Download Test Results
-        if: ${{ inputs.quietMode == 'false' }}
+        if: ${{ inputs.quietMode == 'false' || inputs.editmodeFailed == 'true' || inputs.playmodeFailed == 'true' }}
         uses: actions/download-artifact@v4
         with:
           path: downloaded-results
@@ -91,7 +131,7 @@ jobs:
                 HAS_FAILS=1
                 FAIL_BLOCK+="### ❌ ${MODE} Failed Tests"$'\n'
                 while read -r fail; do
-                  FAIL_BLOCK+="- \\`$fail\\`"$'\n'
+                  FAIL_BLOCK+="- \`$fail\`"$'\n'
                 done <<< "$FAILS"
                 FAIL_BLOCK+=$'\n'
               fi
