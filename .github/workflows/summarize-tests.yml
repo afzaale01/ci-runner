@@ -1,0 +1,110 @@
+name: 📄 Summarize Unity Tests
+
+description: Summarizes the results of EditMode and PlayMode Unity test jobs into the GitHub Actions summary tab.
+
+on:
+  workflow_call:
+    inputs:
+      projectName:
+        required: false
+        type: string
+        default: "My Unity Project"
+      quietMode:
+        required: false
+        type: string
+        default: "false"
+    outputs:
+      hasFails:
+        description: "Whether any test failures occurred"
+        value: ${{ jobs.summarize.outputs.has_fails }}
+
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    outputs:
+      has_fails: ${{ steps.failed-check.outputs.has_fails }}
+    steps:
+      - name: 📄 Write Test Summary
+        run: |
+          echo "### 📋 Unity Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Mode   | Result     | Duration | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|------------|----------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          summarize() {
+            local MODE=$1
+            local ICON=$2
+            local TOTAL=$3
+            local PASSED=$4
+            local RESULT=$5
+            local DURATION=$6
+
+            local DISPLAY_RESULT="- / -"
+            local DISPLAY_DURATION="N/A"
+            local STATUS="ℹ️"
+
+            if [[ -n "$TOTAL" && "$TOTAL" != "0" && "$RESULT" != "Skipped" && "$RESULT" != "" && "$RESULT" != "null" ]]; then
+              DISPLAY_RESULT="${PASSED} / ${TOTAL}"
+              DISPLAY_DURATION="$DURATION"
+
+              if [[ "$RESULT" == "Passed" ]]; then
+                STATUS="✔️"
+              else
+                STATUS="❌"
+              fi
+            fi
+
+            echo "| ${ICON} ${MODE} | ${DISPLAY_RESULT} | ${DISPLAY_DURATION} | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
+          }
+
+          summarize "EditMode" "🥪" \
+            "${{ needs.run-editmode.outputs.total }}" \
+            "${{ needs.run-editmode.outputs.passed }}" \
+            "${{ needs.run-editmode.outputs.result }}" \
+            "${{ needs.run-editmode.outputs.duration }}"
+
+          summarize "PlayMode" "🎮" \
+            "${{ needs.run-playmode.outputs.total }}" \
+            "${{ needs.run-playmode.outputs.passed }}" \
+            "${{ needs.run-playmode.outputs.result }}" \
+            "${{ needs.run-playmode.outputs.duration }}"
+
+      - name: 📃 Download Test Results
+        if: ${{ inputs.quietMode == 'false' }}
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded-results
+
+      - name: 🔍 Append Failed Test Details
+        id: failed-check
+        run: |
+          set +e
+          HAS_FAILS=0
+          FAIL_BLOCK=""
+
+          for MODE in EditMode PlayMode; do
+            XML=$(find downloaded-results -type f -path "*Unity-${MODE}-*" -name "*.xml" | head -n 1)
+
+            if [[ -f "$XML" ]]; then
+              FAILS=$(grep -oP 'test-case[^>]+result="Failed"' "$XML" | grep -oP 'fullname="\K[^"]+')
+              if [[ -n "$FAILS" ]]; then
+                HAS_FAILS=1
+                FAIL_BLOCK+="### ❌ ${MODE} Failed Tests"$'\n'
+                while read -r fail; do
+                  FAIL_BLOCK+="- \\`$fail\\`"$'\n'
+                done <<< "$FAILS"
+                FAIL_BLOCK+=$'\n'
+              fi
+            fi
+          done
+
+          if [[ "$HAS_FAILS" == "1" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "<details>" >> $GITHUB_STEP_SUMMARY
+            echo "<summary>❌ Failed Tests (details)</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "$FAIL_BLOCK" >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "has_fails=$HAS_FAILS" >> $GITHUB_OUTPUT
