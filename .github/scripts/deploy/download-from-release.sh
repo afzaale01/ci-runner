@@ -76,6 +76,12 @@ else
   echo "📦 Downloading all per-platform artifacts..."
 
   while read -r NAME URL; do
+    # Skip combined artifact if not needed
+    if [[ "$NAME" == *-all-platforms.zip ]]; then
+      echo "⏭️ Skipping combined artifact: $NAME"
+      continue
+    fi
+
     echo "⬇️ Downloading: ${NAME}"
     curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${URL}" -o "${DEST_DIR}/${NAME}"
   done <<< "${ASSETS}"
