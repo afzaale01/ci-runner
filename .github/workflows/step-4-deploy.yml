@@ -93,6 +93,11 @@ jobs:
           ${{ secrets.GITHUB_TOKEN }} \
           ${{ inputs.hasCombinedArtifacts }}
 
+      - name: 🛠️ Normalize Artifact Structure
+        if: inputs.hasCombinedArtifacts == 'true'
+        run: |
+          .github/scripts/deploy/normalize-artifact-structure.sh "${{ env.DEPLOY_DIR }}"
+
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
 
@@ -343,6 +348,7 @@ jobs:
           retention-days: 1
 
   summarize_deploy:
+    if: always()
     uses: ./.github/workflows/summarize-deploys.yml
     needs: [deploy]
     with:
