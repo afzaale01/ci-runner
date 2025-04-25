@@ -69,7 +69,8 @@ jobs:
 
     steps:
       - name: 🧰 Setup Helper Scripts
-        run: chmod +x .github/scripts/deploy/*.sh
+        run: |
+          find .github/scripts/deploy -type f -name "*.sh" -exec chmod +x {} \;
 
       # ───── Build Artifact Download ─────
       - name: 📥 Download Artifacts from Build
