@@ -51,7 +51,7 @@ jobs:
       version: ${{ inputs.version }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
-      combineArtifacts: ${{ fromJSON(needs.setup-prerequisites.outputs.requiresCombinedArtifact || 'true') }}
+      combineArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact }}
     secrets: inherit
 
   release:
@@ -64,6 +64,6 @@ jobs:
       version: ${{ needs.build.outputs.version }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
-      combineArtifacts: ${{ fromJSON(needs.setup-prerequisites.outputs.requiresCombinedArtifact || 'true') }}
-      skipPerPlatformArtifacts: ${{ fromJSON(needs.setup-prerequisites.outputs.skipPerPlatformArtifacts || 'true') }}  
+      combineArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact || 'true' }}
+      skipPerPlatformArtifacts: ${{ needs.setup-prerequisites.outputs.skipPerPlatformArtifacts || 'true' }}  
     secrets: inherit

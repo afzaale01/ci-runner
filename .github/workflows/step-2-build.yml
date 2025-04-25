@@ -34,8 +34,8 @@ on:
         required: false
       combineArtifacts:
         description: "Whether to combine all platform builds into a versioned folder"
-        type: boolean
-        default: false
+        type: string
+        default: "false"
         required: false
     outputs:
       version:
@@ -162,7 +162,7 @@ jobs:
           retention-days: ${{ inputs.retentionDays }}
 
   combine_builds:
-    if: inputs.combineArtifacts == true
+    if: ${{ inputs.combineArtifacts == 'true' }}
     needs: [build_platforms, generate_version]
     uses: ./.github/workflows/combine-builds.yml
     with:
