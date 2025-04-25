@@ -13,6 +13,11 @@ on:
       projectName:
         type: string
         required: true
+      hasCombinedArtifacts:
+        description: "Whether a combined artifact folder has been created"
+        required: true
+        default: 'false'
+        type: string
       deployTargets:
         description: "JSON array of deploy targets (e.g. ['itch.io','appcenter','firebase','s3','gh-pages'])"
         type: string

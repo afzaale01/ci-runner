@@ -53,6 +53,7 @@ jobs:
       version: ${{ inputs.version }}
       projectName: ${{ inputs.projectName }}
       deployTargets: ${{ needs.setup-prerequisites.outputs.validDeployTargets }}
+      hasCombinedArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact }}
       artifactSource: release
     secrets: inherit
 
