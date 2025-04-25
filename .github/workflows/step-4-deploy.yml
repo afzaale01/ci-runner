@@ -93,15 +93,15 @@ jobs:
           ${{ secrets.GITHUB_TOKEN }} \
           ${{ inputs.hasCombinedArtifacts }}
 
+      - name: 🧾 List Artifacts
+        run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
+
       - name: 🧠 Show Deployment Info
         run: |
           echo "Deploying to: ${{ matrix.target }}"
           echo "Project: ${{ inputs.projectName }}"
           echo "Version: ${{ inputs.version }}"
           echo "Build type: ${{ inputs.buildType }}"
-
-      - name: 🧾 List Artifacts
-        run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
 
       # ───── GitHub Pages ─────
       - name: 🔍 Check WebGL Build Exists
