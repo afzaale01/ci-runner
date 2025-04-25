@@ -182,7 +182,7 @@ jobs:
           echo "  version           = ${{ needs.generate_version.outputs.version }}"
           echo "  groupedPlatforms  = ${{ needs.filter_platforms.outputs.groupedPlatforms }}"
           echo "  combineRequested  = ${{ inputs.combineArtifacts }}"
-          echo "  combinedCreated   = ${{ needs.combine_builds.outputs.created || 'false' }}"
+          echo "  combinedCreated   = ${{ needs.combine_builds.outputs.created }}"
 
   summarize_builds:
     needs: [generate_version, filter_platforms, build_platforms, combine_builds]
@@ -192,4 +192,4 @@ jobs:
       version: ${{ needs.generate_version.outputs.version }}
       groupedPlatforms: ${{ needs.filter_platforms.outputs.groupedPlatforms }}
       combineRequested: ${{ inputs.combineArtifacts }}
-      combinedCreated: ${{ needs.combine_builds.outputs.created || 'false' }}
+      combinedCreated: ${{ needs.combine_builds.outputs.created }}

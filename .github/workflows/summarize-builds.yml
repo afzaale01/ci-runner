@@ -21,8 +21,8 @@ on:
         type: boolean
       combinedCreated:
         required: false
-        type: boolean
-        default: false
+        type: string
+        default: "false"
 
 jobs:
   summarize:
