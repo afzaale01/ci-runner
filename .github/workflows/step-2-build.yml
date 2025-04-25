@@ -171,61 +171,11 @@ jobs:
       retentionDays: ${{ inputs.retentionDays }}
 
   confirm_builds:
-    name: 📄 Summarize Build Results
-    if: always()
     needs: [generate_version, filter_platforms, build_platforms, combine_builds]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: all-artifacts
-
-      - if: inputs.combineArtifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.projectName }}-${{ needs.generate_version.outputs.version }}
-          path: combined-artifact
-
-      - run: |
-          echo "### 🧩 Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
-
-          VERSION="${{ needs.generate_version.outputs.version }}"
-          PROJECT="${{ inputs.projectName }}"
-          GROUPED='${{ needs.filter_platforms.outputs.groupedPlatforms }}'
-          ALL_PLATFORMS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')
-
-          for platform in $ALL_PLATFORMS; do
-            artifact_dir="all-artifacts/${PROJECT}-${VERSION}-${platform}"
-            case "$platform" in
-              Android) label="Android" ;;
-              WebGL) label="WebGL" ;;
-              StandaloneWindows|StandaloneWindows64) label="Windows" ;;
-              StandaloneLinux64) label="Linux" ;;
-              StandaloneOSX) label="macOS" ;;
-              iOS) label="iOS" ;;
-              *) label="$platform" ;;
-            esac
-
-            if [ -d "$artifact_dir" ]; then
-              echo "| $label | ✅ Build successful |" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "| $label | ❌ Build failed |" >> $GITHUB_STEP_SUMMARY
-            fi
-          done
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 Combined Artifact" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [[ "${{ inputs.combineArtifacts }}" == "true" ]]; then
-            if [[ "${{ needs.combine_builds.outputs.created }}" == "true" ]]; then
-              echo "- ✅ Combined artifact successfully created and uploaded." >> $GITHUB_STEP_SUMMARY
-            else
-              echo "- ❌ Combined artifact expected but failed to create/upload." >> $GITHUB_STEP_SUMMARY
-            fi
-          else
-            echo "- ℹ️ Combined artifact was not requested." >> $GITHUB_STEP_SUMMARY
-          fi
+    uses: ./.github/workflows/summarize-builds.yml
+    with:
+      projectName: ${{ inputs.projectName }}
+      version: ${{ needs.generate_version.outputs.version }}
+      groupedPlatforms: ${{ needs.filter_platforms.outputs.groupedPlatforms }}
+      combineRequested: ${{ inputs.combineArtifacts }}
+      combinedCreated: ${{ needs.combine_builds.outputs.created }}
