@@ -86,7 +86,7 @@ jobs:
       # ───── Release Artifact Download ─────
       - name: 📥 Download Artifacts from GitHub Release
         if: inputs.artifactSource == 'release'
-        run: .github/scripts/release/download-from-release.sh \
+        run: .github/scripts/deploy/download-from-release.sh \
           ${{ inputs.projectName }} \
           ${{ inputs.version }} \
           ${{ github.repository }} \
