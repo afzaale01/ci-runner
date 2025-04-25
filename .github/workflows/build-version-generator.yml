@@ -27,7 +27,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Fetch tags
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Fetch All Tags
+        run: git fetch --tags --force
 
       - name: Determine Version
         id: get_version
@@ -38,20 +42,21 @@ jobs:
           INPUT_VERSION="${{ inputs.version }}"
           BUILD_TYPE="${{ inputs.buildType }}"
 
-          # For release builds, a Git tag is required (triggered by pushing a tag)
+          # For release builds
           if [[ "$BUILD_TYPE" == "release" ]]; then
-            if [[ "$REF" =~ ^refs/tags/(v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.\-]+)?)$ ]]; then
+            if [[ "$REF" =~ ^refs/tags/(v?[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
               VERSION="${BASH_REMATCH[1]}"
-
-              # ⛔ Validate the tag format strictly as vX.Y.Z (no suffixes)
-              if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-                echo "❌ Invalid release tag format: '$VERSION'"
-                echo "Must be in format: vX.Y.Z (no suffixes like -rc)"
-                echo "ℹ️ Example of a valid release tag: v1.2.3"
+            elif [[ -n "$INPUT_VERSION" ]]; then
+              # Validate the manual version format
+              if [[ "$INPUT_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                VERSION="$INPUT_VERSION"
+              else
+                echo "❌ Invalid manual release version: '$INPUT_VERSION'"
+                echo "Must be in format: vX.Y.Z (no suffixes)"
                 exit 1
               fi
             else
-              echo "❌ For 'release' builds, a Git tag is required. This should be triggered by pushing a tag."
+              echo "❌ For 'release' builds, either push a Git tag or provide a version input."
               exit 1
             fi
 
@@ -66,13 +71,13 @@ jobs:
             chmod +x .github/scripts/build/version-generator-for-rc.sh
             VERSION=$(./.github/scripts/build/version-generator-for-rc.sh "$BASE_TAG" | tail -n 1)
 
-          # For release_candidate with a manual version → use as base
+          # For release_candidate with manual version → use as base
           elif [[ "$BUILD_TYPE" == "release_candidate" && -n "$INPUT_VERSION" ]]; then
             echo "🔢 Using provided version as RC base: $INPUT_VERSION"
             chmod +x .github/scripts/build/version-generator-for-rc.sh
             VERSION=$(./.github/scripts/build/version-generator-for-rc.sh "$INPUT_VERSION" | tail -n 1)
 
-          # Manual override for non-RC builds
+          # Manual override for non-RC builds (e.g. preview)
           elif [[ "$BUILD_TYPE" != "release" && -n "$INPUT_VERSION" ]]; then
             VERSION="$INPUT_VERSION"
 
@@ -90,7 +95,7 @@ jobs:
               VERSION="${BRANCH_NAME}"
             fi
 
-          # Fallback to commit SHA
+          # Fallback to short commit SHA
           else
             SHORT_SHA=$(git rev-parse --short HEAD)
             VERSION="commit-${SHORT_SHA}"
