@@ -14,31 +14,31 @@ DEST_DIR="deployment-artifacts/${PROJECT_NAME}-${VERSION}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📦 Starting Release Asset Download"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔹 Project             : $PROJECT_NAME"
-echo "🔹 Version             : $VERSION"
-echo "🔹 Repository          : $GITHUB_REPOSITORY"
-echo "🔹 Has Combined        : $HAS_COMBINED_ARTIFACTS"
-echo "🔹 Target Download Dir : $DEST_DIR"
+echo "🔹 Project             : ${PROJECT_NAME}"
+echo "🔹 Version             : ${VERSION}"
+echo "🔹 Repository          : ${GITHUB_REPOSITORY}"
+echo "🔹 Has Combined        : ${HAS_COMBINED_ARTIFACTS}"
+echo "🔹 Target Download Dir : ${DEST_DIR}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-mkdir -p "$DEST_DIR"
+mkdir -p "${DEST_DIR}"
 
 # ────────────────────────────
 # Fetch Release Metadata
 # ────────────────────────────
-ASSETS_URL="https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/$VERSION"
-echo "📡 Fetching release assets from: $ASSETS_URL"
+ASSETS_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${VERSION}"
+echo "📡 Fetching release assets from: ${ASSETS_URL}"
 
-RELEASE_DATA=$(curl -sSL -H "Authorization: token $GITHUB_TOKEN" "$ASSETS_URL")
+RELEASE_DATA=$(curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${ASSETS_URL}")
 
 # ────────────────────────────
 # Extract URLs
 # ────────────────────────────
 echo "🔍 Extracting asset download URLs..."
-ASSETS=$(echo "$RELEASE_DATA" | jq -r '.assets[] | "\(.name) \(.browser_download_url)"')
+ASSETS=$(echo "${RELEASE_DATA}" | jq -r '.assets[] | "\(.name) \(.browser_download_url)"')
 
-if [[ -z "$ASSETS" ]]; then
-  echo "❌ No assets found for tag $VERSION"
+if [[ -z "${ASSETS}" ]]; then
+  echo "❌ No assets found for tag ${VERSION}"
   exit 1
 fi
 
@@ -47,34 +47,32 @@ fi
 # ────────────────────────────
 found_combined_artifact=false
 
-if [[ "$HAS_COMBINED_ARTIFACTS" == "true" ]]; then
+if [[ "${HAS_COMBINED_ARTIFACTS}" == "true" ]]; then
   echo "🛠️ Only downloading combined artifact..."
 
   while read -r NAME URL; do
-    if [[ "$NAME" == *-all-platforms.zip ]]; then
-      echo "⬇️ Downloading combined artifact: $NAME"
-      curl -sSL -H "Authorization: token $GITHUB_TOKEN" "$URL" -o "$DEST_DIR/$NAME"
-      echo "📂 Extracting $NAME into $DEST_DIR"
-      unzip -q "$DEST_DIR/$NAME" -d "$DEST_DIR"
-      rm "$DEST_DIR/$NAME"
+    if [[ "${NAME}" == *-all-platforms.zip ]]; then
+      echo "⬇️ Downloading combined artifact: ${NAME}"
+      curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${URL}" -o "${DEST_DIR}/${NAME}"
+      echo "📂 Extracting ${NAME} into ${DEST_DIR}"
+      unzip -q "${DEST_DIR}/${NAME}" -d "${DEST_DIR}"
+      rm "${DEST_DIR}/${NAME}"
       found_combined_artifact=true
       break
     fi
-  done <<< "$ASSETS"
+  done <<< "${ASSETS}"
 
-  if [[ "$found_combined_artifact" == "false" ]]; then
+  if [[ "${found_combined_artifact}" == "false" ]]; then
     echo "❌ Expected combined artifact (-all-platforms.zip) but none was found!"
     exit 1
   fi
-
 else
   echo "📦 Downloading all per-platform artifacts..."
 
   while read -r NAME URL; do
-    echo "⬇️ Downloading: $NAME"
-    curl -sSL -H "Authorization: token $GITHUB_TOKEN" "$URL" -o "$DEST_DIR/$NAME"
-  done <<< "$ASSETS"
-
+    echo "⬇️ Downloading: ${NAME}"
+    curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${URL}" -o "${DEST_DIR}/${NAME}"
+  done <<< "${ASSETS}"
 fi
 
-echo "✅ Finished downloading release assets to: $DEST_DIR"
+echo "✅ Finished downloading release assets to: ${DEST_DIR}"
