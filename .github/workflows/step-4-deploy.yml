@@ -101,13 +101,6 @@ jobs:
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
 
-      - name: 🧠 Show Deployment Info
-        run: |
-          echo "Deploying to: ${{ matrix.target }}"
-          echo "Project: ${{ inputs.projectName }}"
-          echo "Version: ${{ inputs.version }}"
-          echo "Build type: ${{ inputs.buildType }}"
-
       # ───── GitHub Pages ─────
       - name: 🔍 Check WebGL Build Exists
         if: matrix.target == 'gh-pages'
