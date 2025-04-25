@@ -170,7 +170,7 @@ jobs:
       version: ${{ needs.generate_version.outputs.version }}
       retentionDays: ${{ inputs.retentionDays }}
 
-  confirm_builds:
+  summarize_builds:
     needs: [generate_version, filter_platforms, build_platforms, combine_builds]
     uses: ./.github/workflows/summarize-builds.yml
     with:
