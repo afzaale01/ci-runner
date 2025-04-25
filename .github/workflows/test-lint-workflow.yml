@@ -1,4 +1,4 @@
-name: 🧪 Test Analyze Workflow
+name: 🧪 Test Lint Workflow
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ permissions:
 jobs:
   test-analyze:
     name: Analyze with Roslynator
-    uses: avalin/unity-ci-templates/.github/workflows/step-0-roslyn-analyze.yml@main
+    uses: avalin/unity-ci-templates/.github/workflows/step-0-roslyn-lint.yml@main
     with:
       allowAutofix: ${{ inputs.allowAutofix == 'true' }}
       allowFailure: ${{ inputs.allowFailure == 'true' }}
