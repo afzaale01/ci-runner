@@ -116,7 +116,7 @@ jobs:
       - name: 🔍 Check WebGL Build Exists
         if: matrix.target == 'gh-pages'
         run: |
-          if [ ! -d "$DEPLOY_DIR/WebGL" ]; then
+          if [ ! -d "${DEPLOY_DIR}-WebGL" ]; then
             echo "❌ WebGL build not found. Cannot deploy to GitHub Pages."
             exit 1
           fi
@@ -125,7 +125,7 @@ jobs:
         id: detect-compression
         if: matrix.target == 'gh-pages'
         run: |
-          cd "$DEPLOY_DIR/WebGL"
+          cd "${DEPLOY_DIR}-WebGL"
 
           echo "🔍 Checking for compression in WebGL build..."
 
@@ -162,7 +162,7 @@ jobs:
           # Install brotli/gzip tools if needed
           sudo apt-get update && sudo apt-get install -y brotli gzip
 
-          cd "$DEPLOY_DIR/WebGL"
+          cd "${DEPLOY_DIR}-WebGL"
 
           # 1) Decompress any .br → original
           find . -type f -name "*.br" | while read f; do
@@ -197,7 +197,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ env.DEPLOY_DIR }}/WebGL
+          publish_dir: ${{ env.DEPLOY_DIR }}-WebGL
 
       # ───── itch.io ─────
       - name: 🕹️ Deploy to itch.io
@@ -239,7 +239,7 @@ jobs:
             echo "⚠️ Missing Firebase token."; 
             exit 1;
           fi
-          cd "$DEPLOY_DIR/WebGL" || exit 1
+          cd "${DEPLOY_DIR}-WebGL" || exit 1
           npm install -g firebase-tools
           firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}"
 
@@ -253,7 +253,7 @@ jobs:
           fi
           aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
           aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-          aws s3 sync "$DEPLOY_DIR/WebGL" "s3://${{ secrets.S3_BUCKET }}" --delete
+          aws s3 sync "${DEPLOY_DIR}-WebGL" "s3://${{ secrets.S3_BUCKET }}" --delete
 
       # ───── Steam ─────
       - name: 🎮 Deploy to Steam
