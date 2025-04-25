@@ -177,5 +177,5 @@ jobs:
       projectName: ${{ inputs.projectName }}
       version: ${{ needs.generate_version.outputs.version }}
       groupedPlatforms: ${{ needs.filter_platforms.outputs.groupedPlatforms }}
-      combineRequested: ${{ inputs.combineArtifacts }}
+      combineRequested: ${{ fromJSON(inputs.combineArtifacts) }}
       combinedCreated: ${{ needs.combine_builds.outputs.created }}
