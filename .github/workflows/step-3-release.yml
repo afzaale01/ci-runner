@@ -21,13 +21,13 @@ on:
         required: true
       combineArtifacts:
         description: "Whether to upload the combined artifact to the release"
-        type: boolean
-        default: false
+        type: string
+        default: "false"
         required: false
       skipPerPlatformArtifacts:
         description: "Whether to skip uploading per-platform artifacts"
-        type: boolean
-        default: false
+        type: string
+        default: "false"
         required: false      
     outputs:
       releaseErrorMessage:
@@ -118,7 +118,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: 🧮 Upload Per-Platform Artifacts
-        if: ${{ inputs.skipPerPlatformArtifacts != true }}
+        if: ${{ inputs.skipPerPlatformArtifacts != 'true' }}
         run: |
           VERSION="${{ needs.tag.outputs.version }}"
           RELEASE_ID="${{ steps.check_release.outputs.release_id || steps.create_release.outputs.release_id }}"
@@ -131,7 +131,7 @@ jobs:
             '${{ inputs.targetPlatforms }}'
 
       - name: 🧮 Upload Combined Artifact
-        if: ${{ inputs.combineArtifacts == true }}
+        if: ${{ inputs.combineArtifacts == 'true' }}
         run: |
           VERSION="${{ needs.tag.outputs.version }}"
           PROJECT="${{ inputs.projectName }}"
