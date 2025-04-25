@@ -35,7 +35,7 @@ jobs:
           path: all-artifacts
 
       - name: 📅 Download Combined Artifact
-        if: inputs.combineRequested
+        if: ${{ inputs.combineRequested == true }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.projectName }}-${{ inputs.version }}

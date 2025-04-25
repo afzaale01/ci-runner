@@ -162,7 +162,7 @@ jobs:
           retention-days: ${{ inputs.retentionDays }}
 
   combine_builds:
-    if: inputs.combineArtifacts
+    if: fromJSON(inputs.combineArtifacts)
     needs: [build_platforms, generate_version]
     uses: ./.github/workflows/combine-builds.yml
     with:
