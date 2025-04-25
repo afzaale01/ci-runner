@@ -56,7 +56,6 @@ jobs:
 
       - name: 📦 Upload Combined Artifact
         id: upload
-        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.projectName }}-${{ inputs.version }}
@@ -65,15 +64,13 @@ jobs:
 
       - name: 📤 Set Output if Combined Artifact Exists and Uploaded
         id: set-created
-        env:
-          UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
         run: |
           COMBINED_DIR="${{ inputs.projectName }}-${{ inputs.version }}"
 
-          if [ "$UPLOAD_OUTCOME" = "success" ] && [ -d "$COMBINED_DIR" ] && [ "$(ls -A "$COMBINED_DIR")" ]; then
+          if [ -d "$COMBINED_DIR" ] && [ "$(ls -A "$COMBINED_DIR")" ]; then
             echo "✅ Combined folder exists and was uploaded successfully"
             echo "success=true" >> $GITHUB_OUTPUT
           else
-            echo "❌ Combined folder missing, empty, or upload failed"
+            echo "❌ Combined folder missing or empty"
             echo "success=false" >> $GITHUB_OUTPUT
           fi
