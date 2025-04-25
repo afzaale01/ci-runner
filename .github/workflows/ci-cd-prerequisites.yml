@@ -23,10 +23,10 @@ on:
         value: ${{ jobs.validate-deploy-targets.outputs.validTargets }}
       requiresCombinedArtifact:
         description: "Whether any deploy target requires a combined artifact"
-        value: ${{ jobs.analyze-artifact-strategy.outputs.requiresCombined }}
+        value: ${{ jobs.analyze-artifact-strategy.outputs.requiresCombined || 'true' }}
       skipPerPlatformArtifacts:
         description: "Whether per-platform artifacts can be skipped"
-        value: ${{ jobs.analyze-artifact-strategy.outputs.skipPerPlatform }}
+        value: ${{ jobs.analyze-artifact-strategy.outputs.skipPerPlatform || 'true' }}
 
 jobs:
   validate-vars:
@@ -58,7 +58,7 @@ jobs:
     with:
       artifactSource: ${{ inputs.artifactSource }}
       deployTargets: ${{ needs.validate-deploy-targets.outputs.validTargets }}
-  
+
   upload-license:
     name: 📥️ Upload Unity License
     if: ${{ inputs.excludesUnityTests == 'false' }}
