@@ -101,12 +101,14 @@ jobs:
             VERSION="commit-${SHORT_SHA}"
           fi
 
-          # If version already exists as a tag, fail early
-          if git rev-parse "$VERSION" >/dev/null 2>&1; then
-            echo "❌ Version '$VERSION' already exists as a tag!"
-            echo "🧩 Existing tags:"
-            git tag --list "${VERSION%%-*}*" || true
-            exit 1
+          # If version already exists as a tag, outside of a tag-push, fail early
+          if [[ ! "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            if git rev-parse "$VERSION" >/dev/null 2>&1; then
+              echo "❌ Version '$VERSION' already exists as a tag!"
+              echo "🧩 Existing tags:"
+              git tag --list "${VERSION%%-*}*" || true
+              exit 1
+            fi
           fi
 
           echo "VERSION=$VERSION" >> $GITHUB_ENV
