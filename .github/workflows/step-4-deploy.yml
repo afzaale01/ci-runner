@@ -68,6 +68,12 @@ jobs:
       DEPLOY_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}
 
     steps:
+      - name: 📁 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🧰 Setup Helper Scripts
+        run: chmod +x .github/scripts/deploy/*.sh
+
       # ───── Build Artifact Download ─────
       - name: 📥 Download Artifacts from Build
         if: inputs.artifactSource == 'build'
