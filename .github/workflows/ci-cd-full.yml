@@ -144,6 +144,7 @@ jobs:
       version: ${{ needs.build.outputs.version }}
       projectName: ${{ vars.PROJECT_NAME }}
       deployTargets: ${{ needs.setup-prerequisites.outputs.validDeployTargets }}
+      hasCombinedArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact }}
       artifactSource: build
     secrets: inherit
 
