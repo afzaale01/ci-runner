@@ -11,6 +11,12 @@ GITHUB_TOKEN="${4:?Missing GitHub token}"
 HAS_COMBINED_ARTIFACTS="${5:?Missing hasCombinedArtifacts flag (true/false)}"
 DEST_DIR="deployment-artifacts/${PROJECT_NAME}-${VERSION}"
 
+PROJECT_NAME="$(echo "$PROJECT_NAME" | xargs)"
+VERSION="$(echo "$VERSION" | xargs)"
+GITHUB_REPOSITORY="$(echo "$GITHUB_REPOSITORY" | xargs)"
+GITHUB_TOKEN="$(echo "$GITHUB_TOKEN" | xargs)"
+HAS_COMBINED_ARTIFACTS="$(echo "$HAS_COMBINED_ARTIFACTS" | xargs)"
+
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📦 Starting Release Asset Download"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
