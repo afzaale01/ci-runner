@@ -1,0 +1,88 @@
+name: 📄 Summarize Builds
+
+description: |
+  Writes a summary of the Unity build results, including per-platform status
+  and combined artifact status.
+
+on:
+  workflow_call:
+    inputs:
+      projectName:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      groupedPlatforms:
+        required: true
+        type: string
+      combineRequested:
+        required: true
+        type: boolean
+      combinedCreated:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  summarize:
+    name: 📄 Summarize Build Results
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📅 Download All Platform Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+
+      - name: 📅 Download Combined Artifact
+        if: inputs.combineRequested
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.projectName }}-${{ inputs.version }}
+          path: combined-artifact
+
+      - name: 📜 Write Build Summary
+        run: |
+          echo "### 🧙‍♂️ Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          GROUPED='${{ inputs.groupedPlatforms }}'
+          VERSION='${{ inputs.version }}'
+          PROJECT='${{ inputs.projectName }}'
+          ALL_PLATFORMS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')
+
+          for platform in $ALL_PLATFORMS; do
+            artifact_dir="all-artifacts/${PROJECT}-${VERSION}-${platform}"
+
+            case "$platform" in
+              Android) label="Android" ;;
+              WebGL) label="WebGL" ;;
+              StandaloneWindows|StandaloneWindows64) label="Windows" ;;
+              StandaloneLinux64) label="Linux" ;;
+              StandaloneOSX) label="macOS" ;;
+              iOS) label="iOS" ;;
+              *) label="$platform" ;;
+            esac
+
+            if [ -d "$artifact_dir" ]; then
+              echo "| $label | ✅ Build successful |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| $label | ❌ Build failed |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📆 Combined Artifact" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ inputs.combineRequested }}" == "true" ]]; then
+            if [[ "${{ inputs.combinedCreated }}" == "true" ]]; then
+              echo "- ✅ Combined artifact successfully created and uploaded." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ❌ Combined artifact expected but failed to create/upload." >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "- ℹ️ Combined artifact was not requested." >> $GITHUB_STEP_SUMMARY
+          fi
