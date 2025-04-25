@@ -170,6 +170,20 @@ jobs:
       version: ${{ needs.generate_version.outputs.version }}
       retentionDays: ${{ inputs.retentionDays }}
 
+  debug_summarize_inputs:
+    name: 🐛 Debug Summarize Inputs
+    runs-on: ubuntu-latest
+    needs: [generate_version, filter_platforms, build_platforms, combine_builds]
+    steps:
+      - name: Print Debug Info
+        run: |
+          echo "🎯 Inputs to summarize_builds:"
+          echo "  projectName       = ${{ inputs.projectName }}"
+          echo "  version           = ${{ needs.generate_version.outputs.version }}"
+          echo "  groupedPlatforms  = ${{ needs.filter_platforms.outputs.groupedPlatforms }}"
+          echo "  combineRequested  = ${{ inputs.combineArtifacts }}"
+          echo "  combinedCreated   = ${{ needs.combine_builds.outputs.created || 'false' }}"
+
   summarize_builds:
     needs: [generate_version, filter_platforms, build_platforms, combine_builds]
     uses: ./.github/workflows/summarize-builds.yml
