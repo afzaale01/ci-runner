@@ -162,7 +162,7 @@ jobs:
           retention-days: ${{ inputs.retentionDays }}
 
   combine_builds:
-    if: ${{ fromJSON(inputs.combineArtifacts) }}
+    if: inputs.combineArtifacts == true
     needs: [build_platforms, generate_version]
     uses: ./.github/workflows/combine-builds.yml
     with:
@@ -177,5 +177,5 @@ jobs:
       projectName: ${{ inputs.projectName }}
       version: ${{ needs.generate_version.outputs.version }}
       groupedPlatforms: ${{ needs.filter_platforms.outputs.groupedPlatforms }}
-      combineRequested: ${{ fromJSON(inputs.combineArtifacts) }}
-      combinedCreated: ${{ needs.combine_builds.outputs.created }}
+      combineRequested: ${{ inputs.combineArtifacts }}
+      combinedCreated: ${{ needs.combine_builds.outputs.created || 'false' }}
