@@ -114,8 +114,10 @@ jobs:
     if: > 
       always() && 
       needs.build.result == 'success' && 
-      (inputs.buildType == 'release' || 
-       inputs.buildType == 'release_candidate')
+      (
+        inputs.buildType == 'release' || 
+        inputs.buildType == 'release_candidate'
+      )
     uses: avalin/unity-ci-templates/.github/workflows/step-3-release.yml@main
     with:
       buildType: release
