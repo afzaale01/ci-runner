@@ -254,9 +254,9 @@ jobs:
             esac
 
             if [ -d "$artifact_dir" ]; then
-              echo "| $label | ✅ |" >> $GITHUB_STEP_SUMMARY
+              echo "| $label | ✅ Built successfully |" >> $GITHUB_STEP_SUMMARY
             else
-              echo "| $label | ❌ |" >> $GITHUB_STEP_SUMMARY
+              echo "| $label | ❌ Built failed |" >> $GITHUB_STEP_SUMMARY
             fi
           done
 
