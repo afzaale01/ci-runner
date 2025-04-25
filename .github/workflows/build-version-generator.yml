@@ -114,3 +114,22 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "🏷️ Determined version: $VERSION"
+
+      - name: 📋 Summarize Build Version Info
+        if: always()
+        run: |
+          echo "### 🏷️ Build Version Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Type:** \`${{ inputs.buildType }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger:** \`${{ github.event_name }}\` → \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Resolved Version:** \`${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${GITHUB_REF}" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "- 🏷️ This was a **tag push** — tag already exists by design." >> $GITHUB_STEP_SUMMARY
+          else
+            if git rev-parse "${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
+              echo "- ⚠️ Tag \`${{ steps.get_version.outputs.version }}\` **already exists** — run failed on purpose to avoid overwrite." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ✅ Tag \`${{ steps.get_version.outputs.version }}\` **does not exist yet** — good to go!" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
