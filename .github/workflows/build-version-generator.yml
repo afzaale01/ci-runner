@@ -42,6 +42,13 @@ jobs:
           if [[ "$BUILD_TYPE" == "release" ]]; then
             if [[ "$REF" =~ ^refs/tags/(v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.\-]+)?)$ ]]; then
               VERSION="${BASH_REMATCH[1]}"
+
+              # ⛔ Validate the tag format strictly as vX.Y.Z (no suffixes)
+              if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "❌ Invalid release tag format: '$VERSION'"
+                echo "Must be in format: vX.Y.Z (no suffixes like -rc)"
+                exit 1
+              fi
             else
               echo "❌ For 'release' builds, a Git tag is required. This should be triggered by pushing a tag."
               exit 1
