@@ -69,7 +69,7 @@ jobs:
           echo "### 📋 Unity Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Test Mode   | Result     | Duration | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------------|------------|----------|--------|"
+          echo "|-------------|------------|----------|--------|" >> $GITHUB_STEP_SUMMARY
 
           summarize() {
             local MODE=$1
@@ -94,7 +94,7 @@ jobs:
               fi
             fi
 
-            echo "| ${ICON} ${MODE} | ${DISPLAY_RESULT} | ${DISPLAY_DURATION} | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
+            printf "| %s %s | %s | %s | %s |\n" "$ICON" "$MODE" "$DISPLAY_RESULT" "$DISPLAY_DURATION" "$STATUS" >> $GITHUB_STEP_SUMMARY
           }
 
           summarize "EditMode" "🥪" \
