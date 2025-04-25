@@ -68,10 +68,6 @@ jobs:
       DEPLOY_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}
 
     steps:
-      - name: 🧰 Setup Helper Scripts
-        run: |
-          find .github/scripts/deploy -type f -name "*.sh" -exec chmod +x {} \;
-
       # ───── Build Artifact Download ─────
       - name: 📥 Download Artifacts from Build
         if: inputs.artifactSource == 'build'
