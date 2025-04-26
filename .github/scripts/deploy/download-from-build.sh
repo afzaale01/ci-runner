@@ -7,52 +7,60 @@ set -euo pipefail
 PROJECT_NAME="${1:?Missing project name}"
 VERSION="${2:?Missing version}"
 HAS_COMBINED_ARTIFACTS="${3:?Missing hasCombinedArtifacts flag (true/false)}"
+
+PROJECT_NAME="$(echo "$PROJECT_NAME" | xargs)"
+VERSION="$(echo "$VERSION" | xargs)"
+HAS_COMBINED_ARTIFACTS="$(echo "$HAS_COMBINED_ARTIFACTS" | xargs)"
+
 DEST_DIR="${4:-deployment-artifacts/${PROJECT_NAME}-${VERSION}}"
 
-mkdir -p "$DEST_DIR"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📦 Starting Build Artifact Download"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔹 Project                   : ${PROJECT_NAME}"
+echo "🔹 Version                   : ${VERSION}"
+echo "🔹 Has Combined Artifacts    : ${HAS_COMBINED_ARTIFACTS}"
+echo "🔹 Target Download Directory : ${DEST_DIR}"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-echo "🧹 Preparing to download build artifacts..."
-echo "🎯 Project      : $PROJECT_NAME"
-echo "🎯 Version      : $VERSION"
-echo "🎯 Combined     : $HAS_COMBINED_ARTIFACTS"
-echo "🎯 Target Folder: $DEST_DIR"
-echo ""
+mkdir -p "${DEST_DIR}"
 
 # ────────────────────────────
-# Combined Artifact Download
+# Download & Extract
 # ────────────────────────────
-if [[ "$HAS_COMBINED_ARTIFACTS" == "true" ]]; then
-  echo "📦 Downloading combined artifact..."
+if [[ "${HAS_COMBINED_ARTIFACTS}" == "true" ]]; then
+  echo "🛠️ Only downloading combined artifact..."
+
   ARTIFACT_NAME="${PROJECT_NAME}-${VERSION}"
 
-  gh run download --name "$ARTIFACT_NAME" --dir "$DEST_DIR"
+  echo "⬇️ Downloading artifact: ${ARTIFACT_NAME}"
+  gh run download --name "${ARTIFACT_NAME}" --dir "${DEST_DIR}"
 
-  # Unzip if it's an archive (optional safety check)
-  if ls "$DEST_DIR"/*.zip &>/dev/null; then
-    echo "📂 Extracting combined zip..."
-    unzip -q "$DEST_DIR"/*.zip -d "$DEST_DIR"
-    rm "$DEST_DIR"/*.zip
+  # If a zip exists, extract and clean up
+  if ls "${DEST_DIR}"/*.zip &>/dev/null; then
+    echo "📂 Extracting combined artifact..."
+    unzip -q "${DEST_DIR}"/*.zip -d "${DEST_DIR}"
+    rm "${DEST_DIR}"/*.zip
   fi
 
-# ────────────────────────────
-# Per-Platform Artifacts Download
-# ────────────────────────────
 else
-  echo "📦 Downloading all per-platform artifacts..."
-  
-  gh run download --dir "$DEST_DIR"
+  echo "📦 Downloading per-platform artifacts..."
 
-  # (Optional) Unzip all artifacts individually
-  if ls "$DEST_DIR"/*.zip &>/dev/null; then
-    echo "📂 Extracting all platform zips..."
-    for zipfile in "$DEST_DIR"/*.zip; do
-      platform_dir="${zipfile%.zip}"
-      mkdir -p "$platform_dir"
-      unzip -q "$zipfile" -d "$platform_dir"
-      rm "$zipfile"
+  gh run download --dir "${DEST_DIR}"
+
+  # Extract each platform artifact into its own folder
+  if ls "${DEST_DIR}"/*.zip &>/dev/null; then
+    echo "📂 Extracting platform-specific artifacts..."
+
+    for zipfile in "${DEST_DIR}"/*.zip; do
+      base_name="$(basename "${zipfile}" .zip)"  # Remove .zip
+      platform_dir="${DEST_DIR}-${base_name##*-}"  # Use suffix after last hyphen
+      echo "📂 Extracting ${zipfile} to ${platform_dir}"
+      mkdir -p "${platform_dir}"
+      unzip -q "${zipfile}" -d "${platform_dir}"
+      rm "${zipfile}"
     done
   fi
 fi
 
-echo ""
-echo "✅ Artifact download and extraction complete."
+echo "✅ Finished downloading and extracting build artifacts to: ${DEST_DIR}"
