@@ -27,7 +27,7 @@ jobs:
   test-run-tests:
     name: Test Run Tests
     needs: [ setup-prerequisites ]
-    uses: avalin/unity-ci-templates/.github/workflows/modules/test/step-1-test.yml@main
+    uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION || 'auto' }}
       useGitLfs: ${{ vars.USE_GIT_LFS || 'false' }}

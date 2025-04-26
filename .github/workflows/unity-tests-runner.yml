@@ -41,6 +41,7 @@ on:
         description: "Whether the test job failed"
         value: ${{ jobs.run-tests.outputs.failed }}
 
+
 jobs:
   run-tests:
     name: Run ${{ inputs.testMode }} Tests
