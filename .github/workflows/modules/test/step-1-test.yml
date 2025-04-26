@@ -44,7 +44,7 @@ on:
 jobs:
   detect-tests:
     name: 🔍 Detect Tests
-    uses: ./.github/workflows/unity-tests-detection.yml
+    uses: ./.github/workflows/modules/test/unity-tests-detection.yml
     with:
       editModePath: ${{ inputs.editModePath }}
       playModePath: ${{ inputs.playModePath }}
@@ -53,7 +53,7 @@ jobs:
     name: 🥪 EditMode Tests
     needs: [detect-tests]
     if: needs.detect-tests.outputs.has_editmode == 'true'
-    uses: ./.github/workflows/unity-tests-runner.yml
+    uses: ./.github/workflows/modules/test/unity-tests-runner.yml
     with:
       testMode: EditMode
       unityVersion: ${{ inputs.unityVersion }}
@@ -66,7 +66,7 @@ jobs:
     name: 🎮 PlayMode Tests
     needs: [detect-tests]
     if: needs.detect-tests.outputs.has_playmode == 'true'
-    uses: ./.github/workflows/unity-tests-runner.yml
+    uses: ./.github/workflows/modules/test/unity-tests-runner.yml
     with:
       testMode: PlayMode
       unityVersion: ${{ inputs.unityVersion }}
@@ -85,7 +85,7 @@ jobs:
         (needs.run-editmode.result == 'success' && needs.run-editmode.outputs.failed == 'true') ||
         (needs.run-playmode.result == 'success' && needs.run-playmode.outputs.failed == 'true')
       )
-    uses: ./.github/workflows/summarize-tests.yml
+    uses: ./.github/workflows/modules/test/summarize-tests.yml
     with:
       quietMode: ${{ inputs.quietMode }}
       editmodeFailed: ${{ needs.run-editmode.outputs.failed }}
