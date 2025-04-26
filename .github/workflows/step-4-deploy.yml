@@ -93,10 +93,10 @@ jobs:
           ${{ secrets.GITHUB_TOKEN }} \
           ${{ inputs.hasCombinedArtifacts }}
 
-      - name: 🛠️ Normalize Artifact Structure
+      - name: 🛠️ Normalize Artifact Layout
         if: inputs.hasCombinedArtifacts == 'true'
         run: |
-          .github/scripts/deploy/normalize-artifact-structure.sh "${{ env.DEPLOY_DIR }}"
+          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.DEPLOY_DIR }}"
 
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
