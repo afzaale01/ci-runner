@@ -81,17 +81,18 @@ jobs:
           .github/scripts/deploy/download-from-build.sh \
             "${{ inputs.projectName }}" \
             "${{ inputs.version }}" \
-            '${{ inputs.hasCombinedArtifacts }}'
+            "${{ inputs.hasCombinedArtifacts }}"
 
       # ───── Release Artifact Download ─────
       - name: 📥 Download Artifacts from GitHub Release
         if: inputs.artifactSource == 'release'
-        run: .github/scripts/deploy/download-from-release.sh \
-          ${{ inputs.projectName }} \
-          ${{ inputs.version }} \
-          ${{ github.repository }} \
-          ${{ secrets.GITHUB_TOKEN }} \
-          ${{ inputs.hasCombinedArtifacts }}
+        run: |
+          .github/scripts/deploy/download-from-release.sh \
+            "${{ inputs.projectName }}" \
+            "${{ inputs.version }}" \
+            "${{ github.repository }}" \
+            "${{ secrets.GITHUB_TOKEN }}" \
+            "${{ inputs.hasCombinedArtifacts }}"
 
       - name: 🛠️ Normalize Artifact Layout
         if: inputs.hasCombinedArtifacts == 'true'
