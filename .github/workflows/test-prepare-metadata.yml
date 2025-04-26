@@ -1,0 +1,29 @@
+name: 🧪 Test Prepare Metadata
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Optional base version (e.g., v1.2.3) for release candidate"
+        required: false
+      buildType:
+        description: "Build type"
+        required: false
+        type: choice
+        options:
+          - preview
+          - release_candidate
+          - release
+        default: preview
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  prepare-metadata:
+    name: ⏳ Prepare Metadata
+    uses: ./.github/workflows/prepare-metadata.yml
+    with:
+      version: ${{ inputs.version }}
+      buildType: ${{ inputs.buildType || 'preview' }}

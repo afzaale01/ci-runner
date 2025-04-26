@@ -1,0 +1,49 @@
+name: 📥 Load Build Metadata
+on:
+  workflow_call:
+    outputs:
+      version:
+        value: ${{ jobs.load.outputs.version }}
+      buildType:
+        value: ${{ jobs.load.outputs.buildType }}
+      deployTargets:
+        value: ${{ jobs.load.outputs.deployTargets }}
+      hasCombinedArtifacts:
+        value: ${{ jobs.load.outputs.hasCombined }}
+      skipPerPlatform:
+        value: ${{ jobs.load.outputs.skipPerPlatform }}
+      runTestsOnly:
+        value: ${{ jobs.load.outputs.runTestsOnly }}
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+      buildType: ${{ steps.read.outputs.buildType }}
+      deployTargets: ${{ steps.read.outputs.deployTargets }}
+      hasCombined: ${{ steps.read.outputs.hasCombined }}
+      skipPerPlatform: ${{ steps.read.outputs.skipPerPlatform }}
+      runTestsOnly: ${{ steps.read.outputs.runTestsOnly }}
+    steps:
+      - name: Download metadata
+        uses: actions/download-artifact@v4
+        with:
+          name: build-metadata
+
+      - name: Parse metadata
+        id: read
+        run: |
+          VERSION=$(jq -r .version build-metadata.json)
+          BUILD_TYPE=$(jq -r .buildType build-metadata.json)
+          DEPLOY_TARGETS=$(jq -c .deployTargets build-metadata.json)
+          COMBINED=$(jq -r .requiresCombinedArtifacts build-metadata.json)
+          SKIP_PER_PLATFORM=$(jq -r .skipPerPlatformArtifacts build-metadata.json)
+          TESTS_ONLY=$(jq -r .runTestsOnly build-metadata.json)
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
+          echo "deployTargets=$DEPLOY_TARGETS" >> $GITHUB_OUTPUT
+          echo "hasCombined=$COMBINED" >> $GITHUB_OUTPUT
+          echo "skipPerPlatform=$SKIP_PER_PLATFORM" >> $GITHUB_OUTPUT
+          echo "runTestsOnly=$TESTS_ONLY" >> $GITHUB_OUTPUT

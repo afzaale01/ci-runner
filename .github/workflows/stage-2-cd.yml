@@ -1,0 +1,12 @@
+name: 🚀 Stage 2 - CD
+
+on:
+  workflow_run:
+    workflows: ["🚀 Stage 1 - CI"]
+    types:
+      - completed
+
+jobs:
+  load-metadata:
+    name: 📥 Load Metadata
+    uses: ./.github/workflows/load-metadata.yml
