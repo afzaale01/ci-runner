@@ -73,11 +73,11 @@ if [[ "${HAS_COMBINED_ARTIFACTS}" == "true" ]]; then
     echo "❌ Expected combined artifact (-all-platforms.zip) but none was found!"
     exit 1
   fi
+
 else
-  echo "📦 Downloading all per-platform artifacts..."
+  echo "📦 Downloading and extracting per-platform artifacts..."
 
   while read -r NAME URL; do
-    # Skip combined artifact if not needed
     if [[ "$NAME" == *-all-platforms.zip ]]; then
       echo "⏭️ Skipping combined artifact: $NAME"
       continue
@@ -85,6 +85,14 @@ else
 
     echo "⬇️ Downloading: ${NAME}"
     curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${URL}" -o "${DEST_DIR}/${NAME}"
+
+    TARGET="${NAME##*-}"       # e.g. WebGL.zip
+    PLATFORM="${TARGET%.zip}"  # e.g. WebGL
+
+    echo "📂 Extracting $NAME to ${DEST_DIR}-${PLATFORM}"
+    mkdir -p "${DEST_DIR}-${PLATFORM}"
+    unzip -q "${DEST_DIR}/${NAME}" -d "${DEST_DIR}-${PLATFORM}"
+    rm "${DEST_DIR}/${NAME}"
   done <<< "${ASSETS}"
 fi
 
