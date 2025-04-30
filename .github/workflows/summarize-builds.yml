@@ -55,11 +55,6 @@ jobs:
             gh run download --name "$name" --dir "all-artifacts/${name}" || echo "⚠️ Failed to download $name"
           done
 
-      - name: List Downloaded Artifacts
-        run: |
-          echo "📂 Contents of all-artifacts:"
-          find all-artifacts -type f
-
       - name: 📜 Write Build Summary
         run: |
           echo "### 🧩 Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
