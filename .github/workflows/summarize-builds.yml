@@ -36,10 +36,13 @@ jobs:
         if: ${{ inputs.combineRequested == 'true' }}
         uses: actions/download-artifact@v4
         with:
+          name: ${{ inputs.projectName }}-${{ inputs.version }}
           path: all-artifacts
 
       - name: 📦 Download Per-Platform Artifacts
         if: ${{ inputs.combineRequested == 'false' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           grouped='${{ inputs.groupedPlatforms }}'
           version='${{ inputs.version }}'
@@ -47,6 +50,7 @@ jobs:
 
           echo "$grouped" | jq -r 'to_entries[].value[]' | while read -r platform; do
             name="${project}-${version}-${platform}"
+            echo "⬇️ Downloading: $name"
             mkdir -p "all-artifacts/${name}"
             gh run download --name "$name" --dir "all-artifacts/${name}" || echo "⚠️ Failed to download $name"
           done
