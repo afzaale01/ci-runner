@@ -175,6 +175,13 @@ jobs:
         run: |
           DEPLOY_TARGETS="${{ needs.validate_deploy_targets.outputs.validTargets }}"
           DEPLOY_TARGETS=${DEPLOY_TARGETS:-'[]'}
+
+          # Ensure we pass valid JSON into jq, even if it's just '[]'
+          if ! echo "$DEPLOY_TARGETS" | jq empty >/dev/null 2>&1; then
+            echo "⚠️ Invalid JSON detected in deploy targets: $DEPLOY_TARGETS"
+            DEPLOY_TARGETS='[]'
+          fi
+
           DEPLOY_TARGETS=$(echo "$DEPLOY_TARGETS" | jq -c '.')
 
           echo "## ⏳ Build Metadata Summary" >> $GITHUB_STEP_SUMMARY
