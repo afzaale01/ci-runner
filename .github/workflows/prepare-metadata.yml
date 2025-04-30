@@ -163,11 +163,11 @@ jobs:
       - validate_deploy_targets
       - analyze_artifact_strategy
     outputs:
-      version: ${{ needs.version.outputs.version }}
+      version: ${{ needs.version.outputs.version || 'N/A'  }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
       triggeredBy: ${{ needs.resolve_trigger.outputs.triggeredBy }}
-      validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets }}
+      validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets || '[]' }}
       requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }}
       skipPerPlatform: ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform || true }}
     steps:
@@ -178,7 +178,7 @@ jobs:
           echo "## ⏳ Build Metadata Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Key                          | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|------------------------------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Version                      | ${{ needs.version.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version                      | ${{ needs.version.outputs.version || 'N/A'  }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build Type                   | ${{ needs.resolve_build_type.outputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Tests                   | ${{ needs.detect_skip_tests.outputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Tests Only                   | ${{ needs.detect_tests_only.outputs.testsOnly }} |" >> $GITHUB_STEP_SUMMARY
