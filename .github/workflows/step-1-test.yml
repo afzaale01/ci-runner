@@ -42,6 +42,12 @@ on:
         required: true
 
 jobs:
+  upload_unity_license:
+    name: 📥️ Upload Unity License
+    uses: ./.github/workflows/unity-license-uploader.yml
+    secrets:
+      inherit
+
   detect-tests:
     name: 🔍 Detect Tests
     uses: ./.github/workflows/unity-tests-detection.yml
