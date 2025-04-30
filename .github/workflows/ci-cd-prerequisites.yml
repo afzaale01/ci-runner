@@ -36,6 +36,22 @@ on:
       - 'Tests/**'
 
 jobs:
+  validate-vars:
+    name: Validate GitHub Variables
+    uses: avalin/unity-ci-templates/.github/workflows/validate-github-vars.yml@main
+    with:
+      requiredVars: |
+        [
+          "COMBINE_ARTIFACTS",
+          "DEPLOY_TARGETS",
+          "EXCLUDE_UNITY_TESTS",
+          "PROJECT_NAME",
+          "RETENTION_DAYS_PREVIEW",
+          "RETENTION_DAYS_RELEASE",
+          "TARGET_PLATFORMS_PREVIEW",
+          "TARGET_PLATFORMS_RELEASE"
+        ]
+
   prepare-metadata:
     uses: ./.github/workflows/prepare-metadata.yml
     with:
