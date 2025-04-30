@@ -74,25 +74,24 @@ jobs:
           ALL_PLATFORMS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')
 
           for platform in $ALL_PLATFORMS; do
+            label="$platform"
+
             if [[ "$COMBINED" == "true" ]]; then
-              artifact_dir="all-artifacts/${PROJECT}-${VERSION}/${platform}"
+              # Try standard combined path first, fallback to flat path
+              if [ -d "all-artifacts/${PROJECT}-${VERSION}/${platform}" ]; then
+                artifact_dir="all-artifacts/${PROJECT}-${VERSION}/${platform}"
+              elif [ -d "all-artifacts/${platform}" ]; then
+                artifact_dir="all-artifacts/${platform}"
+              else
+                artifact_dir=""
+              fi
             else
               artifact_dir="all-artifacts/${PROJECT}-${VERSION}-${platform}"
             fi
 
-            case "$platform" in
-              Android) label="Android" ;;
-              WebGL) label="WebGL" ;;
-              StandaloneWindows|StandaloneWindows64) label="Windows" ;;
-              StandaloneLinux64) label="Linux" ;;
-              StandaloneOSX) label="macOS" ;;
-              iOS) label="iOS" ;;
-              *) label="$platform" ;;
-            esac
-
             echo "🔍 Checking artifact path: $artifact_dir"
 
-            if [ -n "$(find "$artifact_dir" -mindepth 1 -type f 2>/dev/null)" ]; then
+            if [ -n "$artifact_dir" ] && [ -n "$(find "$artifact_dir" -mindepth 1 -type f 2>/dev/null)" ]; then
               echo "| $label | ✅ Build successful |" >> $GITHUB_STEP_SUMMARY
             else
               echo "| $label | ❌ Build failed |" >> $GITHUB_STEP_SUMMARY
