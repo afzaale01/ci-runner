@@ -15,6 +15,19 @@ on:
           - release_candidate
           - release
         default: preview
+      skipTests:
+        description: "Whether tests should be skipped"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      deployTargets:
+        description: "Deploy targets"
+        required: true
+        default: "[]"
+        type: string
 
 permissions:
   contents: read
@@ -25,5 +38,7 @@ jobs:
     name: ⏳ Prepare Metadata
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      skipTests: ${{ inputs.skipTests }}
+      deployTargets: ${{ inputs.deployTargets }}
+      buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
-      buildType: ${{ inputs.buildType || 'preview' }}
