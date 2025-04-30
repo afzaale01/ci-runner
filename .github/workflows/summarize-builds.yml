@@ -40,7 +40,7 @@ jobs:
 
       - name: 🧰 Setup Helper Scripts
         if: ${{ inputs.combineRequested == 'true' }}
-        run: chmod +x .github/scripts/deploy/*.sh
+        run: chmod +x .github/scripts/general/*.sh
 
       - name: 🛠️ Normalize Artifact Layout
         if: ${{ inputs.combineRequested == 'true' }}
