@@ -163,6 +163,6 @@ jobs:
     with:
       projectName: ${{ inputs.projectName }}
       version: ${{ inputs.version }}
-      groupedPlatforms: ${{ needs.filter_platforms.outputs.groupedPlatforms }}
+      groupedPlatforms: ${{ needs.filter_platforms.outputs.validTargetPlatforms }}
       combineRequested: ${{ inputs.combineArtifacts }}
       combinedCreated: ${{ needs.combine_builds.outputs.created || 'false' }}
