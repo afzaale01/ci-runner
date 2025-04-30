@@ -8,10 +8,6 @@ on:
         default: "My_Project"
         type: string
         required: false
-      buildType:
-        description: "Build type: 'preview' | 'release_candidate' | 'release'"
-        type: string
-        required: true
       version:
         description: "Optional version string (e.g. v1.2.3 or v1.2.3-rc.1). Leave blank to auto-generate (e.g. PR-0001, manual-main)"
         required: false
@@ -37,10 +33,6 @@ on:
         type: string
         default: "false"
         required: false
-    outputs:
-      version:
-        description: "The resolved version string used in the build"
-        value: ${{ jobs.generate_version.outputs.version }}
     secrets:
       UNITY_EMAIL: { required: true }
       UNITY_PASSWORD: { required: true }
@@ -56,16 +48,10 @@ jobs:
     with:
       targetPlatforms: ${{ inputs.targetPlatforms }}
 
-  generate_version:
-    uses: avalin/unity-ci-templates/.github/workflows/build-version-generator.yml@main
-    with:
-      buildType: ${{ inputs.buildType }}
-      version: ${{ inputs.version }}
-
   generate_matrix:
     name: 🧮 Generate Build Matrix
     runs-on: ubuntu-latest
-    needs: [filter_platforms, generate_version]
+    needs: [ filter_platforms ]
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -88,7 +74,7 @@ jobs:
     name: Build for ${{ matrix.targetPlatform }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ inputs.timeoutMinutes }}
-    needs: [ generate_matrix, generate_version ]
+    needs: [ generate_matrix ]
     strategy:
       fail-fast: false
       matrix:
@@ -157,25 +143,25 @@ jobs:
       - name: Upload ${{ matrix.targetPlatform }}-Platform Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.projectName }}-${{ needs.generate_version.outputs.version }}-${{ matrix.targetPlatform }}
-          path: ${{ inputs.projectName }}-${{ needs.generate_version.outputs.version }}
+          name: ${{ inputs.projectName }}-${{ inputs.version }}-${{ matrix.targetPlatform }}
+          path: ${{ inputs.projectName }}-${{ inputs.version }}
           retention-days: ${{ inputs.retentionDays }}
 
   combine_builds:
     if: ${{ inputs.combineArtifacts == 'true' }}
-    needs: [build_platforms, generate_version]
+    needs: [ build_platforms ]
     uses: ./.github/workflows/combine-builds.yml
     with:
       projectName: ${{ inputs.projectName }}
-      version: ${{ needs.generate_version.outputs.version }}
+      version: ${{ inputs.version }}
       retentionDays: ${{ inputs.retentionDays }}
 
   summarize_builds:
-    needs: [generate_version, filter_platforms, build_platforms, combine_builds]
+    needs: [filter_platforms, build_platforms, combine_builds]
     uses: ./.github/workflows/summarize-builds.yml
     with:
       projectName: ${{ inputs.projectName }}
-      version: ${{ needs.generate_version.outputs.version }}
+      version: ${{ inputs.version }}
       groupedPlatforms: ${{ needs.filter_platforms.outputs.groupedPlatforms }}
       combineRequested: ${{ inputs.combineArtifacts }}
       combinedCreated: ${{ needs.combine_builds.outputs.created }}
