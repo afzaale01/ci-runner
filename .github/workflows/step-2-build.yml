@@ -165,4 +165,4 @@ jobs:
       version: ${{ inputs.version }}
       groupedPlatforms: ${{ needs.filter_platforms.outputs.validTargetPlatforms }}
       combineRequested: ${{ inputs.combineArtifacts }}
-      combinedCreated: ${{ needs.combine_builds.outputs.created || 'false' }}
+      combinedCreated: ${{ (needs.combine_builds.result == 'success' && needs.combine_builds.outputs.created) || 'false' }}
