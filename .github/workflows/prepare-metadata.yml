@@ -139,5 +139,5 @@ jobs:
           echo "| Skip Tests                   | ${{ needs.detect_skip_tests.outputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered by                 | ${{ needs.resolve_trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Requires Combined Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Skip Per-Platform Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Requires Combined Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Skip Per-Platform Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform || true }} |" >> $GITHUB_STEP_SUMMARY
