@@ -12,6 +12,9 @@ on:
       skipTests:
         type: string
         required: false
+      testsOnly:
+        type: string
+        required: false
       version:
         type: string
         required: false
@@ -32,6 +35,31 @@ on:
         value: ${{ jobs.metadata.outputs.skipPerPlatform }}
 
 jobs:
+  detect_tests_only:
+    name: Detect Tests-Only Run
+    runs-on: ubuntu-latest
+    outputs:
+      testsOnly: ${{ steps.detect.outputs.testsOnly }}
+    steps:
+      - id: detect
+        run: |
+          IS_TESTS_ONLY="false"
+
+          # Manual flag (from dispatch input)
+          if [[ "${{ inputs.testsOnly }}" == "true" ]]; then
+            IS_TESTS_ONLY="true"
+          fi
+
+          # Auto-detect based on event
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            TYPE="${{ github.event.action }}"
+            if [[ "$TYPE" == "ready_for_review" || "$TYPE" == "synchronize" || "$TYPE" == "reopened" ]]; then
+              IS_TESTS_ONLY="true"
+            fi
+          fi
+
+          echo "testsOnly=$IS_TESTS_ONLY" >> "$GITHUB_OUTPUT"
+
   detect_skip_tests:
     name: Detect Skip Tests
     runs-on: ubuntu-latest
