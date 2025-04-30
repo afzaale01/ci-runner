@@ -35,17 +35,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   run-tests:
     name: Run Tests
-    if: >
-      always() &&
-      (vars.EXCLUDE_UNITY_TESTS || 'false') == 'false' &&
-      (
-        github.event_name == 'pull_request' ||
-        github.event_name == 'workflow_dispatch' ||
-        (
-          github.event_name == 'push' &&
-          !contains(github.event.head_commit.message, '[skip tests]')
-        )
-      )
+    if: inputs.skipTests != 'true'
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION || 'auto' }}
