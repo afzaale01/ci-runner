@@ -125,7 +125,7 @@ jobs:
 
       - name: Organize Build Output
         run: |
-          VERSION="${{ needs.generate_version.outputs.version }}"
+          VERSION="${{ inputs.version }}"
           PLATFORM="${{ matrix.targetPlatform }}"
           DEST="${{ inputs.projectName }}-${VERSION}"
           SOURCE="build/${PLATFORM}"
