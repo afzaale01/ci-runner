@@ -9,6 +9,9 @@ on:
       buildType:
         type: string
         required: true
+      skipTests:
+        type: string
+        required: true
       version:
         type: string
         required: true
