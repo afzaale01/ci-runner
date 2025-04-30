@@ -58,7 +58,7 @@ jobs:
 
       - name: Trigger downstream pipeline
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CICD_PAT }}
         run: |
           gh workflow run ci-cd-full.yml \
             --ref "${{ github.ref }}" \
