@@ -42,12 +42,19 @@ jobs:
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
   
-  trigger-pipeline:
+  trigger-ci:
+    name: Trigger CI/CD Pipeline
     needs: prepare-metadata
-    uses: ./.github/workflows/ci-cd-full.yml
-    with:
-      buildType: ${{ needs.prepare-metadata.outputs.buildType }}
-      version: ${{ needs.prepare-metadata.outputs.version }}
-      validDeployTargets: ${{ needs.prepare-metadata.outputs.validDeployTargets }}
-      requiresCombined: ${{ needs.prepare-metadata.outputs.requiresCombined }}
-      skipPerPlatform: ${{ needs.prepare-metadata.outputs.skipPerPlatform }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger downstream pipeline
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run ci-cd-full.yml \
+            --ref "${{ github.ref }}" \
+            --field buildType="${{ needs.prepare-metadata.outputs.buildType }}" \
+            --field version="${{ needs.prepare-metadata.outputs.version }}" \
+            --field validDeployTargets='${{ needs.prepare-metadata.outputs.validDeployTargets }}' \
+            --field requiresCombined="${{ needs.prepare-metadata.outputs.requiresCombined }}" \
+            --field skipPerPlatform="${{ needs.prepare-metadata.outputs.skipPerPlatform }}"
