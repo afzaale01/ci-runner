@@ -6,24 +6,31 @@ on:
       triggeredBy:
         type: string
         required: true
+        default: 'workflow_dispatch'
       buildType:
         type: string
         required: true
+        default: 'preview'
       skipTests:
         type: string
         required: true
+        default: 'false'
       version:
         type: string
         required: true
+        default: 'v0.0.0'
       validDeployTargets:
         type: string
         required: true
+        default: '[]'
       requiresCombined:
         type: string
         required: true
+        default: 'false'
       skipPerPlatform:
         type: string
         required: true
+        default: 'false'
 
 permissions:
   contents: write
