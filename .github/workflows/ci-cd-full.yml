@@ -62,6 +62,7 @@ jobs:
     with:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
       projectName: ${{ vars.PROJECT_NAME }}
+      version: ${{ inputs.version  }}
       targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
       combineArtifacts: ${{ inputs.requiresCombined }}
       timeoutMinutes: ${{ fromJson(vars.TIMEOUT_BUILD_IN_MINUTES || '30') }}
