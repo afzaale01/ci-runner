@@ -1,4 +1,4 @@
-name: ⏳ CI/CD Prerequisites
+name: 🏗️ CI/CD Preparations
 
 on:
   # Allow manual dispatch with a buildType input
