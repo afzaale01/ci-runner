@@ -68,9 +68,9 @@ jobs:
 
       - name: 📝 Check if Release Already Exists
         id: check_release
-        run: .github/scripts/release/check-release-exists.sh "${{ needs.tag.outputs.version }}" "${{ github.repository }}" "${{ github.token }}"
+        run: .github/scripts/release/check-release-exists.sh "${{ needs.tag.outputs.version }}" "${{ github.repository }}" "$GITHUB_TOKEN"
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🏷️ Show Resolved Version
         run: |
@@ -99,7 +99,7 @@ jobs:
             '{ tag_name: $tag_name, name: $name, draft: $draft, prerelease: $prerelease }')
 
           RESPONSE=$(curl -s -X POST \
-            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             -d "$PAYLOAD" \
             "https://api.github.com/repos/${{ github.repository }}/releases")
@@ -115,7 +115,7 @@ jobs:
           echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
           echo "✅ Created release with ID: $RELEASE_ID"
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧮 Upload Per-Platform Artifacts
         if: ${{ inputs.skipPerPlatformArtifacts != 'true' }}
@@ -127,8 +127,10 @@ jobs:
             "$VERSION" \
             "$RELEASE_ID" \
             "${{ github.repository }}" \
-            "${{ github.token }}" \
+            "$GITHUB_TOKEN" \
             '${{ inputs.targetPlatforms }}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧮 Upload Combined Artifact
         if: ${{ inputs.combineArtifacts == 'true' }}
@@ -137,24 +139,26 @@ jobs:
           PROJECT="${{ inputs.projectName }}"
           COMBINED_PATH="${PROJECT}-${VERSION}"
           COMBINED_ZIP="${PROJECT}-${VERSION}-all-platforms.zip"
-        
+
           RELEASE_ID="${{ steps.check_release.outputs.release_id || steps.create_release.outputs.release_id }}"
-        
+
           if [ -d "$COMBINED_PATH" ]; then
             echo "📦 Zipping contents of: $COMBINED_PATH → $COMBINED_ZIP"
             cd "$COMBINED_PATH"
             zip -r "../$COMBINED_ZIP" .
             cd -
-        
+
             echo "📤 Uploading $COMBINED_ZIP to release ID $RELEASE_ID"
             curl -s -X POST \
-              -H "Authorization: Bearer ${{ github.token }}" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
               -H "Content-Type: application/zip" \
               --data-binary @"$COMBINED_ZIP" \
               "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets?name=$COMBINED_ZIP"
           else
             echo "ℹ️ No combined build artifact found — skipping."
           fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🛠️ Capture Release Errors
         if: failure()
