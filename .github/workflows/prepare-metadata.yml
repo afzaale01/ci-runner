@@ -124,8 +124,8 @@ jobs:
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
       triggeredBy: ${{ needs.resolve_trigger.outputs.triggeredBy }}
       validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets }}
-      requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined }}
-      skipPerPlatform: ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform }}
+      requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }}
+      skipPerPlatform: ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform || true }}
     steps:
       - name: Summarize
         run: |
