@@ -78,17 +78,17 @@ jobs:
           fi
           echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
+  valid_target_platforms:
+    uses: avalin/unity-ci-templates/.github/workflows/validate-target-platforms.yml@main
+    with:
+      targetPlatforms: ${{ vars.TARGET_PLATFORMS_RELEASE }}
+
   version:
     needs: resolve_build_type
     uses: avalin/unity-ci-templates/.github/workflows/build-version-generator.yml@main
     with:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       version: ${{ inputs.version }}
-
-  validate_target_platforms:
-    uses: ./.github/workflows/validate-target-platforms.yml
-    with:
-      targetPlatforms: ${{ vars.TARGET_PLATFORMS_RELEASE }}
 
   validate_deploy_targets:
     uses: ./.github/workflows/validate-deploy-targets.yml
@@ -136,7 +136,7 @@ jobs:
           echo "| Build Type                   | ${{ needs.resolve_build_type.outputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Tests                   | ${{ needs.detect_skip_tests.outputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered by                 | ${{ needs.resolve_trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Target Platforms             | \`$PLATFORM_MAP\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Target Platforms (per OS)    | \`$PLATFORM_MAP\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Per-Platform Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform }} |" >> $GITHUB_STEP_SUMMARY
