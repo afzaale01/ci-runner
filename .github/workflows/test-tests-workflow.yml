@@ -17,16 +17,18 @@ permissions:
   pull-requests: write
 
 jobs:
-  setup-prerequisites:
-    name: Setup Prerequisites
-    uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
+  prepare_metadata:
+    name: ⏳ Prepare Metadata
+    uses: ./.github/workflows/prepare-metadata.yml
     with:
-      excludesUnityTests: "false"
-    secrets: inherit
+      skipTests: false
+      deployTargets: '[]'
+      buildType: 'preview'
+      version: 'v0.0.0'
 
   test-run-tests:
     name: Test Run Tests
-    needs: [ setup-prerequisites ]
+    needs: [ prepare_metadata ]
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION || 'auto' }}
