@@ -5,6 +5,7 @@ on:
 
 jobs:
   activate-license:
+    name: Activate Unity License
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
