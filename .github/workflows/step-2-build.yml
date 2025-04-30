@@ -158,10 +158,11 @@ jobs:
 
   summarize_builds:
     needs: [filter_platforms, build_platforms, combine_builds]
+    if: always()
     uses: ./.github/workflows/summarize-builds.yml
     with:
       projectName: ${{ inputs.projectName }}
       version: ${{ inputs.version }}
       groupedPlatforms: ${{ needs.filter_platforms.outputs.groupedPlatforms }}
       combineRequested: ${{ inputs.combineArtifacts }}
-      combinedCreated: ${{ needs.combine_builds.outputs.created }}
+      combinedCreated: ${{ needs.combine_builds.outputs.created || 'false' }}
