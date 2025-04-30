@@ -65,7 +65,7 @@ jobs:
       deployTargets: ${{ needs.validate-deploy-targets.outputs.validTargets }}
 
   metadata:
-    name: 💾 Save Metadata
+    name: Summarize Metadata
     runs-on: ubuntu-latest
     needs:
       - resolve-build-type
