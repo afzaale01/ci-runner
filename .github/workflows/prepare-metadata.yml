@@ -62,6 +62,8 @@ jobs:
 
   detect_skip_tests:
     name: Detect Skip Tests
+    needs: detect_tests_only
+    if: needs.detect_tests_only.outputs.testsOnly == 'false'
     runs-on: ubuntu-latest
     outputs:
       skipTests: ${{ steps.detect.outputs.skipTests }}
@@ -97,6 +99,8 @@ jobs:
 
   resolve_build_type:
     name: Resolve Build Type (Preview, RC, Release)
+    needs: detect_tests_only
+    if: needs.detect_tests_only.outputs.testsOnly == 'false'
     runs-on: ubuntu-latest
     outputs:
       buildType: ${{ steps.set.outputs.buildType }}
@@ -114,14 +118,19 @@ jobs:
 
   version:
     name: Create versioning
-    needs: resolve_build_type
+    needs: 
+      - resolve_build_type
+      - detect_tests_only
+    if: needs.detect_tests_only.outputs.testsOnly == 'false'
     uses: avalin/unity-ci-templates/.github/workflows/build-version-generator.yml@main
     with:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       version: ${{ inputs.version }}
 
   validate_deploy_targets:
-    name: Validate Deploy Targets
+    name: Validate Deploy Targets    
+    needs: detect_tests_only
+    if: needs.detect_tests_only.outputs.testsOnly == 'false'
     uses: ./.github/workflows/validate-deploy-targets.yml
     with:
       deployTargets: ${{ inputs.deployTargets }}
