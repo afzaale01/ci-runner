@@ -130,7 +130,10 @@ jobs:
     needs: [ build, release, deploy ]
     if: > 
       always() && 
-      startsWith(github.ref, 'refs/tags/')
+      (
+        inputs.buildType == 'release' || 
+        inputs.buildType == 'release_candidate'
+      )
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
       releaseResult: ${{ needs.release.result }}
