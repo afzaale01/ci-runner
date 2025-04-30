@@ -8,16 +8,16 @@ on:
         required: true
         type: string
     outputs:
-      groupedPlatforms:
+      validTargetPlatforms:
         description: "Map of OS runner label to list of platforms"
-        value: ${{ jobs.filter_platforms.outputs.groupedPlatforms }}
+        value: ${{ jobs.filter_platforms.outputs.validTargetPlatforms }}
 
 jobs:
   filter_platforms:
     name: 🧮 Filter Platforms
     runs-on: ubuntu-latest
     outputs:
-      groupedPlatforms: ${{ steps.group.outputs.groupedPlatforms }}
+      validTargetPlatforms: ${{ steps.group.outputs.validTargetPlatforms }}
 
     steps:
       - name: 📁 Checkout repo
@@ -94,7 +94,7 @@ jobs:
           echo "📦 Grouped platforms:"
           cat grouped.json
 
-          echo "groupedPlatforms<<EOF" >> $GITHUB_OUTPUT
+          echo "validTargetPlatforms<<EOF" >> $GITHUB_OUTPUT
           cat grouped.json >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
