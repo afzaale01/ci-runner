@@ -24,7 +24,7 @@ on:
       deployTargets:
         description: "Deploy targets"
         required: true
-        default: "[]"
+        default: "['steam', 'gh-pages']"
         type: string
       version:
         description: Optional version override
