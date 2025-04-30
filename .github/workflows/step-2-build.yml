@@ -51,8 +51,13 @@ jobs:
       - name: 🧮 Create Build Matrix from Grouped Platforms
         id: set-matrix
         run: |
-          grouped='${{ inputs.validTargetPlatforms }}'
-          echo "📦 Grouped platforms: $grouped"
+          grouped=$(cat <<'EOF'
+          ${{ inputs.validTargetPlatforms }}
+            EOF
+          )
+
+          compact=$(echo "$grouped" | jq -c '.')
+          echo "📦 Grouped platforms (compacted): $compact"
       
           matrix=$(echo "$grouped" | jq -c '
             to_entries
