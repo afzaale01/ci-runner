@@ -129,7 +129,7 @@ jobs:
           DEPLOY_TARGETS=$(echo '${{ needs.validate_deploy_targets.outputs.validTargets }}' | jq -c '.')
           PLATFORM_MAP=$(echo '${{ needs.valid_target_platforms.outputs.validTargetPlatforms }}' | jq -c '.')
 
-          echo "## 🚀 Build Metadata Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## ⏳ Build Metadata Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Key                          | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|------------------------------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Version                      | ${{ needs.version.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
