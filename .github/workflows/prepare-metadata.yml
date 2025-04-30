@@ -3,15 +3,15 @@ name: ⏳ Prepare Metadata
 on:
   workflow_call:
     inputs:
-      buildType:
-        type: string
-        required: true
-      skipTests:
-        type: string
-        required: true
       deployTargets:
         type: string
         required: true
+      buildType:
+        type: string
+        required: false
+      skipTests:
+        type: string
+        required: false
       version:
         type: string
         required: false

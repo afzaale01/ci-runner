@@ -70,8 +70,8 @@ jobs:
     needs: validate-vars
     uses: ./.github/workflows/prepare-metadata.yml
     with:
-      skipTests: ${{ inputs.skipTests }}
-      deployTargets: ${{ vars.DEPLOY_TARGETS }}
+      skipTests: ${{ inputs.skipTests || vars.EXCLUDE_UNITY_TESTS}}
+      deployTargets: ${{ inputs.deployTargets || vars.DEPLOY_TARGETS }}
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
   
