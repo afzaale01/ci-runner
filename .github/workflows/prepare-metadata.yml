@@ -110,6 +110,7 @@ jobs:
   metadata:
     name: Summarize Metadata
     runs-on: ubuntu-latest
+    if: always()
     needs:
       - detect_skip_tests
       - resolve_trigger
