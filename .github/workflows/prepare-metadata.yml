@@ -13,6 +13,8 @@ on:
     outputs:
       buildType:
         value: ${{ jobs.metadata.outputs.buildType }}
+      triggeredBy:
+        value: ${{ jobs.metadata.outputs.triggeredBy }}
       version:
         value: ${{ jobs.metadata.outputs.version }}
       validDeployTargets:
@@ -23,26 +25,29 @@ on:
         value: ${{ jobs.metadata.outputs.skipPerPlatform }}
 
 jobs:
+  resolve-trigger:
+    runs-on: ubuntu-latest
+    outputs:
+      triggeredBy: ${{ steps.event.outputs.triggeredBy }}
+    steps:
+      - id: event
+        run: echo "triggeredBy=$GITHUB_EVENT_NAME" >> "$GITHUB_OUTPUT"
+
   resolve-build-type:
     runs-on: ubuntu-latest
     outputs:
       buildType: ${{ steps.set.outputs.buildType }}
-      triggeredBy: ${{ steps.set.outputs.triggeredBy }}
     steps:
       - id: set
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             BUILD_TYPE="release"
-            TRIGGERED_BY="push"
           elif [ "${{ github.event_name }}" = "pull_request" ]; then
             BUILD_TYPE="${{ inputs.buildType || 'preview' }}"
-            TRIGGERED_BY="pull_request"
           else
             BUILD_TYPE="${{ inputs.buildType || 'preview' }}"
-            TRIGGERED_BY="manual"
           fi
           echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
-          echo "triggeredBy=$TRIGGERED_BY" >> $GITHUB_OUTPUT
 
   version:
     needs: resolve-build-type
@@ -68,6 +73,7 @@ jobs:
     name: Summarize Metadata
     runs-on: ubuntu-latest
     needs:
+      - resolve-trigger
       - resolve-build-type
       - version
       - validate-deploy-targets
@@ -75,7 +81,7 @@ jobs:
     outputs:
       version: ${{ needs.version.outputs.version }}
       buildType: ${{ needs.resolve-build-type.outputs.buildType }}
-      triggeredBy: ${{ needs.resolve-build-type.outputs.triggeredBy }}
+      triggeredBy: ${{ needs.resolve-trigger.outputs.triggeredBy }}
       validDeployTargets: ${{ needs.validate-deploy-targets.outputs.validTargets }}
       requiresCombined: ${{ needs.analyze-artifact-strategy.outputs.requiresCombined }}
       skipPerPlatform: ${{ needs.analyze-artifact-strategy.outputs.skipPerPlatform }}
@@ -88,7 +94,7 @@ jobs:
           echo "|------------------------------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Version                      | ${{ needs.version.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build Type                   | ${{ needs.resolve-build-type.outputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Triggered by                 | ${{ needs.resolve-build-type.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered by                 | ${{ needs.resolve-trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ needs.analyze-artifact-strategy.outputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Per-Platform Artifacts  | ${{ needs.analyze-artifact-strategy.outputs.skipPerPlatform }} |" >> $GITHUB_STEP_SUMMARY
