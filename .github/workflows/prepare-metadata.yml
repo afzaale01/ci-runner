@@ -44,6 +44,7 @@ jobs:
       - id: detect
         run: |
           IS_TESTS_ONLY="false"
+          SKIP=false
 
           # Manual flag (from dispatch input)
           if [[ "${{ inputs.testsOnly }}" == "true" ]]; then
@@ -59,6 +60,7 @@ jobs:
           fi
 
           echo "testsOnly=$IS_TESTS_ONLY" >> "$GITHUB_OUTPUT"
+          echo "skipTests=$SKIP" >> "$GITHUB_OUTPUT"
 
   detect_skip_tests:
     name: Detect Skip Tests
