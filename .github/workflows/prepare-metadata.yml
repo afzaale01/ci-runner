@@ -39,15 +39,11 @@ jobs:
     name: Detect Tests-Only Run
     runs-on: ubuntu-latest
     outputs:
-      skipTests: ${{ steps.detect.outputs.skipTests }}
       testsOnly: ${{ steps.detect.outputs.testsOnly }}
-      buildType: ${{ steps.detect.outputs.buildType }}
     steps:
       - id: detect
         run: |
           IS_TESTS_ONLY="false"
-          BUILD_TYPE="preview"
-          SKIP_TESTS=false
 
           # Manual flag (from dispatch input)
           if [[ "${{ inputs.testsOnly }}" == "true" ]]; then
@@ -63,13 +59,11 @@ jobs:
           fi
 
           echo "testsOnly=$IS_TESTS_ONLY" >> "$GITHUB_OUTPUT"
-          echo "skipTests=$SKIP_TESTS" >> "$GITHUB_OUTPUT"
-          echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
+          echo "skipTests=$SKIP" >> "$GITHUB_OUTPUT"
 
   detect_skip_tests:
     name: Detect Skip Tests
     needs: detect_tests_only
-    if: needs.detect_tests_only.outputs.testsOnly == 'false'
     runs-on: ubuntu-latest
     outputs:
       skipTests: ${{ steps.detect.outputs.skipTests }}
@@ -77,22 +71,22 @@ jobs:
       - id: detect
         run: |
           # Default to false
-          SKIP=false
+          SKIP_TESTS=false
 
           # Check vars.EXCLUDE_UNITY_TESTS
           if [[ "${{ vars.EXCLUDE_UNITY_TESTS }}" == "true" ]]; then
-            SKIP=true
+            SKIP_TESTS=true
           fi
 
           # Check commit message if this is a push event
           if [[ "$GITHUB_EVENT_NAME" == "push" && -f "$GITHUB_EVENT_PATH" ]]; then
             COMMIT_MSG=$(jq -r .head_commit.message < "$GITHUB_EVENT_PATH")
             if [[ "$COMMIT_MSG" == *"[skip tests]"* ]]; then
-              SKIP=true
+              SKIP_TESTS=true
             fi
           fi
 
-          echo "skipTests=$SKIP" >> "$GITHUB_OUTPUT"
+          echo "skipTests=$SKIP_TESTS" >> "$GITHUB_OUTPUT"
 
   resolve_trigger:
     name: Resolve Github Event Trigger
@@ -106,14 +100,17 @@ jobs:
   resolve_build_type:
     name: Resolve Build Type (Preview, RC, Release)
     needs: detect_tests_only
-    if: needs.detect_tests_only.outputs.testsOnly == 'false'
     runs-on: ubuntu-latest
+    env:
+      TESTS_ONLY: ${{ needs.detect_tests_only.outputs.testsOnly }}
     outputs:
       buildType: ${{ steps.set.outputs.buildType }}
     steps:
       - id: set
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [ "$TESTS_ONLY" = "true" ]; then
+            BUILD_TYPE="preview"
+          elif [ "${{ github.event_name }}" = "push" ]; then
             BUILD_TYPE="release"
           elif [ "${{ github.event_name }}" = "pull_request" ]; then
             BUILD_TYPE="${{ inputs.buildType || 'preview' }}"
