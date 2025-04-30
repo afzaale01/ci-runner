@@ -13,10 +13,11 @@ on:
         required: true
         default: ""
         type: string
-      validTargetPlatforms:
+      targetPlatforms:
         description: "JSON array of platforms to build"
         type: string
-        required: true
+        default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+        required: false
       timeoutMinutes:
         description: "Timeout for each build job in minutes"
         type: number
@@ -42,16 +43,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  filter_platforms:
+    uses: avalin/unity-ci-templates/.github/workflows/validate-target-platforms.yml@main
+    with:
+      targetPlatforms: ${{ inputs.targetPlatforms }}
+
   generate_matrix:
     name: 🧮 Generate Build Matrix
     runs-on: ubuntu-latest
+    needs: [ filter_platforms ]
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: 🧮 Create Build Matrix from Grouped Platforms
         id: set-matrix
         run: |
-          grouped='${{ inputs.validTargetPlatforms }}'
+          grouped='${{ needs.filter_platforms.outputs.groupedPlatforms }}'
           echo "📦 Grouped platforms: $grouped"
       
           matrix=$(echo "$grouped" | jq -c '
@@ -150,12 +157,12 @@ jobs:
       retentionDays: ${{ inputs.retentionDays }}
 
   summarize_builds:
-    needs: [ build_platforms, combine_builds ]
+    needs: [filter_platforms, build_platforms, combine_builds]
     if: always()
     uses: ./.github/workflows/summarize-builds.yml
     with:
       projectName: ${{ inputs.projectName }}
       version: ${{ inputs.version }}
-      groupedPlatforms: ${{ inputs.validTargetPlatforms }}
+      groupedPlatforms: ${{ needs.filter_platforms.outputs.groupedPlatforms }}
       combineRequested: ${{ inputs.combineArtifacts }}
       combinedCreated: ${{ needs.combine_builds.outputs.created || 'false' }}

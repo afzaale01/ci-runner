@@ -80,7 +80,6 @@ jobs:
             --field skipTests="${{ needs.prepare-metadata.outputs.skipTests }}" \
             --field buildType="${{ needs.prepare-metadata.outputs.buildType }}" \
             --field version="${{ needs.prepare-metadata.outputs.version }}" \
-            --field validTargetPlatforms="${{ needs.prepare-metadata.outputs.validTargetPlatforms }}" \
             --field validDeployTargets="$(printf '%s' '${{ needs.prepare-metadata.outputs.validDeployTargets }}')" \
             --field requiresCombined="${{ needs.prepare-metadata.outputs.requiresCombined }}" \
             --field skipPerPlatform="${{ needs.prepare-metadata.outputs.skipPerPlatform }}"
