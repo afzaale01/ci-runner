@@ -55,7 +55,7 @@ jobs:
       editModePath: ${{ inputs.editModePath }}
       playModePath: ${{ inputs.playModePath }}
 
-  run-editmode:
+  run_editmode:
     name: 🥪 EditMode Tests
     needs: 
       - detect_tests
@@ -70,7 +70,7 @@ jobs:
       quietMode: ${{ inputs.quietMode }}
     secrets: inherit
 
-  run-playmode:
+  run_playmode:
     name: 🎮 PlayMode Tests
     needs: 
       - detect_tests
@@ -85,26 +85,26 @@ jobs:
       quietMode: ${{ inputs.quietMode }}
     secrets: inherit
 
-  summarize-tests:
+  summarize_tests:
     name: 📄 Summarize Test Results
-    needs: [run-editmode, run-playmode]
+    needs: [run_editmode, run_playmode]
     if: |
       always() &&
       (
         inputs.quietMode == 'false' ||
-        (needs.run-editmode.result == 'success' && needs.run-editmode.outputs.failed == 'true') ||
-        (needs.run-playmode.result == 'success' && needs.run-playmode.outputs.failed == 'true')
+        (needs.run_editmode.result == 'success' && needs.run_editmode.outputs.failed == 'true') ||
+        (needs.run_playmode.result == 'success' && needs.run_playmode.outputs.failed == 'true')
       )
     uses: ./.github/workflows/summarize-tests.yml
     with:
       quietMode: ${{ inputs.quietMode }}
-      editmodeFailed: ${{ needs.run-editmode.outputs.failed }}
-      playmodeFailed: ${{ needs.run-playmode.outputs.failed }}
-      editmodeTotal: ${{ needs.run-editmode.outputs.total }}
-      editmodePassed: ${{ needs.run-editmode.outputs.passed }}
-      editmodeResult: ${{ needs.run-editmode.outputs.result }}
-      editmodeDuration: ${{ needs.run-editmode.outputs.duration }}
-      playmodeTotal: ${{ needs.run-playmode.outputs.total }}
-      playmodePassed: ${{ needs.run-playmode.outputs.passed }}
-      playmodeResult: ${{ needs.run-playmode.outputs.result }}
-      playmodeDuration: ${{ needs.run-playmode.outputs.duration }}
+      editmodeFailed: ${{ needs.run_editmode.outputs.failed }}
+      playmodeFailed: ${{ needs.run_playmode.outputs.failed }}
+      editmodeTotal: ${{ needs.run_editmode.outputs.total }}
+      editmodePassed: ${{ needs.run_editmode.outputs.passed }}
+      editmodeResult: ${{ needs.run_editmode.outputs.result }}
+      editmodeDuration: ${{ needs.run_editmode.outputs.duration }}
+      playmodeTotal: ${{ needs.run_playmode.outputs.total }}
+      playmodePassed: ${{ needs.run_playmode.outputs.passed }}
+      playmodeResult: ${{ needs.run_playmode.outputs.result }}
+      playmodeDuration: ${{ needs.run_playmode.outputs.duration }}
