@@ -15,6 +15,8 @@ on:
         value: ${{ jobs.metadata.outputs.buildType }}
       triggeredBy:
         value: ${{ jobs.metadata.outputs.triggeredBy }}
+      skipTests:
+        value: ${{ jobs.metadata.outputs.skipTests }}
       version:
         value: ${{ jobs.metadata.outputs.version }}
       validDeployTargets:
@@ -25,6 +27,31 @@ on:
         value: ${{ jobs.metadata.outputs.skipPerPlatform }}
 
 jobs:
+  detect-skip-tests:
+    runs-on: ubuntu-latest
+    outputs:
+      skipTests: ${{ steps.detect.outputs.skipTests }}
+    steps:
+      - id: detect
+        run: |
+          # Default to false
+          SKIP=false
+
+          # Check vars.EXCLUDE_UNITY_TESTS
+          if [[ "${{ vars.EXCLUDE_UNITY_TESTS }}" == "true" ]]; then
+            SKIP=true
+          fi
+
+          # Check commit message if this is a push event
+          if [[ "$GITHUB_EVENT_NAME" == "push" && -f "$GITHUB_EVENT_PATH" ]]; then
+            COMMIT_MSG=$(jq -r .head_commit.message < "$GITHUB_EVENT_PATH")
+            if [[ "$COMMIT_MSG" == *"[skip tests]"* ]]; then
+              SKIP=true
+            fi
+          fi
+
+          echo "skipTests=$SKIP" >> "$GITHUB_OUTPUT"
+
   resolve-trigger:
     runs-on: ubuntu-latest
     outputs:
@@ -73,6 +100,7 @@ jobs:
     name: Summarize Metadata
     runs-on: ubuntu-latest
     needs:
+      - detect-skip-tests
       - resolve-trigger
       - resolve-build-type
       - version
@@ -81,6 +109,7 @@ jobs:
     outputs:
       version: ${{ needs.version.outputs.version }}
       buildType: ${{ needs.resolve-build-type.outputs.buildType }}
+      skipTests: ${{ needs.detect-skip-tests.outputs.skipTests }}
       triggeredBy: ${{ needs.resolve-trigger.outputs.triggeredBy }}
       validDeployTargets: ${{ needs.validate-deploy-targets.outputs.validTargets }}
       requiresCombined: ${{ needs.analyze-artifact-strategy.outputs.requiresCombined }}
@@ -94,6 +123,7 @@ jobs:
           echo "|------------------------------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Version                      | ${{ needs.version.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build Type                   | ${{ needs.resolve-build-type.outputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Skip Tests                   | ${{ needs.detect-skip-tests.outputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered by                 | ${{ needs.resolve-trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ needs.analyze-artifact-strategy.outputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
