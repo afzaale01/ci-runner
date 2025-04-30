@@ -34,36 +34,26 @@ permissions:
   contents: write
 
 jobs:
-  setup-prerequisites:
-    name: ⏳ Setup Prerequisites
-    uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
-    with:
-      excludesUnityTests: "true"
-      deployTargets: ${{ inputs.deployTargets }}
-    secrets: inherit
-
   build:
     name: 🧩 Trigger Unity Build (Step 2)
-    needs: setup-prerequisites
     uses: ./.github/workflows/step-2-build.yml
+    with:
+      version: ${{ inputs.version }}
+      projectName: ${{ inputs.projectName }}
+      targetPlatforms: ${{ inputs.targetPlatforms }}
+      combineArtifacts: ${{ true }}
+    secrets: inherit
+
+  release:
+    name: 📦 Trigger GitHub Release (Step 3)
+    needs: [ build ]
+    if: ${{ inputs.buildType == 'release' || inputs.buildType == 'release_candidate' }}
+    uses: ./.github/workflows/step-3-release.yml
     with:
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
-      combineArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact }}
-    secrets: inherit
-
-  release:
-    name: 📦 Trigger GitHub Release (Step 3)
-    needs: [ setup-prerequisites, build ]
-    if: ${{ inputs.buildType == 'release' || inputs.buildType == 'release_candidate' }}
-    uses: ./.github/workflows/step-3-release.yml
-    with:
-      buildType: ${{ inputs.buildType }}
-      version: ${{ needs.build.outputs.version }}
-      projectName: ${{ inputs.projectName }}
-      targetPlatforms: ${{ inputs.targetPlatforms }}
-      combineArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact }}
-      skipPerPlatformArtifacts: ${{ needs.setup-prerequisites.outputs.skipPerPlatformArtifacts }}  
+      combineArtifacts: ${{ true }}
+      skipPerPlatformArtifacts: ${{ false }}  
     secrets: inherit
