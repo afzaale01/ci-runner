@@ -58,7 +58,7 @@ jobs:
       - name: 🧮 Create Build Matrix from Grouped Platforms
         id: set-matrix
         run: |
-          grouped='${{ needs.filter_platforms.outputs.groupedPlatforms }}'
+          grouped='${{ needs.filter_platforms.outputs.validTargetPlatforms }}'
           echo "📦 Grouped platforms: $grouped"
       
           matrix=$(echo "$grouped" | jq -c '
