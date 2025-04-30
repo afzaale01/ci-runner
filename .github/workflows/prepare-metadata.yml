@@ -21,6 +21,8 @@ on:
         value: ${{ jobs.metadata.outputs.version }}
       validDeployTargets:
         value: ${{ jobs.metadata.outputs.validDeployTargets }}
+      validTargetPlatforms:
+        value: ${{ jobs.metadata.outputs.validTargetPlatforms }}
       requiresCombined:
         value: ${{ jobs.metadata.outputs.requiresCombined }}
       skipPerPlatform:
@@ -110,13 +112,14 @@ jobs:
       - resolve_build_type
       - version
       - validate_deploy_targets
+      - valid_target_platforms
       - analyze_artifact_strategy
     outputs:
       version: ${{ needs.version.outputs.version }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
       triggeredBy: ${{ needs.resolve_trigger.outputs.triggeredBy }}
-      validTargetPlatforms: ${{ needs.validate_deploy_targets.outputs.validTargets }}
+      validTargetPlatforms: ${{ needs.valid_target_platforms.outputs.validTargetPlatforms }}
       validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets }}
       requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined }}
       skipPerPlatform: ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform }}
@@ -124,6 +127,8 @@ jobs:
       - name: Summarize
         run: |
           DEPLOY_TARGETS=$(echo '${{ needs.validate_deploy_targets.outputs.validTargets }}' | jq -c '.')
+          PLATFORM_MAP=$(echo '${{ needs.valid_target_platforms.outputs.validTargetPlatforms }}' | jq -c '.')
+
           echo "## 🚀 Build Metadata Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Key                          | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|------------------------------|-------|" >> $GITHUB_STEP_SUMMARY
@@ -131,6 +136,7 @@ jobs:
           echo "| Build Type                   | ${{ needs.resolve_build_type.outputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Tests                   | ${{ needs.detect_skip_tests.outputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered by                 | ${{ needs.resolve_trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Target Platforms (per OS)    | \`$PLATFORM_MAP\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Per-Platform Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform }} |" >> $GITHUB_STEP_SUMMARY
