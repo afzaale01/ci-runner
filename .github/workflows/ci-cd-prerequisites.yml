@@ -1,4 +1,4 @@
-name: ▶️ Trigger Full Pipeline
+name: ⏳ CI/CD Prerequisites
 
 on:
   # Allow manual dispatch with a buildType input
