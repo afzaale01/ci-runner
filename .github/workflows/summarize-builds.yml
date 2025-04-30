@@ -29,13 +29,14 @@ jobs:
     name: 📄 Summarize Build Results
     runs-on: ubuntu-latest
     steps:
-      - name: 📅 Download All Platform Artifacts
+      - name: 📅 Download Combined Artifact
+        if: ${{ inputs.combineRequested == true }}
         uses: actions/download-artifact@v4
         with:
           path: all-artifacts
 
-      - name: 📅 Download Combined Artifact
-        if: ${{ inputs.combineRequested == true }}
+      - name: 📅 Download All Platform Artifacts
+        if: ${{ inputs.combineRequested == false }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.projectName }}-${{ inputs.version }}
