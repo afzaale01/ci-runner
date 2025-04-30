@@ -39,13 +39,15 @@ jobs:
     name: Detect Tests-Only Run
     runs-on: ubuntu-latest
     outputs:
+      skipTests: ${{ steps.detect.outputs.skipTests }}
       testsOnly: ${{ steps.detect.outputs.testsOnly }}
+      buildType: ${{ steps.detect.outputs.buildType }}
     steps:
       - id: detect
         run: |
           IS_TESTS_ONLY="false"
           BUILD_TYPE="preview"
-          SKIP=false
+          SKIP_TESTS=false
 
           # Manual flag (from dispatch input)
           if [[ "${{ inputs.testsOnly }}" == "true" ]]; then
@@ -61,7 +63,7 @@ jobs:
           fi
 
           echo "testsOnly=$IS_TESTS_ONLY" >> "$GITHUB_OUTPUT"
-          echo "skipTests=$SKIP" >> "$GITHUB_OUTPUT"
+          echo "skipTests=$SKIP_TESTS" >> "$GITHUB_OUTPUT"
           echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
   detect_skip_tests:
