@@ -38,17 +38,24 @@ jobs:
         with:
           path: all-artifacts
 
-      - name: 📅 Download All Platform Artifacts
-        if: ${{ inputs.combineRequested == 'false' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.projectName }}-${{ inputs.version }}
-          path: all-artifacts
-
       - name: 🛠️ Normalize Artifact Layout
-        if: ${{ inputs.combineRequested == 'false' }}
+        if: ${{ inputs.combineRequested == 'true' }}
         run: |
           .github/scripts/general/normalize-artifact-layout.sh all-artifacts
+
+      - name: 📦 Download Per-Platform Artifacts
+        if: ${{ inputs.combineRequested == 'false' }}
+        run: |
+          grouped='${{ inputs.groupedPlatforms }}'
+          version='${{ inputs.version }}'
+          project='${{ inputs.projectName }}'
+
+          echo "$grouped" | jq -r 'to_entries[].value[]' | while read -r platform; do
+            name="${project}-${version}-${platform}"
+            echo "Downloading artifact: $name"
+            mkdir -p "all-artifacts-${platform}"
+            gh run download --name "$name" --dir "all-artifacts-${platform}" || echo "⚠️ Failed to download $name"
+          done
 
       - name: 📜 Write Build Summary
         run: |
