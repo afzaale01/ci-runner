@@ -44,6 +44,7 @@ jobs:
       - id: detect
         run: |
           IS_TESTS_ONLY="false"
+          BUILD_TYPE="preview"
           SKIP=false
 
           # Manual flag (from dispatch input)
@@ -61,6 +62,7 @@ jobs:
 
           echo "testsOnly=$IS_TESTS_ONLY" >> "$GITHUB_OUTPUT"
           echo "skipTests=$SKIP" >> "$GITHUB_OUTPUT"
+          echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
   detect_skip_tests:
     name: Detect Skip Tests
