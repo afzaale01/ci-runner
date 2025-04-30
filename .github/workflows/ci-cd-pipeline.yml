@@ -8,13 +8,20 @@ on:
         required: true
         default: 'workflow_dispatch'
       buildType:
-        type: string
+        type: choice
         required: true
         default: 'preview'
+        options:
+          - 'preview'
+          - 'release_candidate'
+          - 'release'
       skipTests:
-        type: string
+        type: choice
         required: true
         default: 'false'
+        options:
+          - 'true'
+          - 'false'
       version:
         type: string
         required: true
@@ -24,13 +31,19 @@ on:
         required: true
         default: '[]'
       requiresCombined:
-        type: string
+        type: choice
         required: true
         default: 'false'
+        options:
+          - 'true'
+          - 'false'
       skipPerPlatform:
-        type: string
+        type: choice
         required: true
         default: 'false'
+        options:
+          - 'true'
+          - 'false'
 
 permissions:
   contents: write
