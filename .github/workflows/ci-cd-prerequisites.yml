@@ -53,6 +53,8 @@ jobs:
         ]
 
   prepare-metadata:
+    name: Prepare Metadata
+    needs: validate-vars
     uses: ./.github/workflows/prepare-metadata.yml
     with:
       buildType: ${{ inputs.buildType }}
