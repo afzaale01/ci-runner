@@ -44,7 +44,7 @@ concurrency:
 
 jobs:
   filter_platforms:
-    uses: avalin/unity-ci-templates/.github/workflows/validate-target-platforms.yml@main
+    uses: avalin/unity-ci-templates/.github/workflows/group-target-platforms-by-os.yml@main
     with:
       targetPlatforms: ${{ inputs.targetPlatforms }}
 

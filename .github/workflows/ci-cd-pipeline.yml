@@ -18,6 +18,9 @@ on:
       validDeployTargets:
         type: string
         required: true
+      validTargetPlatforms:
+        type: string
+        required: true
       requiresCombined:
         type: string
         required: true
