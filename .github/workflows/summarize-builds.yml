@@ -32,7 +32,7 @@ jobs:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 📅 Download Combined Artifact
+      - name: 📦 Download Combined Artifact
         if: ${{ inputs.combineRequested == 'true' }}
         uses: actions/download-artifact@v4
         with:
@@ -52,9 +52,8 @@ jobs:
 
           echo "$grouped" | jq -r 'to_entries[].value[]' | while read -r platform; do
             name="${project}-${version}-${platform}"
-            echo "Downloading artifact: $name"
-            mkdir -p "all-artifacts-${platform}"
-            gh run download --name "$name" --dir "all-artifacts-${platform}" || echo "⚠️ Failed to download $name"
+            mkdir -p "all-artifacts/${name}"
+            gh run download --name "$name" --dir "all-artifacts/${name}" || echo "⚠️ Failed to download $name"
           done
 
       - name: 📜 Write Build Summary
@@ -70,7 +69,7 @@ jobs:
           ALL_PLATFORMS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')
 
           for platform in $ALL_PLATFORMS; do
-            artifact_dir="all-artifacts-${platform}"
+            artifact_dir="all-artifacts/${PROJECT}-${VERSION}-${platform}"
 
             case "$platform" in
               Android) label="Android" ;;
@@ -83,7 +82,8 @@ jobs:
             esac
 
             if [ -d "$artifact_dir" ]; then
-              echo "| $label | ✅ Build successful |" >> $GITHUB_STEP_SUMMARY
+              size=$(du -sh "$artifact_dir" | cut -f1)
+              echo "| $label | ✅ Build successful ($size) |" >> $GITHUB_STEP_SUMMARY
             else
               echo "| $label | ❌ Build failed |" >> $GITHUB_STEP_SUMMARY
             fi
@@ -95,7 +95,12 @@ jobs:
 
           if [[ "${{ inputs.combineRequested }}" == "true" ]]; then
             if [[ "${{ inputs.combinedCreated }}" == "true" ]]; then
-              echo "- ✅ Combined artifact successfully created and uploaded." >> $GITHUB_STEP_SUMMARY
+              combined_dir="all-artifacts"
+              platform_dirs=$(find "$combined_dir" -maxdepth 1 -type d -name "${PROJECT}-${VERSION}-*" ! -path "$combined_dir" || true)
+              num_platforms=$(echo "$platform_dirs" | grep -c . || true)
+              size=$(du -sh "$combined_dir" | cut -f1)
+
+              echo "- ✅ Combined artifact contains $num_platforms platform(s), total size: $size." >> $GITHUB_STEP_SUMMARY
             else
               echo "- ❌ Combined artifact expected but failed to create/upload." >> $GITHUB_STEP_SUMMARY
             fi
