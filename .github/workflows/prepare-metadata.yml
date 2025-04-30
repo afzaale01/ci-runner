@@ -27,7 +27,7 @@ on:
         value: ${{ jobs.metadata.outputs.skipPerPlatform }}
 
 jobs:
-  detect-skip-tests:
+  detect_skip_tests:
     runs-on: ubuntu-latest
     outputs:
       skipTests: ${{ steps.detect.outputs.skipTests }}
@@ -52,7 +52,7 @@ jobs:
 
           echo "skipTests=$SKIP" >> "$GITHUB_OUTPUT"
 
-  resolve-trigger:
+  resolve_trigger:
     runs-on: ubuntu-latest
     outputs:
       triggeredBy: ${{ steps.event.outputs.triggeredBy }}
@@ -60,7 +60,7 @@ jobs:
       - id: event
         run: echo "triggeredBy=$GITHUB_EVENT_NAME" >> "$GITHUB_OUTPUT"
 
-  resolve-build-type:
+  resolve_build_type:
     runs-on: ubuntu-latest
     outputs:
       buildType: ${{ steps.set.outputs.buildType }}
@@ -76,55 +76,61 @@ jobs:
           fi
           echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
+  valid_target_platforms:
+    uses: avalin/unity-ci-templates/.github/workflows/validate-target-platforms.yml@main
+    with:
+      targetPlatforms: ${{ vars.TARGET_PLATFORMS_RELEASE }}
+
   version:
-    needs: resolve-build-type
+    needs: resolve_build_type
     uses: avalin/unity-ci-templates/.github/workflows/build-version-generator.yml@main
     with:
-      buildType: ${{ needs.resolve-build-type.outputs.buildType }}
+      buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       version: ${{ inputs.version }}
 
-  validate-deploy-targets:
+  validate_deploy_targets:
     uses: ./.github/workflows/validate-deploy-targets.yml
     with:
       deployTargets: ${{ vars.DEPLOY_TARGETS }}
 
-  analyze-artifact-strategy:
-    needs: validate-deploy-targets
-    if: needs.validate-deploy-targets.outputs.skipAnalysis != 'true'
+  analyze_artifact_strategy:
+    needs: validate_deploy_targets
+    if: needs.validate_deploy_targets.outputs.skipAnalysis != 'true'
     uses: ./.github/workflows/analyze-artifact-strategy.yml
     with:
       artifactSource: build
-      deployTargets: ${{ needs.validate-deploy-targets.outputs.validTargets }}
+      deployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets }}
 
   metadata:
     name: Summarize Metadata
     runs-on: ubuntu-latest
     needs:
-      - detect-skip-tests
-      - resolve-trigger
-      - resolve-build-type
+      - detect_skip_tests
+      - resolve_trigger
+      - resolve_build_type
       - version
-      - validate-deploy-targets
-      - analyze-artifact-strategy
+      - validate_deploy_targets
+      - analyze_artifact_strategy
     outputs:
       version: ${{ needs.version.outputs.version }}
-      buildType: ${{ needs.resolve-build-type.outputs.buildType }}
-      skipTests: ${{ needs.detect-skip-tests.outputs.skipTests }}
-      triggeredBy: ${{ needs.resolve-trigger.outputs.triggeredBy }}
-      validDeployTargets: ${{ needs.validate-deploy-targets.outputs.validTargets }}
-      requiresCombined: ${{ needs.analyze-artifact-strategy.outputs.requiresCombined }}
-      skipPerPlatform: ${{ needs.analyze-artifact-strategy.outputs.skipPerPlatform }}
+      buildType: ${{ needs.resolve_build_type.outputs.buildType }}
+      skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
+      triggeredBy: ${{ needs.resolve_trigger.outputs.triggeredBy }}
+      validTargetPlatforms: ${{ needs.validate_deploy_targets.outputs.validTargets }}
+      validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets }}
+      requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined }}
+      skipPerPlatform: ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform }}
     steps:
       - name: Summarize
         run: |
-          DEPLOY_TARGETS=$(echo '${{ needs.validate-deploy-targets.outputs.validTargets }}' | jq -c '.')
+          DEPLOY_TARGETS=$(echo '${{ needs.validate_deploy_targets.outputs.validTargets }}' | jq -c '.')
           echo "## 🚀 Build Metadata Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Key                          | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|------------------------------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Version                      | ${{ needs.version.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Type                   | ${{ needs.resolve-build-type.outputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Skip Tests                   | ${{ needs.detect-skip-tests.outputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Triggered by                 | ${{ needs.resolve-trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Type                   | ${{ needs.resolve_build_type.outputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Skip Tests                   | ${{ needs.detect_skip_tests.outputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered by                 | ${{ needs.resolve_trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Requires Combined Artifacts  | ${{ needs.analyze-artifact-strategy.outputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Skip Per-Platform Artifacts  | ${{ needs.analyze-artifact-strategy.outputs.skipPerPlatform }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Requires Combined Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Skip Per-Platform Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform }} |" >> $GITHUB_STEP_SUMMARY
