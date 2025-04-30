@@ -78,11 +78,6 @@ jobs:
           fi
           echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
-  valid_target_platforms:
-    uses: avalin/unity-ci-templates/.github/workflows/validate-target-platforms.yml@main
-    with:
-      targetPlatforms: ${{ vars.TARGET_PLATFORMS_RELEASE }}
-
   version:
     needs: resolve_build_type
     uses: avalin/unity-ci-templates/.github/workflows/build-version-generator.yml@main
