@@ -21,8 +21,6 @@ on:
         value: ${{ jobs.metadata.outputs.version }}
       validDeployTargets:
         value: ${{ jobs.metadata.outputs.validDeployTargets }}
-      validTargetPlatforms:
-        value: ${{ jobs.metadata.outputs.validTargetPlatforms }}
       requiresCombined:
         value: ${{ jobs.metadata.outputs.requiresCombined }}
       skipPerPlatform:
@@ -30,6 +28,7 @@ on:
 
 jobs:
   detect_skip_tests:
+    name: Detect Skip Tests
     runs-on: ubuntu-latest
     outputs:
       skipTests: ${{ steps.detect.outputs.skipTests }}
@@ -55,6 +54,7 @@ jobs:
           echo "skipTests=$SKIP" >> "$GITHUB_OUTPUT"
 
   resolve_trigger:
+    name: Resolve Github Event Trigger
     runs-on: ubuntu-latest
     outputs:
       triggeredBy: ${{ steps.event.outputs.triggeredBy }}
@@ -63,6 +63,7 @@ jobs:
         run: echo "triggeredBy=$GITHUB_EVENT_NAME" >> "$GITHUB_OUTPUT"
 
   resolve_build_type:
+    name: Resolve Build Type (Preview, RC, Release)
     runs-on: ubuntu-latest
     outputs:
       buildType: ${{ steps.set.outputs.buildType }}
@@ -79,6 +80,7 @@ jobs:
           echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
   version:
+    name: Create versioning
     needs: resolve_build_type
     uses: avalin/unity-ci-templates/.github/workflows/build-version-generator.yml@main
     with:
@@ -86,11 +88,13 @@ jobs:
       version: ${{ inputs.version }}
 
   validate_deploy_targets:
+    name: Validate Deploy Targets
     uses: ./.github/workflows/validate-deploy-targets.yml
     with:
       deployTargets: ${{ vars.DEPLOY_TARGETS }}
 
   analyze_artifact_strategy:
+    name: Analyze Artifact Strategy
     needs: validate_deploy_targets
     if: needs.validate_deploy_targets.outputs.skipAnalysis != 'true'
     uses: ./.github/workflows/analyze-artifact-strategy.yml
