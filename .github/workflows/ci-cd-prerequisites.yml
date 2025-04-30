@@ -74,6 +74,7 @@ jobs:
         run: |
           gh workflow run ci-cd-full.yml \
             --ref "${{ github.ref }}" \
+            --field triggeredBy="${{ needs.prepare-metadata.outputs.triggeredBy }}" \
             --field buildType="${{ needs.prepare-metadata.outputs.buildType }}" \
             --field version="${{ needs.prepare-metadata.outputs.version }}" \
             --field validDeployTargets="$(printf '%s' '${{ needs.prepare-metadata.outputs.validDeployTargets }}')" \
