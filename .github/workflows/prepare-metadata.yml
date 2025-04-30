@@ -59,12 +59,13 @@ jobs:
           fi
 
           echo "testsOnly=$IS_TESTS_ONLY" >> "$GITHUB_OUTPUT"
-          echo "skipTests=$SKIP" >> "$GITHUB_OUTPUT"
 
   detect_skip_tests:
     name: Detect Skip Tests
     needs: detect_tests_only
     runs-on: ubuntu-latest
+    env:
+      TESTS_ONLY: ${{ needs.detect_tests_only.outputs.testsOnly }}
     outputs:
       skipTests: ${{ steps.detect.outputs.skipTests }}
     steps:
@@ -73,8 +74,10 @@ jobs:
           # Default to false
           SKIP_TESTS=false
 
-          # Check vars.EXCLUDE_UNITY_TESTS
-          if [[ "${{ vars.EXCLUDE_UNITY_TESTS }}" == "true" ]]; then
+          # Check vars.EXCLUDE_UNITY_TESTS unless TESTS_ONLY
+          if [ "$TESTS_ONLY" = "true" ]; then
+            SKIP_TESTS="false"
+          elif [[ "${{ vars.EXCLUDE_UNITY_TESTS }}" == "true" ]]; then
             SKIP_TESTS=true
           fi
 
