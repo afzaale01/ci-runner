@@ -1,66 +1,53 @@
-name: ⏳ CI/CD Prerequisites
+name: ▶️ Trigger Full Pipeline
 
 on:
-  workflow_call:
+  # Allow manual dispatch with a buildType input
+  workflow_dispatch:
     inputs:
-      excludesUnityTests:
-        description: "Whether unity tests are excluded"
-        type: string
+      buildType:
+        description: "Build type: 'preview' for manual/dev builds, 'release_candidate' for staging (e.g., v1.2.3-rc.1), 'release' for production (e.g., v1.2.3)"
         required: true
-      deployTargets:
-        description: "JSON array of deploy targets (e.g. ['itch.io','appcenter','firebase','s3','gh-pages'])"
+        default: "preview"
+        type: choice
+        options:
+          - preview
+          - release_candidate
+          - release
+      version:
+        description: Optional version override
         type: string
-        default: '[]'
         required: false
-      artifactSource:
-        description: "Where we get our artifacts from"
-        type: string
-        default: 'build'
-        required: false
-    outputs:
-      validDeployTargets:
-        description: "JSON array of filtered and validated deploy targets"
-        value: ${{ jobs.validate-deploy-targets.outputs.validTargets }}
-      requiresCombinedArtifact:
-        description: "Whether any deploy target requires a combined artifact"
-        value: ${{ jobs.analyze-artifact-strategy.outputs.requiresCombined || 'true' }}
-      skipPerPlatformArtifacts:
-        description: "Whether per-platform artifacts can be skipped"
-        value: ${{ jobs.analyze-artifact-strategy.outputs.skipPerPlatform || 'true' }}
+  # Automatically run tests & builds on certain branches or PR changes
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
+  pull_request:
+    types: [ready_for_review, synchronize, reopened]
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+      - 'Tests/**'
 
 jobs:
-  validate-vars:
-    name: Validate GitHub Variables
-    uses: avalin/unity-ci-templates/.github/workflows/validate-github-vars.yml@main
+  prepare-metadata:
+    uses: ./.github/workflows/prepare-metadata.yml
     with:
-      requiredVars: |
-        [
-          "COMBINE_ARTIFACTS",
-          "DEPLOY_TARGETS",
-          "EXCLUDE_UNITY_TESTS",
-          "PROJECT_NAME",
-          "RETENTION_DAYS_PREVIEW",
-          "RETENTION_DAYS_RELEASE",
-          "TARGET_PLATFORMS_PREVIEW",
-          "TARGET_PLATFORMS_RELEASE"
-        ]
-
-  validate-deploy-targets:
-    uses: ./.github/workflows/validate-deploy-targets.yml
+      buildType: ${{ inputs.buildType }}
+      version: ${{ inputs.version }}
+  
+  trigger-pipeline:
+    needs: prepare-metadata
+    uses: ./.github/workflows/ci-cd-full.yml
     with:
-      deployTargets: ${{ inputs.deployTargets }}
-
-  analyze-artifact-strategy:
-    name: 🔍 Analyze Artifact Strategy
-    needs: validate-deploy-targets
-    if: needs.validate-deploy-targets.outputs.skipAnalysis != 'true'
-    uses: ./.github/workflows/analyze-artifact-strategy.yml
-    with:
-      artifactSource: ${{ inputs.artifactSource }}
-      deployTargets: ${{ needs.validate-deploy-targets.outputs.validTargets }}
-
-  upload-license:
-    name: 📥️ Upload Unity License
-    if: ${{ inputs.excludesUnityTests == 'false' }}
-    uses: ./.github/workflows/unity-license-uploader.yml
-    secrets: inherit
+      buildType: ${{ needs.prepare-metadata.outputs.buildType }}
+      version: ${{ needs.prepare-metadata.outputs.version }}
+      validDeployTargets: ${{ needs.prepare-metadata.outputs.validDeployTargets }}
+      requiresCombined: ${{ needs.prepare-metadata.outputs.requiresCombined }}
+      skipPerPlatform: ${{ needs.prepare-metadata.outputs.skipPerPlatform }}

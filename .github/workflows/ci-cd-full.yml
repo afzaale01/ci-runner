@@ -1,55 +1,34 @@
 name: 🚀 Full CI/CD Pipeline
 
 on:
-  # Allow manual dispatch with a buildType input
-  workflow_dispatch:
+  workflow_call:
     inputs:
       buildType:
-        description: "Build type: 'preview' for manual/dev builds, 'release_candidate' for staging (e.g., v1.2.3-rc.1), 'release' for production (e.g., v1.2.3)"
+        type: string
         required: true
-        default: "preview"
-        type: choice
-        options:
-          - preview
-          - release_candidate
-          - release
-  # Automatically run tests & builds on certain branches or PR changes
-  push:
-    tags:
-      - 'v*.*.*'
-      - 'v*.*.*-*'
-    paths:
-      - 'Assets/**'
-      - 'Packages/**'
-      - 'ProjectSettings/**'
-      - 'Tests/**'
-  pull_request:
-    types: [ready_for_review, synchronize, reopened]
-    paths:
-      - 'Assets/**'
-      - 'Packages/**'
-      - 'ProjectSettings/**'
-      - 'Tests/**'
+      version:
+        type: string
+        required: true
+      validDeployTargets:
+        type: string
+        required: true
+      requiresCombined:
+        type: string
+        required: true
+      skipPerPlatform:
+        type: string
+        required: true
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
-  setup-prerequisites:
-    name: Setup Prerequisites
-    uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
-    with:
-      excludesUnityTests: ${{ vars.EXCLUDE_UNITY_TESTS }}
-      deployTargets: ${{ vars.DEPLOY_TARGETS }}
-    secrets: inherit
-
   # ─────────────────────────────────────────────────────────────────────────────
   # 1. Run Tests
   # ─────────────────────────────────────────────────────────────────────────────
   run-tests:
     name: Run Tests
-    needs: [ setup-prerequisites ]
     if: >
       always() &&
       (vars.EXCLUDE_UNITY_TESTS || 'false') == 'false' &&
@@ -79,7 +58,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   build:
     name: Build
-    needs: [ setup-prerequisites, run-tests ]
+    needs: [ run-tests ]
     # Build if ALL of these are true:
     # - Tests passed
     # - The event is a pull_request, workflow_dispatch, or version tag push
@@ -110,7 +89,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   release:
     name: Release
-    needs: [ setup-prerequisites, build ]
+    needs: [ build ]
     if: > 
       always() && 
       needs.build.result == 'success' && 
@@ -133,7 +112,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy
-    needs: [ setup-prerequisites, build, release ]
+    needs: [ build, release ]
     if: > 
       always() &&
       needs.release.result == 'success' &&
