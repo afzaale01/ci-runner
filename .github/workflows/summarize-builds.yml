@@ -29,18 +29,26 @@ jobs:
     name: 📄 Summarize Build Results
     runs-on: ubuntu-latest
     steps:
+      - name: 📁 Checkout Repository
+        uses: actions/checkout@v4
+
       - name: 📅 Download Combined Artifact
-        if: ${{ inputs.combineRequested == true }}
+        if: ${{ inputs.combineRequested == 'true' }}
         uses: actions/download-artifact@v4
         with:
           path: all-artifacts
 
       - name: 📅 Download All Platform Artifacts
-        if: ${{ inputs.combineRequested == false }}
+        if: ${{ inputs.combineRequested == 'false' }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.projectName }}-${{ inputs.version }}
-          path: combined-artifact
+          path: all-artifacts
+
+      - name: 🛠️ Normalize Artifact Layout
+        if: ${{ inputs.combineRequested == 'false' }}
+        run: |
+          .github/scripts/general/normalize-artifact-layout.sh all-artifacts
 
       - name: 📜 Write Build Summary
         run: |
@@ -55,7 +63,7 @@ jobs:
           ALL_PLATFORMS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')
 
           for platform in $ALL_PLATFORMS; do
-            artifact_dir="all-artifacts/${PROJECT}-${VERSION}-${platform}"
+            artifact_dir="all-artifacts-${platform}"
 
             case "$platform" in
               Android) label="Android" ;;
