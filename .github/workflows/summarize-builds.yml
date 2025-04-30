@@ -38,15 +38,6 @@ jobs:
         with:
           path: all-artifacts
 
-      - name: 🧰 Setup Helper Scripts
-        if: ${{ inputs.combineRequested == 'true' }}
-        run: chmod +x .github/scripts/general/*.sh
-
-      - name: 🛠️ Normalize Artifact Layout
-        if: ${{ inputs.combineRequested == 'true' }}
-        run: |
-          .github/scripts/general/normalize-artifact-layout.sh all-artifacts
-
       - name: 📦 Download Per-Platform Artifacts
         if: ${{ inputs.combineRequested == 'false' }}
         run: |
@@ -60,6 +51,11 @@ jobs:
             gh run download --name "$name" --dir "all-artifacts/${name}" || echo "⚠️ Failed to download $name"
           done
 
+      - name: List Downloaded Artifacts
+        run: |
+          echo "📂 Contents of all-artifacts:"
+          find all-artifacts -type f
+
       - name: 📜 Write Build Summary
         run: |
           echo "### 🧩 Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
@@ -70,10 +66,15 @@ jobs:
           GROUPED='${{ inputs.groupedPlatforms }}'
           VERSION='${{ inputs.version }}'
           PROJECT='${{ inputs.projectName }}'
+          COMBINED='${{ inputs.combineRequested }}'
           ALL_PLATFORMS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')
 
           for platform in $ALL_PLATFORMS; do
-            artifact_dir="all-artifacts/${PROJECT}-${VERSION}-${platform}"
+            if [[ "$COMBINED" == "true" ]]; then
+              artifact_dir="all-artifacts/${PROJECT}-${VERSION}/${platform}"
+            else
+              artifact_dir="all-artifacts/${PROJECT}-${VERSION}-${platform}"
+            fi
 
             case "$platform" in
               Android) label="Android" ;;
@@ -85,7 +86,9 @@ jobs:
               *) label="$platform" ;;
             esac
 
-            if [ -d "$artifact_dir" ]; then
+            echo "🔍 Checking artifact path: $artifact_dir"
+
+            if [ -n "$(find "$artifact_dir" -mindepth 1 -type f 2>/dev/null)" ]; then
               echo "| $label | ✅ Build successful |" >> $GITHUB_STEP_SUMMARY
             else
               echo "| $label | ❌ Build failed |" >> $GITHUB_STEP_SUMMARY
@@ -96,7 +99,7 @@ jobs:
           echo "### 📆 Combined Artifact" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [[ "${{ inputs.combineRequested }}" == "true" ]]; then
+          if [[ "$COMBINED" == "true" ]]; then
             if [[ "${{ inputs.combinedCreated }}" == "true" ]]; then
               echo "- ✅ Combined artifact successfully created and uploaded." >> $GITHUB_STEP_SUMMARY
             else

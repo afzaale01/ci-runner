@@ -72,9 +72,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🧰 Setup Helper Scripts
-        run: |
-          chmod +x .github/scripts/deploy/*.sh
-          chmod +x .github/scripts/general/*.sh
+        run: chmod +x .github/scripts/deploy/*.sh
 
       # ───── Build Artifact Download ─────
       - name: 📥 Download Artifacts from Build
@@ -99,7 +97,7 @@ jobs:
       - name: 🛠️ Normalize Artifact Layout
         if: inputs.hasCombinedArtifacts == 'true'
         run: |
-          .github/scripts/general/normalize-artifact-layout.sh "${{ env.DEPLOY_DIR }}"
+          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.DEPLOY_DIR }}"
 
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
