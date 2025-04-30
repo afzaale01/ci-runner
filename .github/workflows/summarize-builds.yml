@@ -82,8 +82,7 @@ jobs:
             esac
 
             if [ -d "$artifact_dir" ]; then
-              size=$(du -sh "$artifact_dir" | cut -f1)
-              echo "| $label | ✅ Build successful ($size) |" >> $GITHUB_STEP_SUMMARY
+              echo "| $label | ✅ Build successful |" >> $GITHUB_STEP_SUMMARY
             else
               echo "| $label | ❌ Build failed |" >> $GITHUB_STEP_SUMMARY
             fi
@@ -95,12 +94,7 @@ jobs:
 
           if [[ "${{ inputs.combineRequested }}" == "true" ]]; then
             if [[ "${{ inputs.combinedCreated }}" == "true" ]]; then
-              combined_dir="all-artifacts"
-              platform_dirs=$(find "$combined_dir" -maxdepth 1 -type d -name "${PROJECT}-${VERSION}-*" ! -path "$combined_dir" || true)
-              num_platforms=$(echo "$platform_dirs" | grep -c . || true)
-              size=$(du -sh "$combined_dir" | cut -f1)
-
-              echo "- ✅ Combined artifact contains $num_platforms platform(s), total size: $size." >> $GITHUB_STEP_SUMMARY
+              echo "- ✅ Combined artifact successfully created and uploaded." >> $GITHUB_STEP_SUMMARY
             else
               echo "- ❌ Combined artifact expected but failed to create/upload." >> $GITHUB_STEP_SUMMARY
             fi
