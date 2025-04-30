@@ -35,10 +35,6 @@ on:
       - 'ProjectSettings/**'
       - 'Tests/**'
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   prepare-metadata:
     uses: ./.github/workflows/prepare-metadata.yml
