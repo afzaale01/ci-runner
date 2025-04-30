@@ -13,6 +13,19 @@ on:
           - preview
           - release_candidate
           - release
+      skipTests:
+        description: "Whether tests should be skipped"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      deployTargets:
+        description: "Deploy targets"
+        required: true
+        default: "[]"
+        type: string
       version:
         description: Optional version override
         type: string
@@ -57,6 +70,8 @@ jobs:
     needs: validate-vars
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      skipTests: ${{ inputs.skipTests }}
+      deployTargets: ${{ vars.DEPLOY_TARGETS }}
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
   

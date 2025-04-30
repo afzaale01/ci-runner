@@ -5,8 +5,13 @@ on:
     inputs:
       buildType:
         type: string
-        default: preview
-        required: false
+        required: true
+      skipTests:
+        type: string
+        required: true
+      deployTargets:
+        type: string
+        required: true
       version:
         type: string
         required: false
@@ -91,7 +96,7 @@ jobs:
     name: Validate Deploy Targets
     uses: ./.github/workflows/validate-deploy-targets.yml
     with:
-      deployTargets: ${{ vars.DEPLOY_TARGETS }}
+      deployTargets: ${{ inputs.deployTargets }}
 
   analyze_artifact_strategy:
     name: Analyze Artifact Strategy
