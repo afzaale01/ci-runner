@@ -39,6 +39,7 @@ jobs:
           path: all-artifacts
 
       - name: 🧰 Setup Helper Scripts
+        if: ${{ inputs.combineRequested == 'true' }}
         run: chmod +x .github/scripts/deploy/*.sh
 
       - name: 🛠️ Normalize Artifact Layout
