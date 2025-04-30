@@ -48,6 +48,10 @@ on:
       - 'ProjectSettings/**'
       - 'Tests/**'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   validate-vars:
     name: Validate GitHub Variables
