@@ -48,7 +48,7 @@ jobs:
     secrets:
       inherit
 
-  detect-tests:
+  detect_tests:
     name: 🔍 Detect Tests
     uses: ./.github/workflows/unity-tests-detection.yml
     with:
@@ -57,8 +57,10 @@ jobs:
 
   run-editmode:
     name: 🥪 EditMode Tests
-    needs: [detect-tests]
-    if: needs.detect-tests.outputs.has_editmode == 'true'
+    needs: 
+      - detect_tests
+      - upload_unity_license
+    if: needs.detect_tests.outputs.has_editmode == 'true'
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
       testMode: EditMode
@@ -70,8 +72,10 @@ jobs:
 
   run-playmode:
     name: 🎮 PlayMode Tests
-    needs: [detect-tests]
-    if: needs.detect-tests.outputs.has_playmode == 'true'
+    needs: 
+      - detect_tests
+      - upload_unity_license
+    if: needs.detect_tests.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
       testMode: PlayMode
