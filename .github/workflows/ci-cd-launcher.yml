@@ -53,8 +53,29 @@ permissions:
   pull-requests: write
 
 jobs:
-  validate-vars:
+  skip_ci:
+    name: Check Skip CI triggers
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - id: check
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Last commit message: $COMMIT_MSG"
+
+          if [[ "$COMMIT_MSG" == *"[skip ci]"* || "$COMMIT_MSG" == *"[ci skip]"* ]]; then
+            echo "Skipping CI as requested."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Proceeding with CI."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  validate_vars:
     name: Validate GitHub Variables
+    needs: skip_ci
+    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     uses: avalin/unity-ci-templates/.github/workflows/validate-github-vars.yml@main
     with:
       requiredVars: |
@@ -69,9 +90,12 @@ jobs:
           "TARGET_PLATFORMS_RELEASE"
         ]
 
-  prepare-metadata:
+  prepare_metadata:
     name: Prepare Metadata
-    needs: validate-vars
+    needs: 
+      - validate_vars
+      - skip_ci
+    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
       skipTests: ${{ inputs.skipTests || vars.EXCLUDE_UNITY_TESTS}}
@@ -79,12 +103,16 @@ jobs:
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
   
-  trigger-ci:
+  trigger_ci:
     name: Trigger CI/CD Pipeline
-    needs: prepare-metadata
+    needs: 
+      - prepare_metadata
+      - skip_ci
+    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Install GitHub CLI
         run: sudo apt-get install gh -y
@@ -95,11 +123,11 @@ jobs:
         run: |
           gh workflow run ci-cd-pipeline.yml \
             --ref "${{ github.ref }}" \
-            --field triggeredBy="${{ needs.prepare-metadata.outputs.triggeredBy }}" \
-            --field skipTests="${{ needs.prepare-metadata.outputs.skipTests }}" \
-            --field testsOnly="${{ needs.prepare-metadata.outputs.testsOnly }}" \
-            --field buildType="${{ needs.prepare-metadata.outputs.buildType }}" \
-            --field version="${{ needs.prepare-metadata.outputs.version }}" \
-            --field validDeployTargets="$(printf '%s' '${{ needs.prepare-metadata.outputs.validDeployTargets }}')" \
-            --field requiresCombined="${{ needs.prepare-metadata.outputs.requiresCombined }}" \
-            --field skipPerPlatform="${{ needs.prepare-metadata.outputs.skipPerPlatform }}"
+            --field triggeredBy="${{ needs.prepare_metadata.outputs.triggeredBy }}" \
+            --field skipTests="${{ needs.prepare_metadata.outputs.skipTests }}" \
+            --field testsOnly="${{ needs.prepare_metadata.outputs.testsOnly }}" \
+            --field buildType="${{ needs.prepare_metadata.outputs.buildType }}" \
+            --field version="${{ needs.prepare_metadata.outputs.version }}" \
+            --field validDeployTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.validDeployTargets }}')" \
+            --field requiresCombined="${{ needs.prepare_metadata.outputs.requiresCombined }}" \
+            --field skipPerPlatform="${{ needs.prepare_metadata.outputs.skipPerPlatform }}"
