@@ -34,7 +34,6 @@ on:
   push:
     tags:
       - 'v*.*.*'
-      - 'v*.*.*-*'
     paths:
       - 'Assets/**'
       - 'Packages/**'
