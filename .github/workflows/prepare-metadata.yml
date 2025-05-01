@@ -166,6 +166,7 @@ jobs:
       version: ${{ needs.version.outputs.version || 'N/A'  }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
+      testsOnly: ${{ needs.detect_tests_only.outputs.testsOnly }}
       triggeredBy: ${{ needs.resolve_trigger.outputs.triggeredBy }}
       validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets || '[]' }}
       requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }}
