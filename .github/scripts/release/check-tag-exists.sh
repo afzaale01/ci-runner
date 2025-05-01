@@ -1,4 +1,19 @@
 #!/bin/bash
+# -----------------------------------------------------------------------------
+# Script: check-tag-exists.sh
+#
+# Checks if a Git tag exists in the given repository.
+#
+# ⚠ Uses:
+#   GITHUB_TOKEN → the default GitHub Actions token (read permissions).
+#   This is sufficient because we only perform a GET request.
+#
+# Usage:
+#   ./check-tag-exists.sh <version> <repository>
+#
+# Example:
+#   ./check-tag-exists.sh "v1.2.3" "owner/repo"
+# -----------------------------------------------------------------------------
 set -euo pipefail
 
 VERSION="$1"

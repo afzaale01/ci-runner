@@ -1,4 +1,21 @@
 #!/bin/bash
+# -----------------------------------------------------------------------------
+# Script: create-tag.sh
+#
+# Creates a Git tag in the given repository pointing to the specified commit.
+#
+# ⚠ Uses:
+#   GITHUB_PAT → a personal access token (PAT) provided in secrets.
+#   This is necessary because the default GITHUB_TOKEN may not have
+#   permission to create tags depending on repository settings.
+#
+# Usage:
+#   ./create-tag.sh <version> [sha]
+#
+# Example:
+#   ./create-tag.sh "v1.2.3" (defaults to HEAD commit)
+# -----------------------------------------------------------------------------
+
 set -euo pipefail
 
 VERSION="${1:-}"
