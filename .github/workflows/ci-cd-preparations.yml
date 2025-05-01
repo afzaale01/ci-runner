@@ -24,7 +24,7 @@ on:
       deployTargets:
         description: "JSON array of deploy targets (e.g. ['itch.io','s3'])"
         required: true
-        default: "['steam', 'gh-pages']"
+        default: '["steam", "gh-pages"]'
         type: string
       version:
         description: Optional version override
