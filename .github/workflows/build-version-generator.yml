@@ -104,12 +104,10 @@ jobs:
           # If version already exists as a tag, outside of a tag-push, fail early
           if [[ ! "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             if git rev-parse "$VERSION" >/dev/null 2>&1; then
-              echo "❌ Version '$VERSION' already exists as a tag! Aborting."
+              echo "❌ Version '$VERSION' already exists as a tag!"
               echo "🧩 Existing tags:"
               git tag --list "${VERSION%%-*}*" || true
               exit 1
-            else
-              echo "✅ No existing tag conflict detected for '$VERSION'"
             fi
           fi
 
