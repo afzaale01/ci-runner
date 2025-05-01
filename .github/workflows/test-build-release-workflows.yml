@@ -50,10 +50,10 @@ jobs:
     needs: prepare_metadata
     uses: ./.github/workflows/step-2-build.yml
     with:
-      version: ${{ inputs.version }}
+      version: ${{ needs.prepare_metadata.outputs.version }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
-      combineArtifacts: ${{ true }}
+      combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
     secrets: inherit
 
   release:
