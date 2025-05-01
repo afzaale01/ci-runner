@@ -15,6 +15,7 @@ on:
       skipBuild:
         type: string
         required: false
+        default: 'false'
       testsOnly:
         type: string
         required: false
