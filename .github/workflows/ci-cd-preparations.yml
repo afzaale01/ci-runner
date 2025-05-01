@@ -32,9 +32,9 @@ on:
         required: false
   # Automatically run tests & builds on certain branches or PR changes
   push:
-    tags:
-      - 'v*.*.*'
-      - 'v*.*.*-*'
+    branches-ignore:
+      - 'main'
+      - 'master'
     paths:
       - 'Assets/**'
       - 'Packages/**'
