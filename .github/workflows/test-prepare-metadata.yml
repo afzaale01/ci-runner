@@ -24,10 +24,9 @@ on:
           - 'true'
           - 'false'
       deployTargets:
-        description: "Deploy targets"
+        description: "JSON array of deploy targets (e.g. [\"itch.io\",\"s3\"])"
         required: true
-        default: "[]"
-        type: string
+        default: '["steam", "gh-pages"]'
 
 permissions:
   contents: read
