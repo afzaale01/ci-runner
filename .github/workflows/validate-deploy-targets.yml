@@ -22,28 +22,25 @@ jobs:
 
     steps:
       - name: 🧼 Sanitize deployTargets Input
-        id: sanitize
+        id: sanitizer
         run: |
-          RAW_INPUT='${{ inputs.deployTargets }}'
-
-          # Remove outer double quotes if present
-          STRIPPED_INPUT=$(echo "$RAW_INPUT" | sed -E 's/^"(.*)"$/\1/')
-
-          # Replace all inner single quotes with double quotes
+          RAW_INPUT=${{ toJSON(inputs.deployTargets) }}
+      
+          # Strip leading and trailing single or double quotes if present
+          STRIPPED_INPUT=$(echo "$RAW_INPUT" | sed -E 's/^[\'\"](.*)[\'\"]$/\1/')
+      
+          # Replace inner single quotes with double quotes
           SANITIZED_INPUT=$(echo "$STRIPPED_INPUT" | sed "s/'/\"/g")
-
-          # Wrap the result in single quotes if not already
-          FINAL_INPUT="'$SANITIZED_INPUT'"
-
-          echo "✅ Sanitized deployTargets: $FINAL_INPUT"
-
+      
+          echo "✅ Sanitized deployTargets: $SANITIZED_INPUT"
+      
           # Export sanitized input for later steps
-          echo "sanitized=$FINAL_INPUT" >> "$GITHUB_OUTPUT"
+          echo "sanitized=$SANITIZED_INPUT" >> "$GITHUB_OUTPUT"
 
       - name: 🔍 Inspect Input
         id: early-check
         run: |
-          SANITIZED_INPUT='${{ steps.sanitize.outputs.sanitized }}'
+          SANITIZED_INPUT='${{ steps.sanitizer.outputs.sanitized }}'
 
           echo "🔍 Raw deployTargets input: $SANITIZED_INPUT"
 
