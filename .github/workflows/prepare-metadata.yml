@@ -12,6 +12,9 @@ on:
       skipTests:
         type: string
         required: false
+      skipBuild:
+        type: string
+        required: false
       testsOnly:
         type: string
         required: false
@@ -129,7 +132,7 @@ jobs:
     needs: 
       - resolve_build_type
       - detect_tests_only
-    if: needs.detect_tests_only.outputs.testsOnly == 'false'
+    if: needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
     uses: avalin/unity-ci-templates/.github/workflows/build-version-generator.yml@main
     with:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}

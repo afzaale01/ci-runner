@@ -49,6 +49,7 @@ jobs:
     uses: ./.github/workflows/prepare-metadata.yml
     with:
       skipTests: true
+      skipBuild: true
       testsOnly: false
       deployTargets: ${{ inputs.deployTargets }}
       buildType: ${{ inputs.buildType }}
