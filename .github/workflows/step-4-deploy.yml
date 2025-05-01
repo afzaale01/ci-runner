@@ -77,6 +77,8 @@ jobs:
       # ───── Build Artifact Download ─────
       - name: 📥 Download Artifacts from Build
         if: inputs.artifactSource == 'build'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           .github/scripts/deploy/download-from-build.sh \
             "${{ inputs.projectName }}" \
