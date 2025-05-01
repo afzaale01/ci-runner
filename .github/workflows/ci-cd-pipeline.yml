@@ -22,6 +22,13 @@ on:
         options:
           - 'true'
           - 'false'
+      testsOnly:
+        type: choice
+        required: true
+        default: 'false'
+        options:
+          - 'true'
+          - 'false'
       version:
         type: string
         required: true
