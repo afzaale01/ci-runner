@@ -23,6 +23,8 @@ on:
         value: ${{ jobs.metadata.outputs.buildType }}
       triggeredBy:
         value: ${{ jobs.metadata.outputs.triggeredBy }}
+      testsOnly:
+        value: ${{ jobs.metadata.outputs.testsOnly }}
       skipTests:
         value: ${{ jobs.metadata.outputs.skipTests }}
       version:
