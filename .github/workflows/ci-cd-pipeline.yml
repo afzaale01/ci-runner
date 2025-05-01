@@ -84,6 +84,7 @@ jobs:
     needs: [ run-tests ]
     if: >
       always() &&
+      inputs.testsOnly != 'true' &&
       (needs.run-tests.result == 'success' || needs.run-tests.result == 'skipped')
     uses: avalin/unity-ci-templates/.github/workflows/step-2-build.yml@main
     with:
@@ -106,7 +107,8 @@ jobs:
     name: Release
     needs: [ build ]
     if: > 
-      always() && 
+      always() &&
+      inputs.testsOnly != 'true' &&
       needs.build.result == 'success' && 
       (
         inputs.buildType == 'release' || 
@@ -130,6 +132,7 @@ jobs:
     needs: [ build, release ]
     if: > 
       always() &&
+      inputs.testsOnly != 'true' &&
       needs.release.result == 'success' &&
       inputs.validDeployTargets != '[]'
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
@@ -150,6 +153,7 @@ jobs:
     needs: [ build, release, deploy ]
     if: > 
       always() && 
+      inputs.testsOnly != 'true' &&
       (
         inputs.buildType == 'release' || 
         inputs.buildType == 'release_candidate'
