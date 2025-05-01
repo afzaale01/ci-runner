@@ -21,15 +21,28 @@ jobs:
       skipAnalysis: ${{ steps.early-check.outputs.skipRest }}
 
     steps:
-      - name: 🔍 Inspect Input
-        id: early-check
+      - name: 🧼 Sanitize deployTargets Input
+        id: sanitize
         run: |
           RAW_INPUT='${{ inputs.deployTargets }}'
 
-          echo "🔍 Raw deployTargets input: $RAW_INPUT"
+          # Replace single quotes with double quotes
+          SANITIZED_INPUT=$(echo "$RAW_INPUT" | sed "s/'/\"/g")
+
+          echo "✅ Sanitized deployTargets: $SANITIZED_INPUT"
+
+          # Export sanitized input for later steps
+          echo "sanitized=$SANITIZED_INPUT" >> "$GITHUB_OUTPUT"
+
+      - name: 🔍 Inspect Input
+        id: early-check
+        run: |
+          SANITIZED_INPUT='${{ steps.sanitize.outputs.sanitized }}'
+
+          echo "🔍 Raw deployTargets input: $SANITIZED_INPUT"
 
           # Validate JSON format
-          if ! echo "$RAW_INPUT" | jq empty 2>/dev/null; then
+          if ! echo "$SANITIZED_INPUT" | jq empty 2>/dev/null; then
             echo "❌ Invalid JSON in deployTargets input!"
             echo "validTargets=[]" >> $GITHUB_OUTPUT
             echo "VALID_TARGETS=" >> $GITHUB_ENV
@@ -39,7 +52,7 @@ jobs:
           fi
 
           # Check for empty array
-          if [ "$(echo "$RAW_INPUT" | jq 'length')" -eq 0 ]; then
+          if [ "$(echo "$SANITIZED_INPUT" | jq 'length')" -eq 0 ]; then
             echo "ℹ️ No deploy targets provided (empty array). Skipping validation."
             echo "validTargets=[]" >> $GITHUB_OUTPUT
             echo "VALID_TARGETS=" >> $GITHUB_ENV
