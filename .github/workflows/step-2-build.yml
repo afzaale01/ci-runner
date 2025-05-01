@@ -43,17 +43,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  echo_version:
-    name: 📣 Echo Version
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print Version Input
-        run: |
-          VERSION="${{ inputs.version }}"
-          echo "🔖 Version: $VERSION"
-          echo "### 🔖 Version" >> $GITHUB_STEP_SUMMARY
-          echo "Using version: \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
-
   filter_platforms:
     uses: avalin/unity-ci-templates/.github/workflows/validate-target-platforms.yml@main
     with:
