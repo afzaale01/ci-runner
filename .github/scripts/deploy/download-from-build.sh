@@ -12,7 +12,7 @@ PROJECT_NAME="$(echo "$PROJECT_NAME" | xargs)"
 VERSION="$(echo "$VERSION" | xargs)"
 HAS_COMBINED_ARTIFACTS="$(echo "$HAS_COMBINED_ARTIFACTS" | xargs)"
 
-DEST_DIR="${4:-deployment-artifacts/${PROJECT_NAME}-${VERSION}}"
+DEST_DIR="${4:-deployment-artifacts}"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📦 Starting Build Artifact Download"
