@@ -69,13 +69,13 @@ jobs:
             echo "👀 Using latest base tag: $BASE_TAG"
 
             chmod +x .github/scripts/build/version-generator-for-rc.sh
-            VERSION=$(./.github/scripts/build/version-generator-for-rc.sh "$BASE_TAG" | tail -n 1)
+            VERSION=$(./.github/scripts/build/version-generator-for-rc.sh "$BASE_TAG" 2>&1 | tee /dev/stderr | tail -n 1)
 
           # For release_candidate with manual version → use as base
           elif [[ "$BUILD_TYPE" == "release_candidate" && -n "$INPUT_VERSION" ]]; then
             echo "🔢 Using provided version as RC base: $INPUT_VERSION"
             chmod +x .github/scripts/build/version-generator-for-rc.sh
-            VERSION=$(./.github/scripts/build/version-generator-for-rc.sh "$INPUT_VERSION" | tail -n 1)
+            VERSION=$(./.github/scripts/build/version-generator-for-rc.sh "$INPUT_VERSION" 2>&1 | tee /dev/stderr | tail -n 1)
 
           # Manual override for non-RC builds (e.g. preview)
           elif [[ "$BUILD_TYPE" != "release" && -n "$INPUT_VERSION" ]]; then

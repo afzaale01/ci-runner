@@ -5,8 +5,8 @@ set -e
 BASE_VERSION="$1" # Expected format: v1.2.3
 
 if [[ ! "$BASE_VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  echo "❌ Invalid base version: '$BASE_VERSION'"
-  echo "Must be in format v1.2.3"
+  >&2 echo "❌ Invalid base version: '$BASE_VERSION'"
+  >&2 echo "Must be in format v1.2.3"
   exit 1
 fi
 
