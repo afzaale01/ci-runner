@@ -12,6 +12,7 @@ on:
 
 jobs:
   tag:
+    name: 🏷️ Resolve & Create Tag
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set_version.outputs.version }}
