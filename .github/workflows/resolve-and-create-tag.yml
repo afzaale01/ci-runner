@@ -34,7 +34,7 @@ jobs:
         id: create
         run: .github/scripts/release/create-tag.sh "${{ inputs.version }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PAT: ${{ secrets.CICD_PAT }}
 
       - name: Set Output Version
         id: set_version
