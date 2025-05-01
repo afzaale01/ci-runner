@@ -3,6 +3,14 @@ name: 🧪 Test Deploy & Notify Workflows
 on:
   workflow_dispatch:
     inputs:
+      buildType:
+        description: "Build type: 'release_candidate' | 'release'"
+        required: true
+        default: "release_candidate"
+        type: choice
+        options:
+          - release_candidate
+          - release
       version:
         description: "The GitHub release tag (e.g. v0.1.2-ekans)"
         required: true
@@ -36,38 +44,40 @@ permissions:
   pull-requests: write
 
 jobs:
-  setup-prerequisites:
-    name: ⏳ Setup Prerequisites
-    uses: avalin/unity-ci-templates/.github/workflows/ci-cd-prerequisites.yml@main
+  prepare_metadata:
+    name: ⏳ Prepare Metadata
+    uses: ./.github/workflows/prepare-metadata.yml
     with:
-      excludesUnityTests: "true"
+      skipTests: true
+      testsOnly: false
       deployTargets: ${{ inputs.deployTargets }}
-    secrets: inherit
+      buildType: ${{ inputs.buildType }}
+      version: ${{ inputs.version }}
 
-  test-deploy:
+  test_deploy:
     name: Test Deploy
-    needs: [ setup-prerequisites ]
+    needs: [ prepare_metadata ]
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
       version: ${{ inputs.version }}
       projectName: ${{ inputs.projectName }}
-      deployTargets: ${{ needs.setup-prerequisites.outputs.validDeployTargets }}
-      hasCombinedArtifacts: ${{ needs.setup-prerequisites.outputs.requiresCombinedArtifact }}
+      deployTargets: ${{ needs.prepare_metadata.outputs.validDeployTargets }}
+      hasCombinedArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
       artifactSource: release
     secrets: inherit
 
-  test-notify:
+  test_notify:
     name: Test Notify
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     if: >
       always() &&
-      (needs.test-deploy.result == 'success' || needs.test-deploy.result == 'failure') &&
+      (needs.test_deploy.result == 'success' || needs.test_deploy.result == 'failure') &&
       inputs.testNotify == 'true'
-    needs: [ test-deploy ]
+    needs: [ test_deploy ]
     with:
       releaseResult: ${{ inputs.releaseResult }}
       releaseErrorMessage: ""
-      deployResult: ${{ needs.test-deploy.result }}
+      deployResult: ${{ needs.test_deploy.result }}
       version: ${{ inputs.version }}
     secrets: inherit
