@@ -26,9 +26,9 @@ on:
         required: true
         default: '["WebGL", "StandaloneWindows64"]'
       deployTargets:
-        description: "JSON array of deploy targets (e.g. ['itch.io','s3'])"
+        description: "JSON array of deploy targets (e.g. [\"itch.io\",\"s3\"])"
         required: true
-        default: "['steam', 'gh-pages']"
+        default: '["steam", "gh-pages"]'
         type: string
 
 permissions:
