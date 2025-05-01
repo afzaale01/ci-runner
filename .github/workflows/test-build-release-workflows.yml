@@ -47,6 +47,7 @@ jobs:
 
   build:
     name: 🧩 Trigger Unity Build (Step 2)
+    needs: prepare_metadata
     uses: ./.github/workflows/step-2-build.yml
     with:
       version: ${{ inputs.version }}
