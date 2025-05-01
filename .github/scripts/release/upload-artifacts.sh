@@ -17,8 +17,8 @@ for PLATFORM in $PLATFORMS; do
   ZIP_NAME="${ARTIFACT_PATH}.zip"
 
   if [ -d "$ARTIFACT_PATH" ]; then
-    echo "📦 Zipping: $ARTIFACT_PATH → $ZIP_NAME"
-    zip -r "$ZIP_NAME" "$ARTIFACT_PATH"
+    echo "📦 Zipping contents of $ARTIFACT_PATH → $ZIP_NAME"
+    (cd "$ARTIFACT_PATH" && zip -r "../$ZIP_NAME" .)
 
     echo "📤 Uploading $ZIP_NAME to Release ID: $RELEASE_ID"
     HTTP_CODE=$(curl -s -w "%{http_code}" -o /tmp/upload_response.json -X POST \
