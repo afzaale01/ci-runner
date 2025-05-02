@@ -108,7 +108,7 @@ jobs:
       version: ${{ inputs.version }}
 
   tagging:
-    name: 🏷️ Create or Verify Tag
+    name: Create or Verify Tag
     needs: 
       - skip_ci
       - prepare_metadata

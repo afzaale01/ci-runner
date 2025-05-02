@@ -12,16 +12,11 @@ on:
       version:
         type: string
         required: true
-    outputs:
-      version:
-        value: ${{ jobs.tag_resolver.outputs.version }}
 
 jobs:
   tag_resolver:
     name: 🏷️ Resolve & Create Tag
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.set_version.outputs.version }}
 
     steps:
       - name: 📁 Checkout Repository
