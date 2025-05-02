@@ -34,8 +34,10 @@ on:
         value: ${{ jobs.prepare_test_data.outputs.editModePath }}
       playModePath:
         value: ${{ jobs.prepare_test_data.outputs.playModePath }}
-      timeoutMinutes:
-        value: ${{ jobs.prepare_test_data.outputs.timeoutMinutes }}
+      timeoutMinutesTests:
+        value: ${{ jobs.prepare_timeouts.outputs.timeoutMinutesTests }}
+      timeoutMinutesBuild:
+        value: ${{ jobs.prepare_timeouts.outputs.timeoutMinutesBuild }}
       quietMode:
         value: ${{ jobs.prepare_test_data.outputs.quietMode }}
       buildType:
@@ -136,7 +138,6 @@ jobs:
       useGitLfs: ${{ steps.set.outputs.useGitLfs }}
       editModePath: ${{ steps.set.outputs.editModePath }}
       playModePath: ${{ steps.set.outputs.playModePath }}
-      timeoutMinutes: ${{ steps.set.outputs.timeoutMinutes }}
       quietMode: ${{ steps.set.outputs.quietMode }}
     steps:
       - id: set
@@ -145,14 +146,12 @@ jobs:
           USE_GIT_LFS="${{ vars.USE_GIT_LFS || 'false' }}"
           EDIT_MODE_PATH="${{ vars.UNITY_TESTS_EDITMODE_PATH || 'Assets/Tests/Editor' }}"
           PLAY_MODE_PATH="${{ vars.UNITY_TESTS_PLAYMODE_PATH || 'Assets/Tests/PlayMode' }}"
-          TIMEOUT_MINUTES="${{ vars.TIMEOUT_TESTS_IN_MINUTES || '15' }}"
           QUIET_MODE="${{ vars.UNITY_TESTS_QUIET_MODE || 'false' }}"
 
           echo "unityVersion=$UNITY_VERSION" >> "$GITHUB_OUTPUT"
           echo "useGitLfs=$USE_GIT_LFS" >> "$GITHUB_OUTPUT"
           echo "editModePath=$EDIT_MODE_PATH" >> "$GITHUB_OUTPUT"
           echo "playModePath=$PLAY_MODE_PATH" >> "$GITHUB_OUTPUT"
-          echo "timeoutMinutes=$TIMEOUT_MINUTES" >> "$GITHUB_OUTPUT"
           echo "quietMode=$QUIET_MODE" >> "$GITHUB_OUTPUT"
 
           echo "## 📋 Test Data Summary" >> "$GITHUB_STEP_SUMMARY"
@@ -162,8 +161,22 @@ jobs:
           echo "| Use Git LFS     | $USE_GIT_LFS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| EditMode Path   | $EDIT_MODE_PATH |" >> "$GITHUB_STEP_SUMMARY"
           echo "| PlayMode Path   | $PLAY_MODE_PATH |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| Timeout Minutes | $TIMEOUT_MINUTES |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Quiet Mode      | $QUIET_MODE |" >> "$GITHUB_STEP_SUMMARY"
+
+  prepare_timeouts:
+    name: Prepare Timeouts
+    runs-on: ubuntu-latest
+    outputs:
+      timeoutMinutesTests: ${{ steps.set.outputs.timeoutMinutesTests }}
+      timeoutMinutesBuild: ${{ steps.set.outputs.timeoutMinutesBuild }}
+    steps:
+      - id: set
+        run: |
+          TIMEOUT_MINUTES_TESTS="${{ vars.TIMEOUT_TESTS_IN_MINUTES || '15' }}"
+          TIMEOUT_MINUTES_BUILD="${{ vars.TIMEOUT_BUILD_IN_MINUTES || '30' }}"
+
+          echo "timeoutMinutesTests=$TIMEOUT_MINUTES_TESTS" >> "$GITHUB_OUTPUT"
+          echo "timeoutMinutesBuild=$TIMEOUT_MINUTES_BUILD" >> "$GITHUB_OUTPUT"
 
   resolve_trigger:
     name: Resolve Github Event Trigger
@@ -312,6 +325,7 @@ jobs:
       - resolve_trigger
       - resolve_build_type
       - resolve_retention_days
+      - prepare_timeouts
       - resolve_target_platforms
       - version
       - validate_deploy_targets
@@ -323,6 +337,8 @@ jobs:
       testsOnly: ${{ needs.detect_tests_only.outputs.testsOnly }}
       triggeredBy: ${{ needs.resolve_trigger.outputs.triggeredBy }}
       retentionDays: ${{ needs.resolve_retention_days.outputs.retentionDays }}
+      timeoutMinutesTests: ${{ needs.prepare_timeouts.outputs.timeoutMinutesTests }}
+      timeoutMinutesBuild: ${{ needs.prepare_timeouts.outputs.timeoutMinutesBuild }}
       targetPlatforms: ${{ needs.resolve_target_platforms.outputs.targetPlatforms || '[]' }}
       validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets || '[]' }}
       requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }}
@@ -352,6 +368,8 @@ jobs:
           echo "| Tests Only                   | ${{ needs.detect_tests_only.outputs.testsOnly }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered by                 | ${{ needs.resolve_trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Retention Days               | ${{ needs.resolve_retention_days.outputs.retentionDays }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests Timeout                | ${{ needs.prepare_timeouts.outputs.timeoutMinutesTests }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Timeout                | ${{ needs.prepare_timeouts.outputs.timeoutMinutesBuild }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Target Platforms             | \`$TARGET_PLATFORMS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }} |" >> $GITHUB_STEP_SUMMARY

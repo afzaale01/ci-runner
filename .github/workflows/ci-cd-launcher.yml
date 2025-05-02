@@ -168,6 +168,6 @@ jobs:
               --arg useGitLfs "${{ needs.prepare_metadata.outputs.useGitLfs }}" \
               --arg editModePath "${{ needs.prepare_metadata.outputs.editModePath }}" \
               --arg playModePath "${{ needs.prepare_metadata.outputs.playModePath }}" \
-              --arg timeoutMinutes "${{ needs.prepare_metadata.outputs.timeoutMinutes }}" \
+              --arg timeoutMinutes "${{ needs.prepare_metadata.outputs.timeoutMinutesTests }}" \
               --arg quietMode "${{ needs.prepare_metadata.outputs.quietMode }}" \
               '{unityVersion: $unityVersion, useGitLfs: $useGitLfs, editModePath: $editModePath, playModePath: $playModePath, timeoutMinutes: $timeoutMinutes, quietMode: $quietMode}')"
