@@ -33,6 +33,8 @@ on:
         value: ${{ jobs.metadata.outputs.skipTests }}
       version:
         value: ${{ jobs.metadata.outputs.version }}
+      retentionDays:
+        value: ${{ jobs.metadata.outputs.retentionDays }}
       validDeployTargets:
         value: ${{ jobs.metadata.outputs.validDeployTargets }}
       requiresCombined:

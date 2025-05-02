@@ -145,6 +145,7 @@ jobs:
             --field testsOnly="${{ needs.prepare_metadata.outputs.testsOnly }}" \
             --field buildType="${{ needs.prepare_metadata.outputs.buildType }}" \
             --field version="${{ needs.prepare_metadata.outputs.version }}" \
+            --field retentionDays="${{ needs.prepare_metadata.outputs.retentionDays }}" \
             --field validDeployTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.validDeployTargets }}')" \
             --field requiresCombined="${{ needs.prepare_metadata.outputs.requiresCombined }}" \
             --field skipPerPlatform="${{ needs.prepare_metadata.outputs.skipPerPlatform }}"
