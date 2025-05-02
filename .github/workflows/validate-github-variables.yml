@@ -3,7 +3,7 @@ name: 🛡️ Validate Required GitHub Variables
 on:
   workflow_call:
     inputs:
-      requiredVars:
+      requiredVariables:
         description: 'List of required GitHub vars to validate'
         required: true
         type: string # JSON array
@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: 🔍 Validate Required GitHub Variables
         run: |
-          VARS=$(echo '${{ inputs.requiredVars }}' | jq -r '.[]')
+          VARS=$(echo '${{ inputs.requiredVariables }}' | jq -r '.[]')
           VALUE='${{ toJson(vars) }}'
           ERRORS=()
       
