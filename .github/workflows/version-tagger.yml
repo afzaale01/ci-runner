@@ -16,6 +16,9 @@ on:
       version:
         type: string
         required: true
+      buildType:
+        required: true
+        type: string
 
 jobs:
   tag_resolver:
