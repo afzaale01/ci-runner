@@ -38,7 +38,7 @@ jobs:
     steps:
       - name: Validate required secrets
         run: |
-          REQUIRED_SECRETS=("UNITY_PASSWORD" "ANOTHER_SECRET" "SOME_API_KEY")
+          REQUIRED_SECRETS=("CICD_PAT" "UNITY_EMAIL" "UNITY_LICENSE" "UNITY_PASSWORD")
           MISSING=0
 
           for SECRET_NAME in "${REQUIRED_SECRETS[@]}"; do
@@ -58,10 +58,10 @@ jobs:
             exit 1
           fi
         env:
+          SECRET_CICD_PAT: ${{ secrets.CICD_PAT }}
+          SECRET_UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          SECRET_UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           SECRET_UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          SECRET_ANOTHER_SECRET: ${{ secrets.ANOTHER_SECRET }}
-          SECRET_SOME_API_KEY: ${{ secrets.SOME_API_KEY }}
-
 
   prepare-metadata:
     name: ⏳ Prepare Metadata
