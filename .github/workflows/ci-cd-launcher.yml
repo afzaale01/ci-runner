@@ -122,7 +122,6 @@ jobs:
     with:
       requiredVars: |
         [
-          "COMBINE_ARTIFACTS",
           "DEPLOY_TARGETS",
           "EXCLUDE_UNITY_TESTS",
           "PROJECT_NAME",
