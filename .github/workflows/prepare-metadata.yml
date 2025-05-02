@@ -26,6 +26,18 @@ on:
         type: string
         required: false
     outputs:
+      unityVersion:
+        value: ${{ jobs.prepare_test_data.outputs.unityVersion }}
+      useGitLfs:
+        value: ${{ jobs.prepare_test_data.outputs.useGitLfs }}
+      editModePath:
+        value: ${{ jobs.prepare_test_data.outputs.editModePath }}
+      playModePath:
+        value: ${{ jobs.prepare_test_data.outputs.playModePath }}
+      timeoutMinutes:
+        value: ${{ jobs.prepare_test_data.outputs.timeoutMinutes }}
+      quietMode:
+        value: ${{ jobs.prepare_test_data.outputs.quietMode }}
       buildType:
         value: ${{ jobs.metadata.outputs.buildType }}
       triggeredBy:
@@ -104,6 +116,46 @@ jobs:
 
           echo "skipTests=$SKIP_TESTS" >> "$GITHUB_OUTPUT"
 
+  prepare_test_data:
+    name: Prepare Test Data
+    runs-on: ubuntu-latest
+    needs: 
+      - detect_skip_tests
+    if: ${{ needs.detect_skip_tests.outputs.skipTests == 'false' }}
+    outputs:
+      unityVersion: ${{ steps.set.outputs.unityVersion }}
+      useGitLfs: ${{ steps.set.outputs.useGitLfs }}
+      editModePath: ${{ steps.set.outputs.editModePath }}
+      playModePath: ${{ steps.set.outputs.playModePath }}
+      timeoutMinutes: ${{ steps.set.outputs.timeoutMinutes }}
+      quietMode: ${{ steps.set.outputs.quietMode }}
+    steps:
+      - id: set
+        run: |
+          UNITY_VERSION="${{ vars.UNITY_VERSION || 'auto' }}"
+          USE_GIT_LFS="${{ vars.USE_GIT_LFS || 'false' }}"
+          EDIT_MODE_PATH="${{ vars.UNITY_TESTS_EDITMODE_PATH || 'Assets/Tests/Editor' }}"
+          PLAY_MODE_PATH="${{ vars.UNITY_TESTS_PLAYMODE_PATH || 'Assets/Tests/PlayMode' }}"
+          TIMEOUT_MINUTES="${{ vars.TIMEOUT_TESTS_IN_MINUTES || '15' }}"
+          QUIET_MODE="${{ vars.UNITY_TESTS_QUIET_MODE || 'false' }}"
+
+          echo "unityVersion=$UNITY_VERSION" >> "$GITHUB_OUTPUT"
+          echo "useGitLfs=$USE_GIT_LFS" >> "$GITHUB_OUTPUT"
+          echo "editModePath=$EDIT_MODE_PATH" >> "$GITHUB_OUTPUT"
+          echo "playModePath=$PLAY_MODE_PATH" >> "$GITHUB_OUTPUT"
+          echo "timeoutMinutes=$TIMEOUT_MINUTES" >> "$GITHUB_OUTPUT"
+          echo "quietMode=$QUIET_MODE" >> "$GITHUB_OUTPUT"
+
+          echo "## 🧪 Test Data Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Key             | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----------------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Unity Version   | $UNITY_VERSION |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Use Git LFS     | $USE_GIT_LFS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| EditMode Path   | $EDIT_MODE_PATH |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| PlayMode Path   | $PLAY_MODE_PATH |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Timeout Minutes | $TIMEOUT_MINUTES |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Quiet Mode      | $QUIET_MODE |" >> "$GITHUB_STEP_SUMMARY"
+
   resolve_trigger:
     name: Resolve Github Event Trigger
     runs-on: ubuntu-latest
@@ -140,7 +192,7 @@ jobs:
     needs:
       - detect_tests_only
       - resolve_build_type
-    if: needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
+    if: ${{ needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false' }}
     runs-on: ubuntu-latest
     outputs:
       targetPlatforms: ${{ steps.set.outputs.targetPlatforms }}
