@@ -128,6 +128,31 @@ jobs:
           fi
           echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
+  resolve_retention_days:
+    name: Resolve Retention Days
+    needs:
+      - resolve_build_type
+    runs-on: ubuntu-latest
+    outputs:
+      retentionDays: ${{ steps.set.outputs.retentionDays }}
+    steps:
+      - id: set
+        run: |
+          BUILD_TYPE="${{ needs.resolve_build_type.outputs.buildType }}"
+          DEFAULT_RELEASE_DAYS=30
+          DEFAULT_PREVIEW_DAYS=7
+
+          if [[ "$BUILD_TYPE" == "release" ]]; then
+            RETENTION_DAYS="${{ vars.RETENTION_DAYS_RELEASE || '' }}"
+            RETENTION_DAYS="${RETENTION_DAYS:-$DEFAULT_RELEASE_DAYS}"
+          else
+            RETENTION_DAYS="${{ vars.RETENTION_DAYS_PREVIEW || '' }}"
+            RETENTION_DAYS="${RETENTION_DAYS:-$DEFAULT_PREVIEW_DAYS}"
+          fi
+
+          echo "✅ Retention days resolved to: $RETENTION_DAYS"
+          echo "retentionDays=$RETENTION_DAYS" >> "$GITHUB_OUTPUT"
+
   version:
     name: Create versioning
     needs: 
@@ -165,6 +190,7 @@ jobs:
       - detect_tests_only
       - resolve_trigger
       - resolve_build_type
+      - resolve_retention_days
       - version
       - validate_deploy_targets
       - analyze_artifact_strategy
@@ -174,6 +200,7 @@ jobs:
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
       testsOnly: ${{ needs.detect_tests_only.outputs.testsOnly }}
       triggeredBy: ${{ needs.resolve_trigger.outputs.triggeredBy }}
+      retentionDays: ${{ needs.resolve_retention_days.outputs.retentionDays }}
       validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets || '[]' }}
       requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }}
       skipPerPlatform: ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform || false }}
@@ -194,6 +221,7 @@ jobs:
           echo "| Skip Tests                   | ${{ needs.detect_skip_tests.outputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Tests Only                   | ${{ needs.detect_tests_only.outputs.testsOnly }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered by                 | ${{ needs.resolve_trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Retention Days               | ${{ needs.resolve_retention_days.outputs.retentionDays }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Per-Platform Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform || false }} |" >> $GITHUB_STEP_SUMMARY
