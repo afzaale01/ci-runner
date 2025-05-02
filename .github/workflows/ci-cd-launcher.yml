@@ -158,7 +158,9 @@ jobs:
               --arg buildType "${{ needs.prepare_metadata.outputs.buildType }}" \
               --arg version "${{ needs.prepare_metadata.outputs.version }}" \
               --arg retentionDays "${{ needs.prepare_metadata.outputs.retentionDays }}" \
-              '{projectName: $projectName, triggeredBy: $triggeredBy, skipTests: $skipTests, testsOnly: $testsOnly, buildType: $buildType, version: $version, retentionDays: $retentionDays}')" \
+              --arg timeoutMinutesTests "${{ needs.prepare_metadata.outputs.timeoutMinutesTests }}" \
+              --arg timeoutMinutesBuild "${{ needs.prepare_metadata.outputs.timeoutMinutesBuild }}" \
+              '{projectName: $projectName, triggeredBy: $triggeredBy, skipTests: $skipTests, testsOnly: $testsOnly, buildType: $buildType, version: $version, retentionDays: $retentionDays, timeoutMinutesTests: $timeoutMinutesTests, timeoutMinutesBuild: $timeoutMinutesBuild}')" \
             --field artifactConfig="$(jq -c -n \
               --arg requiresCombined "${{ needs.prepare_metadata.outputs.requiresCombined }}" \
               --arg skipPerPlatform "${{ needs.prepare_metadata.outputs.skipPerPlatform }}" \
@@ -168,6 +170,5 @@ jobs:
               --arg useGitLfs "${{ needs.prepare_metadata.outputs.useGitLfs }}" \
               --arg editModePath "${{ needs.prepare_metadata.outputs.editModePath }}" \
               --arg playModePath "${{ needs.prepare_metadata.outputs.playModePath }}" \
-              --arg timeoutMinutes "${{ needs.prepare_metadata.outputs.timeoutMinutesTests }}" \
               --arg quietMode "${{ needs.prepare_metadata.outputs.quietMode }}" \
-              '{unityVersion: $unityVersion, useGitLfs: $useGitLfs, editModePath: $editModePath, playModePath: $playModePath, timeoutMinutes: $timeoutMinutes, quietMode: $quietMode}')"
+              '{unityVersion: $unityVersion, useGitLfs: $useGitLfs, editModePath: $editModePath, playModePath: $playModePath, quietMode: $quietMode}')"

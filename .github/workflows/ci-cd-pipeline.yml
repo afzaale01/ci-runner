@@ -42,7 +42,8 @@ jobs:
       useGitLfs: ${{ steps.unpack.outputs.useGitLfs }}
       editModePath: ${{ steps.unpack.outputs.editModePath }}
       playModePath: ${{ steps.unpack.outputs.playModePath }}
-      timeoutMinutes: ${{ steps.unpack.outputs.timeoutMinutes }}
+      timeoutMinutesTests: ${{ steps.unpack.outputs.timeoutMinutesTests }}
+      timeoutMinutesBuild: ${{ steps.unpack.outputs.timeoutMinutesBuild }}
       quietMode: ${{ steps.unpack.outputs.quietMode }}
     steps:
       - id: unpack
