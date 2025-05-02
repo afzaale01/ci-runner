@@ -10,6 +10,9 @@ on:
       version:
         value: ${{ jobs.tag.outputs.version }}
 
+permissions:
+  contents: write
+
 jobs:
   tag:
     name: 🏷️ Resolve & Create Tag
