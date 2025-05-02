@@ -86,6 +86,7 @@ Can be found under:
 
 | Secret Name      | Required | Description |
 |------------------|-------------|-------------|
+| `CICD_PAT`       | ✅ | A Personal Access Token with 'repo' and 'workflow' permissions |
 | `UNITY_EMAIL`    | ✅ | Unity account email |
 | `UNITY_PASSWORD` | ✅ | Unity account password |
 | `UNITY_LICENSE`  | ✅ | Raw `.ulf` license contents |
