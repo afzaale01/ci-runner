@@ -242,7 +242,7 @@ jobs:
       deployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets }}
 
   metadata:
-    name: Summarize Metadata
+    name: 📄 Summarize Metadata
     runs-on: ubuntu-latest
     if: always()
     needs:

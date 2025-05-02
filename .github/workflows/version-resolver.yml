@@ -115,7 +115,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "🏷️ Determined version: $VERSION"
 
-      - name: 📋 Summarize Build Version Info
+      - name: 📄 Summarize Build Version Info
         if: always()
         run: |
           echo "### 🏷️ Build Version Summary" >> $GITHUB_STEP_SUMMARY

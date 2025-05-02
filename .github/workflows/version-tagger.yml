@@ -55,7 +55,7 @@ jobs:
           echo "version=${{ steps.create.outputs.version || inputs.version }}" >> "$GITHUB_OUTPUT"
 
   summarize_tagging:
-    name: 📋 Summarize Tagging Info
+    name: 📄 Summarize Tagging Info
     runs-on: ubuntu-latest
     needs: [tag_resolver]
     if: always()
