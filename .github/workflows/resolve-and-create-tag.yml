@@ -34,14 +34,14 @@ jobs:
         id: check
         run: .github/scripts/release/check-tag-exists.sh "${{ inputs.version }}" "${{ github.repository }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.CICD_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Tag if Missing
         if: steps.check.outputs.exists != 'true'
         id: create
         run: .github/scripts/release/create-tag.sh "${{ inputs.version }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.CICD_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set Output Version
         id: set_version
