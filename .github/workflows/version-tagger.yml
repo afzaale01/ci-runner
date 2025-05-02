@@ -5,8 +5,8 @@ on:
     inputs:
       buildType:
         description: "Build type: preview | release_candidate | release"
-        required: true
         type: string
+        required: true
       version:
         description: "Tag version (e.g., v1.2.3)"
         type: string
@@ -17,8 +17,8 @@ on:
         type: string
         required: true
       buildType:
-        required: true
         type: string
+        required: true
 
 jobs:
   tag_resolver:
