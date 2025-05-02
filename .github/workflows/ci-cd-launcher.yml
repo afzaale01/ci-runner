@@ -176,6 +176,8 @@ jobs:
         run: |
           gh workflow run ci-cd-pipeline.yml \
             --ref "${{ github.ref }}" \
+            --field targetPlatforms="${{ needs.prepare_metadata.outputs.targetPlatforms }}" \
+            --field validDeployTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.validDeployTargets }}')" \
             --field metadataConfig="$(jq -c -n \
               --arg projectName "${{ vars.PROJECT_NAME }}" \
               --arg triggeredBy "${{ needs.prepare_metadata.outputs.triggeredBy }}" \
@@ -186,8 +188,6 @@ jobs:
               --arg retentionDays "${{ needs.prepare_metadata.outputs.retentionDays }}" \
               '{projectName: $projectName, triggeredBy: $triggeredBy, skipTests: $skipTests, testsOnly: $testsOnly, buildType: $buildType, version: $version, retentionDays: $retentionDays}')" \
             --field artifactConfig="$(jq -c -n \
-              --arg targetPlatforms "${{ needs.prepare_metadata.outputs.targetPlatforms }}" \
-              --arg validDeployTargets "${{ needs.prepare_metadata.outputs.validDeployTargets }}" \
               --arg requiresCombined "${{ needs.prepare_metadata.outputs.requiresCombined }}" \
               --arg skipPerPlatform "${{ needs.prepare_metadata.outputs.skipPerPlatform }}" \
               '{targetPlatforms: $targetPlatforms, validDeployTargets: $validDeployTargets, requiresCombined: $requiresCombined, skipPerPlatform: $skipPerPlatform}')"

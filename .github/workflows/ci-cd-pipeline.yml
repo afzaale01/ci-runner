@@ -3,6 +3,14 @@ name: 🚀 CI/CD Pipeline
 on:
   workflow_dispatch:
     inputs:
+      validDeployTargets:
+        type: string
+        required: true
+        default: '[]'
+      targetPlatforms:
+        type: string
+        required: true
+        default: '[]'
       metadataConfig:
         type: string
         required: true
@@ -25,10 +33,8 @@ jobs:
       buildType: ${{ steps.unpack.outputs.buildType }}
       version: ${{ steps.unpack.outputs.version }}
       retentionDays: ${{ steps.unpack.outputs.retentionDays }}
-      validDeployTargets: ${{ steps.unpack.outputs.validDeployTargets }}
       requiresCombined: ${{ steps.unpack.outputs.requiresCombined }}
       skipPerPlatform: ${{ steps.unpack.outputs.skipPerPlatform }}
-      targetPlatforms: ${{ steps.unpack.outputs.targetPlatforms }}
     steps:
       - id: unpack
         run: |
@@ -43,10 +49,8 @@ jobs:
           echo "version=$(echo "$meta" | jq -r .version)" >> "$GITHUB_OUTPUT"
           echo "retentionDays=$(echo "$meta" | jq -r .retentionDays)" >> "$GITHUB_OUTPUT"
 
-          echo "validDeployTargets=$(echo "$artifact" | jq -r .validDeployTargets)" >> "$GITHUB_OUTPUT"
           echo "requiresCombined=$(echo "$artifact" | jq -r .requiresCombined)" >> "$GITHUB_OUTPUT"
           echo "skipPerPlatform=$(echo "$artifact" | jq -r .skipPerPlatform)" >> "$GITHUB_OUTPUT"
-          echo "targetPlatforms=$(echo "$artifact" | jq -r .targetPlatforms)" >> "$GITHUB_OUTPUT"
 
   # ─────────────────────────────────────────────────────────────────────────────
   # 1. Run Tests
@@ -132,14 +136,14 @@ jobs:
     if: > 
       always() &&
        needs.unpack_inputs.outputs.testsOnly != 'true' &&
-      needs.release.result == 'success' &&
-       needs.unpack_inputs.outputs.validDeployTargets != '[]'
+       needs.release.result == 'success' &&
+       inputs.validDeployTargets != '[]'
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
       version: ${{ needs.unpack_inputs.outputs.version }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
-      deployTargets: ${{ needs.unpack_inputs.outputs.validDeployTargets }}
+      deployTargets: ${{ inputs.validDeployTargets }}
       hasCombinedArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
       artifactSource: build
     secrets: inherit
