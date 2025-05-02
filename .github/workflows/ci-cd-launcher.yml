@@ -190,7 +190,7 @@ jobs:
             --field artifactConfig="$(jq -c -n \
               --arg requiresCombined "${{ needs.prepare_metadata.outputs.requiresCombined }}" \
               --arg skipPerPlatform "${{ needs.prepare_metadata.outputs.skipPerPlatform }}" \
-              '{requiresCombined: $requiresCombined, skipPerPlatform: $skipPerPlatform}')"
+              '{requiresCombined: $requiresCombined, skipPerPlatform: $skipPerPlatform}')" \
             --field testDataConfig="$(jq -c -n \
               --arg unityVersion "${{ vars.UNITY_VERSION || 'auto' }}" \
               --arg useGitLfs "${{ vars.USE_GIT_LFS || 'false' }}" \
