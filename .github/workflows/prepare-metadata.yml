@@ -102,7 +102,7 @@ jobs:
           # Prioritize explicit 'true' or 'false' input
           if [[ "$INPUT_SKIP_TESTS" == "true" || "$INPUT_SKIP_TESTS" == "false" ]]; then
             SKIP_TESTS="$INPUT_SKIP_TESTS"
-            echo "✅ Explicit input.skipTests provided: $SKIP_TESTS"
+            echo "✅ Explicit input provided - skipping tests: $SKIP_TESTS"
           else
             # Auto-detect logic when input is 'default' or anything else
             if [ "$TESTS_ONLY" = "true" ]; then
