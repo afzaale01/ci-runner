@@ -124,8 +124,8 @@ They can be found under:
 | `RETENTION_DAYS_RELEASE`    | ❌        | Days to retain release builds (default is `30`)                          |
 | `TIMEOUT_TESTS_IN_MINUTES`  | ❌        | Test timeout per job in minutes (default is `15`)                        |
 | `TIMEOUT_BUILD_IN_MINUTES`  | ❌        | Build timeout per job in minutes (default is `30`)                       |
-| `UNITY_TESTS_EDITMODE_PATH` | ❌        | Path to EditMode tests                                                   |
-| `UNITY_TESTS_PLAYMODE_PATH` | ❌        | Path to PlayMode tests                                                   |
+| `UNITY_TESTS_EDITMODE_PATH` | ❌        | Path to EditMode tests (default is `Assets/Tests/Editor`)                |
+| `UNITY_TESTS_PLAYMODE_PATH` | ❌        | Path to PlayMode tests (default is `Assets/Tests/PlayMode`)              |
 | `UNITY_VERSION`             | ❌        | Unity version (e.g. `auto` or `2022.3.13f1`)                             |
 | `USE_GIT_LFS`               | ❌        | Use Git LFS (`true`/`false`)                                             |
 
