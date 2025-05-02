@@ -59,7 +59,11 @@ jobs:
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
     steps:
-      - id: check
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check last commit for [skip ci]   
+        id: check
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B)
           echo "Last commit message: $COMMIT_MSG"
