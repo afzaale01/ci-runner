@@ -113,13 +113,14 @@ They can be found under:
 | Variable Name               | Required | Description                                                              |
 |----------------------------|----------|--------------------------------------------------------------------------|
 | `DEPLOY_TARGETS`            | ✅        | Deployment targets (JSON array)                                          |
-| `EXCLUDE_UNITY_TESTS`       | ❌        | Exclude tests from pipeline (`true`/`false`)                             |
-| `FORCE_COMBINE_ARTIFACTS`   | ❌        | Combine all builds into one artifact (e.g. for internal QA or archiving) |
-| `PROJECT_NAME`              | ✅        | Name of the Unity project                                                |
-| `RETENTION_DAYS_PREVIEW`    | ✅        | Days to retain preview builds                                            |
-| `RETENTION_DAYS_RELEASE`    | ✅        | Days to retain release builds                                            |
 | `TARGET_PLATFORMS_PREVIEW`  | ✅        | Preview build platforms (JSON)                                           |
 | `TARGET_PLATFORMS_RELEASE`  | ✅        | Release build platforms (JSON)                                           |
+| `PROJECT_NAME`              | ✅        | Name of the Unity project                                                |
+| `EXCLUDE_UNITY_TESTS`       | ❌        | Exclude tests from pipeline (`true`/`false`)                             |
+| `FORCE_COMBINE_ARTIFACTS`   | ❌        | Combine all builds into one artifact (e.g. for internal QA or archiving) |
+| `RETENTION_DAYS_PREVIEW`    | ❌        | Days to retain preview builds (default is `7`)                           |
+| `RETENTION_DAYS_RC`         | ❌        | Days to retain release candidate builds (default is `14`)                |
+| `RETENTION_DAYS_RELEASE`    | ❌        | Days to retain release builds (default is `30`)                          |
 | `TIMEOUT_TESTS_IN_MINUTES`  | ❌        | Test timeout per job in minutes (default is `15`)                        |
 | `TIMEOUT_BUILD_IN_MINUTES`  | ❌        | Build timeout per job in minutes (default is `30`)                       |
 | `UNITY_TESTS_EDITMODE_PATH` | ❌        | Path to EditMode tests                                                   |
