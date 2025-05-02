@@ -1,0 +1,72 @@
+name: 🛡️ Validate Required Repository Inputs
+
+on:
+  workflow_call:
+    inputs:
+      requiredVariables:
+        description: 'List of required GitHub vars to validate'
+        required: true
+        type: string # JSON array
+    secrets:
+      CICD_PAT: { required: true }
+      UNITY_EMAIL: { required: true }
+      UNITY_PASSWORD: { required: true }
+      UNITY_LICENSE: { required: true }
+
+jobs:
+  validate_github_variables:
+    name: Validate GitHub Variables
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔍 Validate Required GitHub Variables
+        run: |
+          VARS=$(echo '${{ inputs.requiredVariables }}' | jq -r '.[]')
+          VALUE='${{ toJson(vars) }}'
+          ERRORS=()
+      
+          for VAR in $VARS; do
+            if ! echo "$VALUE" | jq -e --arg key "$VAR" 'has($key)' > /dev/null; then
+              ERRORS+=("$VAR")
+            fi
+          done
+      
+          if [[ ${#ERRORS[@]} -gt 0 ]]; then
+            echo "❌ Missing required GitHub Variables:"
+            for V in "${ERRORS[@]}"; do
+              echo "  - $V"
+            done
+            exit 1
+          fi
+      
+          echo "✅ All required GitHub Variables are defined."
+
+  validate_github_secrets:
+    name: Validate GitHub Secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Required GitHub Secrets
+        run: |
+          REQUIRED_SECRETS=("CICD_PAT" "UNITY_EMAIL" "UNITY_LICENSE" "UNITY_PASSWORD")
+          MISSING=0
+
+          for SECRET_NAME in "${REQUIRED_SECRETS[@]}"; do
+            VALUE_VAR="SECRET_${SECRET_NAME}"
+            VALUE="${!VALUE_VAR}"
+
+            if [[ -z "$VALUE" || "$VALUE" == "" ]]; then
+              echo "❌ Required secret '$SECRET_NAME' is not set!"
+              MISSING=1
+            else
+              echo "✅ Secret '$SECRET_NAME' is present."
+            fi
+          done
+
+          if [[ "$MISSING" -eq 1 ]]; then
+            echo "❌ One or more required secrets are missing. Failing..."
+            exit 1
+          fi
+        env:
+          SECRET_CICD_PAT: ${{ secrets.CICD_PAT }}
+          SECRET_UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          SECRET_UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          SECRET_UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
