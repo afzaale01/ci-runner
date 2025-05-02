@@ -88,8 +88,6 @@ jobs:
           "DEPLOY_TARGETS",
           "EXCLUDE_UNITY_TESTS",
           "PROJECT_NAME",
-          "RETENTION_DAYS_PREVIEW",
-          "RETENTION_DAYS_RELEASE",
           "TARGET_PLATFORMS_PREVIEW",
           "TARGET_PLATFORMS_RELEASE"
         ]
