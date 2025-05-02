@@ -112,14 +112,10 @@ jobs:
     needs: 
       - skip_ci
       - prepare_metadata
-    if: >
-      ${{ always() && needs.skip_ci.outputs.should_run == 'true' &&
-          (
-            needs.prepare_metadata.outputs.buildType == 'release' || 
-            needs.prepare_metadata.outputs.buildType == 'release_candidate'
-          ) }}
+    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     uses: ./.github/workflows/version-tagger.yml
     with:
+      buildType: ${{ inputs.buildType }}
       version: ${{ needs.prepare_metadata.outputs.version }}
     secrets: inherit
   
