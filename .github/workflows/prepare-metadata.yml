@@ -141,6 +141,7 @@ jobs:
       - id: set
         run: |
           BUILD_TYPE="${{ needs.resolve_build_type.outputs.buildType }}"
+          
           DEFAULT_RELEASE_DAYS=30
           DEFAULT_RELEASE_CANDIDATE_DAYS=14
           DEFAULT_PREVIEW_DAYS=7
