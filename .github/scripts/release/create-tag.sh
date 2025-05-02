@@ -27,15 +27,10 @@ if [[ -z "${VERSION// }" ]]; then
   exit 1
 fi
 
-if [[ -z "${GITHUB_PAT:-}" ]]; then
-  echo "❌ Error: GITHUB_PAT environment variable not set."
-  exit 1
-fi
-
 echo "🧪 Creating tag '$VERSION' at commit $SHA in $REPO"
 
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-  -H "Authorization: Bearer $GITHUB_PAT" \
+  -H "Authorization: Bearer $GITHUB_TOKEN" \
   -H "Accept: application/vnd.github+json" \
   -d @- "https://api.github.com/repos/${REPO}/git/refs" <<EOF
 {

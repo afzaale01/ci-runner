@@ -1,0 +1,19 @@
+name: 🧪 Test Resolve & Create Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag version to create (e.g., v1.2.3)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  test-create-tag:
+    uses: ./.github/workflows/resolve-and-create-tag.yml
+    secrets: inherit
+    with:
+      version: ${{ inputs.version }}
