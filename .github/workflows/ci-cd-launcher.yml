@@ -24,7 +24,12 @@ on:
       deployTargets:
         description: "JSON array of deploy targets (e.g. [\"itch.io\",\"s3\"])"
         required: true
-        default: '["steam", "gh-pages"]'
+        default: '["gh-pages"]'
+        type: string
+      targetPlatforms:
+        description: "JSON array of target platforms (e.g. [\"WebGL\",\"iOS\"])"
+        required: true
+        default: '["WebGL"]'
         type: string
       version:
         description: Optional version override
@@ -122,6 +127,7 @@ jobs:
           "EXCLUDE_UNITY_TESTS",
           "PROJECT_NAME",
           "TARGET_PLATFORMS_PREVIEW",
+          "TARGET_PLATFORMS_RC",
           "TARGET_PLATFORMS_RELEASE"
         ]
 
@@ -179,6 +185,7 @@ jobs:
             --field buildType="${{ needs.prepare_metadata.outputs.buildType }}" \
             --field version="${{ needs.prepare_metadata.outputs.version }}" \
             --field retentionDays="${{ needs.prepare_metadata.outputs.retentionDays }}" \
+            --field targetPlatforms="${{ needs.prepare_metadata.outputs.targetPlatforms }}" \
             --field validDeployTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.validDeployTargets }}')" \
             --field requiresCombined="${{ needs.prepare_metadata.outputs.requiresCombined }}" \
             --field skipPerPlatform="${{ needs.prepare_metadata.outputs.skipPerPlatform }}"

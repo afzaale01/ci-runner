@@ -38,6 +38,8 @@ on:
         value: ${{ jobs.metadata.outputs.version }}
       retentionDays:
         value: ${{ jobs.metadata.outputs.retentionDays }}
+      targetPlatforms:
+        value: ${{ jobs.metadata.outputs.targetPlatforms }}
       validDeployTargets:
         value: ${{ jobs.metadata.outputs.validDeployTargets }}
       requiresCombined:
@@ -136,7 +138,9 @@ jobs:
   resolve_target_platforms:
     name: Resolve Target Platforms
     needs:
+      - detect_tests_only
       - resolve_build_type
+    if: needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
     runs-on: ubuntu-latest
     outputs:
       targetPlatforms: ${{ steps.set.outputs.targetPlatforms }}
@@ -170,7 +174,9 @@ jobs:
   resolve_retention_days:
     name: Resolve Retention Days
     needs:
+      - detect_tests_only
       - resolve_build_type
+    if: needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
     runs-on: ubuntu-latest
     outputs:
       retentionDays: ${{ steps.set.outputs.retentionDays }}
@@ -236,6 +242,7 @@ jobs:
       - resolve_trigger
       - resolve_build_type
       - resolve_retention_days
+      - resolve_target_platforms
       - version
       - validate_deploy_targets
       - analyze_artifact_strategy
@@ -246,16 +253,24 @@ jobs:
       testsOnly: ${{ needs.detect_tests_only.outputs.testsOnly }}
       triggeredBy: ${{ needs.resolve_trigger.outputs.triggeredBy }}
       retentionDays: ${{ needs.resolve_retention_days.outputs.retentionDays }}
+      targetPlatforms: ${{ needs.resolve_target_platforms.outputs.targetPlatforms || '[]' }}
       validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets || '[]' }}
       requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }}
       skipPerPlatform: ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform || false }}
     steps:
       - name: Summarize
         run: |
+          TARGET_PLATFORMS=$(echo '${{ needs.resolve_target_platforms.outputs.targetPlatforms }}' | jq -c '.')
           DEPLOY_TARGETS=$(echo '${{ needs.validate_deploy_targets.outputs.validTargets }}' | jq -c '.')
+          
           # If after jq we get an empty or blank result, replace it with []
           if [[ -z "$DEPLOY_TARGETS" || "$DEPLOY_TARGETS" == 'null' ]]; then
             DEPLOY_TARGETS='[]'
+          fi
+
+          # If after jq we get an empty or blank result, replace it with []
+          if [[ -z "$TARGET_PLATFORMS" || "$TARGET_PLATFORMS" == 'null' ]]; then
+            TARGET_PLATFORMS='[]'
           fi
 
           echo "## ⏳ Build Metadata Summary" >> $GITHUB_STEP_SUMMARY
@@ -267,6 +282,7 @@ jobs:
           echo "| Tests Only                   | ${{ needs.detect_tests_only.outputs.testsOnly }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered by                 | ${{ needs.resolve_trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Retention Days               | ${{ needs.resolve_retention_days.outputs.retentionDays }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Target Platforms             | \`$TARGET_PLATFORMS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Per-Platform Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform || false }} |" >> $GITHUB_STEP_SUMMARY
