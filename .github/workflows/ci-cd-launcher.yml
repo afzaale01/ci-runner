@@ -97,8 +97,8 @@ jobs:
   prepare_metadata:
     name: Prepare Metadata
     needs: 
-      - validate_vars
       - skip_ci
+      - validate_vars
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
