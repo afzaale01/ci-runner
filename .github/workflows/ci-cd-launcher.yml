@@ -147,7 +147,7 @@ jobs:
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     uses: ./.github/workflows/version-tagger.yml
     with:
-      buildType: ${{ inputs.buildType }}
+      buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       version: ${{ needs.prepare_metadata.outputs.version }}
     secrets: inherit
   
