@@ -33,6 +33,29 @@ permissions:
   pull-requests: write
 
 jobs:
+  validate_secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate required secrets
+        run: |
+          REQUIRED_SECRETS=$(echo '${{ inputs.requiredSecrets }}' | jq -r '.[]')
+          MISSING=0
+
+          for SECRET_NAME in $REQUIRED_SECRETS; do
+            VALUE="${{ secrets[SECRET_NAME] }}"
+            if [[ -z "$VALUE" || "$VALUE" == "" ]]; then
+              echo "❌ Required secret '$SECRET_NAME' is not set!"
+              MISSING=1
+            else
+              echo "✅ Secret '$SECRET_NAME' is present."
+            fi
+          done
+
+          if [[ "$MISSING" -eq 1 ]]; then
+            echo "❌ One or more required secrets are missing. Failing..."
+            exit 1
+          fi
+
   prepare-metadata:
     name: ⏳ Prepare Metadata
     uses: ./.github/workflows/prepare-metadata.yml
