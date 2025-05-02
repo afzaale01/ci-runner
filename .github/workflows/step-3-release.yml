@@ -33,26 +33,14 @@ on:
       releaseErrorMessage:
         description: "Error message if release failed"
         value: ${{ jobs.publish.outputs.releaseErrorMessage }}
-      versionUsed:
-        description: "The resolved version or tag used"
-        value: ${{ jobs.tag.outputs.version }}
 
 jobs:
-  tag:
-    name: 🏷️ Ensure Git Tag Exists
-    uses: avalin/unity-ci-templates/.github/workflows/resolve-and-create-tag.yml@main
-    with:
-      version: ${{ inputs.version }}
-    secrets: inherit
-
   publish:
     if: ${{ inputs.buildType == 'release' || inputs.buildType == 'release_candidate' }}
     name: 📤 Publish GitHub Release
-    needs: tag
     runs-on: ubuntu-latest
     outputs:
       releaseErrorMessage: ${{ steps.error-handler.outputs.releaseErrorMessage }}
-      versionUsed: ${{ needs.tag.outputs.version }}
 
     steps:
       - name: 📁 Checkout Repository
@@ -68,22 +56,15 @@ jobs:
 
       - name: 📝 Check if Release Already Exists
         id: check_release
-        run: .github/scripts/release/check-release-exists.sh "${{ needs.tag.outputs.version }}" "${{ github.repository }}" "$GITHUB_TOKEN"
+        run: .github/scripts/release/check-release-exists.sh "${{ inputs.version }}" "${{ github.repository }}" "$GITHUB_TOKEN"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🏷️ Show Resolved Version
-        run: |
-          VERSION="${{ needs.tag.outputs.version }}"
-          echo "📌 Resolved version from tag job: $VERSION"
-          echo "### 🏷️ Release Version Used" >> $GITHUB_STEP_SUMMARY
-          echo "Tagged version for release: \`$VERSION\`" >> $GITHUB_STEP_SUMMARY
 
       - name: 📝 Create GitHub Release
         if: ${{ steps.check_release.outputs.exists != 'true' }}
         id: create_release
         run: |
-          VERSION="${{ needs.tag.outputs.version }}"
+          VERSION="${{ inputs.version }}"
           BUILD_TYPE="${{ inputs.buildType }}"
 
           IS_PRERELEASE=$([[ "$VERSION" == *-* ]] && echo true || echo false)
@@ -120,7 +101,7 @@ jobs:
       - name: 🧮 Upload Per-Platform Artifacts
         if: ${{ inputs.skipPerPlatformArtifacts != 'true' }}
         run: |
-          VERSION="${{ needs.tag.outputs.version }}"
+          VERSION="${{ inputs.version }}"
           RELEASE_ID="${{ steps.check_release.outputs.release_id || steps.create_release.outputs.release_id }}"
           .github/scripts/release/upload-artifacts.sh \
             "${{ inputs.projectName }}" \
@@ -135,7 +116,7 @@ jobs:
       - name: 🧮 Upload Combined Artifact
         if: ${{ inputs.combineArtifacts == 'true' }}
         run: |
-          VERSION="${{ needs.tag.outputs.version }}"
+          VERSION="${{ inputs.version }}"
           PROJECT="${{ inputs.projectName }}"
           COMBINED_PATH="${PROJECT}-${VERSION}"
           COMBINED_ZIP="${PROJECT}-${VERSION}-all-platforms.zip"

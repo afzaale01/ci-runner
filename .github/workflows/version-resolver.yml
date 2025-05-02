@@ -1,4 +1,4 @@
-name: 🏷️ Build Version Generator
+name: 🏷️ Version Resolver
 
 on:
   workflow_call:
@@ -14,10 +14,10 @@ on:
     outputs:
       version:
         description: "The resolved build version string"
-        value: ${{ jobs.determine.outputs.version }}
+        value: ${{ jobs.version_resolver.outputs.version }}
 
 jobs:
-  determine:
+  version_resolver:
     name: 🏷️ Generate Build Version
     runs-on: ubuntu-latest
     outputs:

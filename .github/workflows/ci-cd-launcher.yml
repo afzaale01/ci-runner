@@ -106,12 +106,29 @@ jobs:
       deployTargets: ${{ inputs.deployTargets || vars.DEPLOY_TARGETS }}
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
+
+  tagging:
+    name: 🏷️ Create or Verify Tag
+    needs: 
+      - skip_ci
+      - prepare_metadata
+    if: >
+      ${{ always() && needs.skip_ci.outputs.should_run == 'true' &&
+          (
+            needs.prepare_metadata.outputs.buildType == 'release' || 
+            needs.prepare_metadata.outputs.buildType == 'release_candidate'
+          ) }}
+    uses: ./.github/workflows/version-tagger.yml
+    with:
+      version: ${{ needs.prepare_metadata.outputs.version }}
+    secrets: inherit
   
   trigger_ci:
     name: Trigger CI/CD Pipeline
     needs: 
-      - prepare_metadata
       - skip_ci
+      - tagging
+      - prepare_metadata
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     runs-on: ubuntu-latest
     steps:
@@ -121,7 +138,7 @@ jobs:
       - name: Install GitHub CLI
         run: sudo apt-get install gh -y
 
-      - name: Use GH CLI to call CICD
+      - name: Trigger downstream pipeline
         env:
           GITHUB_TOKEN: ${{ secrets.CICD_PAT }}
         run: |
