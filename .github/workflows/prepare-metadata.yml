@@ -155,7 +155,7 @@ jobs:
           echo "timeoutMinutes=$TIMEOUT_MINUTES" >> "$GITHUB_OUTPUT"
           echo "quietMode=$QUIET_MODE" >> "$GITHUB_OUTPUT"
 
-          echo "## 🧪 Test Data Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "## 📋 Test Data Summary" >> "$GITHUB_STEP_SUMMARY"
           echo "| Key             | Value |" >> "$GITHUB_STEP_SUMMARY"
           echo "|-----------------|-------|" >> "$GITHUB_STEP_SUMMARY"
           echo "| Unity Version   | $UNITY_VERSION |" >> "$GITHUB_STEP_SUMMARY"

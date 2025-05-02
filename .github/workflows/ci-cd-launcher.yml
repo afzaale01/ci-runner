@@ -193,10 +193,10 @@ jobs:
               --arg skipPerPlatform "${{ needs.prepare_metadata.outputs.skipPerPlatform }}" \
               '{requiresCombined: $requiresCombined, skipPerPlatform: $skipPerPlatform}')" \
             --field testDataConfig="$(jq -c -n \
-              --arg unityVersion "${{ vars.UNITY_VERSION || 'auto' }}" \
-              --arg useGitLfs "${{ vars.USE_GIT_LFS || 'false' }}" \
-              --arg editModePath "${{ vars.UNITY_TESTS_EDITMODE_PATH || 'Assets/Tests/Editor' }}" \
-              --arg playModePath "${{ vars.UNITY_TESTS_PLAYMODE_PATH || 'Assets/Tests/PlayMode' }}" \
-              --arg timeoutMinutes "${{ vars.TIMEOUT_TESTS_IN_MINUTES || '15' }}" \
-              --arg quietMode "${{ vars.UNITY_TESTS_QUIET_MODE || 'false' }}" \
+              --arg unityVersion "${{ needs.prepare_metadata.outputs.unityVersion }}" \
+              --arg useGitLfs "${{ needs.prepare_metadata.outputs.useGitLfs }}" \
+              --arg editModePath "${{ needs.prepare_metadata.outputs.editModePath }}" \
+              --arg playModePath "${{ needs.prepare_metadata.outputs.playModePath }}" \
+              --arg timeoutMinutes "${{ needs.prepare_metadata.outputs.timeoutMinutes }}" \
+              --arg quietMode "${{ needs.prepare_metadata.outputs.quietMode }}" \
               '{unityVersion: $unityVersion, useGitLfs: $useGitLfs, editModePath: $editModePath, playModePath: $playModePath, timeoutMinutes: $timeoutMinutes, quietMode: $quietMode}')"
