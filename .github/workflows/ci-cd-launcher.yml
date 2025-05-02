@@ -77,6 +77,9 @@ jobs:
           fi
 
   validate_github_secrets:
+    name: Validate GitHub Secrets
+    needs: skip_ci
+    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     runs-on: ubuntu-latest
     steps:
       - name: Validate Required GitHub Secrets
