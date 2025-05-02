@@ -122,9 +122,9 @@ jobs:
     with:
       requiredVars: |
         [
+          "PROJECT_NAME",
           "DEPLOY_TARGETS",
           "EXCLUDE_UNITY_TESTS",
-          "PROJECT_NAME",
           "TARGET_PLATFORMS_PREVIEW",
           "TARGET_PLATFORMS_RC",
           "TARGET_PLATFORMS_RELEASE"
