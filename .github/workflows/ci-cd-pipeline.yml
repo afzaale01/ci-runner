@@ -52,10 +52,6 @@ on:
           - 'true'
           - 'false'
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # 1. Run Tests
