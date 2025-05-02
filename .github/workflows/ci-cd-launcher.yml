@@ -121,7 +121,7 @@ jobs:
       - name: Install GitHub CLI
         run: sudo apt-get install gh -y
 
-      - name: Trigger downstream pipeline
+      - name: Use GH CLI to call CI/CD
         env:
           GITHUB_TOKEN: ${{ secrets.CICD_PAT }}
         run: |
