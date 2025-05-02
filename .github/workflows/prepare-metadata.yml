@@ -154,11 +154,20 @@ jobs:
           DEFAULT_PREVIEW='${{ vars.TARGET_PLATFORMS_PREVIEW || '[]' }}'
           DEFAULT_RELEASE='${{ vars.TARGET_PLATFORMS_RELEASE || '[]' }}'
 
-          # Validate input (basic check: non-empty + valid JSON array)
-          if [[ -n "$INPUT_PLATFORMS" ]] && echo "$INPUT_PLATFORMS" | jq -e type >/dev/null 2>&1; then
-            CHOSEN="$INPUT_PLATFORMS"
-            echo "✅ Using provided input targetPlatforms: $CHOSEN"
-          else
+          CHOSEN=""
+          INVALID_INPUT="false"
+
+          if [[ -n "$INPUT_PLATFORMS" ]]; then
+            if echo "$INPUT_PLATFORMS" | jq -e type >/dev/null 2>&1; then
+              CHOSEN="$INPUT_PLATFORMS"
+              echo "✅ Using provided input targetPlatforms: $CHOSEN"
+            else
+              echo "⚠️ Provided input targetPlatforms is malformed — falling back to defaults."
+              INVALID_INPUT="true"
+            fi
+          fi
+
+          if [[ "$INVALID_INPUT" == "true" || -z "$INPUT_PLATFORMS" ]]; then
             if [[ "$BUILD_TYPE" == "release" ]]; then
               CHOSEN="$DEFAULT_RELEASE"
             elif [[ "$BUILD_TYPE" == "release_candidate" ]]; then
@@ -262,7 +271,7 @@ jobs:
         run: |
           TARGET_PLATFORMS=$(echo '${{ needs.resolve_target_platforms.outputs.targetPlatforms }}' | jq -c '.')
           DEPLOY_TARGETS=$(echo '${{ needs.validate_deploy_targets.outputs.validTargets }}' | jq -c '.')
-          
+
           # If after jq we get an empty or blank result, replace it with []
           if [[ -z "$DEPLOY_TARGETS" || "$DEPLOY_TARGETS" == 'null' ]]; then
             DEPLOY_TARGETS='[]'
