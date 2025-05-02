@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       buildType:
-        description: "Build type: 'preview' | 'release_candidate' | 'release'"
+        description: "preview = build only!"
         required: true
         default: "preview"
         type: choice
