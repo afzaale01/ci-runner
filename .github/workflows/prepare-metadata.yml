@@ -121,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: 
       - detect_skip_tests
-    if: ${{ needs.detect_skip_tests.outputs.skipTests == 'false' }}
+    if: ${{ needs.detect_skip_tests.outputs.skipTests != 'true' }}
     outputs:
       unityVersion: ${{ steps.set.outputs.unityVersion }}
       useGitLfs: ${{ steps.set.outputs.useGitLfs }}
