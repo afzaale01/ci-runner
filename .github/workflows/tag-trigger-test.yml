@@ -11,4 +11,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Print tag message
-        run: echo "Tag push detected: ${{ github.ref }}"
+        run: |
+          echo "Tag push detected: ${{ github.ref }}"
