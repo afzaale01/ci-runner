@@ -190,4 +190,4 @@ jobs:
             --field artifactConfig="$(jq -c -n \
               --arg requiresCombined "${{ needs.prepare_metadata.outputs.requiresCombined }}" \
               --arg skipPerPlatform "${{ needs.prepare_metadata.outputs.skipPerPlatform }}" \
-              '{targetPlatforms: $targetPlatforms, validDeployTargets: $validDeployTargets, requiresCombined: $requiresCombined, skipPerPlatform: $skipPerPlatform}')"
+              '{requiresCombined: $requiresCombined, skipPerPlatform: $skipPerPlatform}')"
