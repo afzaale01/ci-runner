@@ -4,10 +4,6 @@
 #
 # Checks if a Git tag exists in the given repository.
 #
-# ⚠ Uses:
-#   GITHUB_TOKEN → the default GitHub Actions token (read permissions).
-#   This is sufficient because we only perform a GET request.
-#
 # Usage:
 #   ./check-tag-exists.sh <version> <repository>
 #
