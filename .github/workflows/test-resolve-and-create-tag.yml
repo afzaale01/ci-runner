@@ -23,9 +23,9 @@ jobs:
 
       - name: Authenticate GitHub CLI with PAT
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # <-- MUST be a PAT with 'repo' + 'workflow' scopes
+          CICD_PAT: ${{ secrets.CICD_PAT }}  # <-- MUST be a PAT with 'repo' + 'workflow' scopes
         run: |
-          echo "${GH_TOKEN}" | gh auth login --with-token
+          echo "${CICD_PAT}" | gh auth login --with-token
 
       - name: Trigger downstream workflow using gh
         env:
