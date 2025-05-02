@@ -124,7 +124,6 @@ jobs:
         [
           "PROJECT_NAME",
           "DEPLOY_TARGETS",
-          "EXCLUDE_UNITY_TESTS",
           "TARGET_PLATFORMS_PREVIEW",
           "TARGET_PLATFORMS_RC",
           "TARGET_PLATFORMS_RELEASE"
@@ -139,7 +138,7 @@ jobs:
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
-      skipTests: ${{ inputs.skipTests || vars.EXCLUDE_UNITY_TESTS}}
+      skipTests: ${{ inputs.skipTests || vars.EXCLUDE_UNITY_TESTS || false }}
       deployTargets: ${{ inputs.deployTargets || vars.DEPLOY_TARGETS }}
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
