@@ -1,4 +1,4 @@
-name: 🧪 Test Resolve & Create Tag
+name: 🧪 Test Tag with GH Workflow Trigger
 
 on:
   workflow_dispatch:
@@ -12,8 +12,19 @@ permissions:
   contents: write
 
 jobs:
-  test-create-tag:
-    uses: ./.github/workflows/resolve-and-create-tag.yml
-    secrets: inherit
-    with:
-      version: ${{ inputs.version }}
+  test-gh-trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
+      - name: Trigger downstream workflow using gh
+        env:
+          GH_TOKEN: ${{ secrets.CICD_PAT }} # You **must** use a PAT here, not GITHUB_TOKEN
+        run: |
+          gh workflow run resolve-and-create-tag.yml \
+            --ref "${{ github.ref }}" \
+            --field version="${{ inputs.version }}"
