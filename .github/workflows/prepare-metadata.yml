@@ -142,11 +142,15 @@ jobs:
         run: |
           BUILD_TYPE="${{ needs.resolve_build_type.outputs.buildType }}"
           DEFAULT_RELEASE_DAYS=30
+          DEFAULT_RELEASE_CANDIDATE_DAYS=14
           DEFAULT_PREVIEW_DAYS=7
 
           if [[ "$BUILD_TYPE" == "release" ]]; then
             RETENTION_DAYS="${{ vars.RETENTION_DAYS_RELEASE || '' }}"
             RETENTION_DAYS="${RETENTION_DAYS:-$DEFAULT_RELEASE_DAYS}"
+          elif [[ "$BUILD_TYPE" == "release_candidate" ]]; then
+            RETENTION_DAYS="${{ vars.RETENTION_DAYS_RELEASE_CANDIDATE || '' }}"
+            RETENTION_DAYS="${RETENTION_DAYS:-$DEFAULT_RELEASE_CANDIDATE_DAYS}"
           else
             RETENTION_DAYS="${{ vars.RETENTION_DAYS_PREVIEW || '' }}"
             RETENTION_DAYS="${RETENTION_DAYS:-$DEFAULT_PREVIEW_DAYS}"
