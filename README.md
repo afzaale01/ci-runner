@@ -115,6 +115,7 @@ They can be found under:
 | `DEPLOY_TARGETS`            | ✅        | Deployment targets (JSON array)                                          |
 | `TARGET_PLATFORMS_PREVIEW`  | ✅        | Preview build platforms (JSON)                                           |
 | `TARGET_PLATFORMS_RELEASE`  | ✅        | Release build platforms (JSON)                                           |
+| `TARGET_PLATFORMS_RC`       | ✅        | Release candidate build platforms (JSON)                                 |
 | `PROJECT_NAME`              | ✅        | Name of the Unity project                                                |
 | `EXCLUDE_UNITY_TESTS`       | ❌        | Exclude tests from pipeline (`true`/`false`)                             |
 | `FORCE_COMBINE_ARTIFACTS`   | ❌        | Combine all builds into one artifact (e.g. for internal QA or archiving) |
@@ -123,8 +124,8 @@ They can be found under:
 | `RETENTION_DAYS_RELEASE`    | ❌        | Days to retain release builds (default is `30`)                          |
 | `TIMEOUT_TESTS_IN_MINUTES`  | ❌        | Test timeout per job in minutes (default is `15`)                        |
 | `TIMEOUT_BUILD_IN_MINUTES`  | ❌        | Build timeout per job in minutes (default is `30`)                       |
-| `UNITY_TESTS_EDITMODE_PATH` | ❌        | Path to EditMode tests                                                   |
-| `UNITY_TESTS_PLAYMODE_PATH` | ❌        | Path to PlayMode tests                                                   |
+| `UNITY_TESTS_EDITMODE_PATH` | ❌        | Path to EditMode tests (default is `Assets/Tests/Editor`)                |
+| `UNITY_TESTS_PLAYMODE_PATH` | ❌        | Path to PlayMode tests (default is `Assets/Tests/PlayMode`)              |
 | `UNITY_VERSION`             | ❌        | Unity version (e.g. `auto` or `2022.3.13f1`)                             |
 | `USE_GIT_LFS`               | ❌        | Use Git LFS (`true`/`false`)                                             |
 
