@@ -3,73 +3,58 @@ name: 🚀 CI/CD Pipeline
 on:
   workflow_dispatch:
     inputs:
-      projectName:
+      metadataConfig:
         type: string
         required: true
-        default: 'My_Unity_Project'
-      triggeredBy:
+      artifactConfig:
         type: string
         required: true
-        default: 'workflow_dispatch'
-      buildType:
-        type: choice
-        required: true
-        default: 'preview'
-        options:
-          - 'preview'
-          - 'release_candidate'
-          - 'release'
-      skipTests:
-        type: choice
-        required: true
-        default: 'false'
-        options:
-          - 'true'
-          - 'false'
-      testsOnly:
-        type: choice
-        required: true
-        default: 'false'
-        options:
-          - 'true'
-          - 'false'
-      version:
-        type: string
-        required: true
-        default: 'v0.0.0'
-      retentionDays:
-        type: string
-        required: true
-        default: '1'
-      validDeployTargets:
-        type: string
-        required: true
-        default: '[]'
-      requiresCombined:
-        type: choice
-        required: true
-        default: 'false'
-        options:
-          - 'true'
-          - 'false'
-      skipPerPlatform:
-        type: choice
-        required: true
-        default: 'false'
-        options:
-          - 'true'
-          - 'false'
 
 permissions:
   contents: write
 
 jobs:
+  unpack_inputs:
+    name: Unpack Inputs
+    runs-on: ubuntu-latest
+    outputs:
+      projectName: ${{ steps.unpack.outputs.projectName }}
+      triggeredBy: ${{ steps.unpack.outputs.triggeredBy }}
+      skipTests: ${{ steps.unpack.outputs.skipTests }}
+      testsOnly: ${{ steps.unpack.outputs.testsOnly }}
+      buildType: ${{ steps.unpack.outputs.buildType }}
+      version: ${{ steps.unpack.outputs.version }}
+      retentionDays: ${{ steps.unpack.outputs.retentionDays }}
+      validDeployTargets: ${{ steps.unpack.outputs.validDeployTargets }}
+      requiresCombined: ${{ steps.unpack.outputs.requiresCombined }}
+      skipPerPlatform: ${{ steps.unpack.outputs.skipPerPlatform }}
+      targetPlatforms: ${{ steps.unpack.outputs.targetPlatforms }}
+    steps:
+      - id: unpack
+        run: |
+          meta='${{ inputs.metadataConfig }}'
+          artifact='${{ inputs.artifactConfig }}'
+
+          echo "projectName=$(echo "$meta" | jq -r .projectName)" >> "$GITHUB_OUTPUT"
+          echo "triggeredBy=$(echo "$meta" | jq -r .triggeredBy)" >> "$GITHUB_OUTPUT"
+          echo "skipTests=$(echo "$meta" | jq -r .skipTests)" >> "$GITHUB_OUTPUT"
+          echo "testsOnly=$(echo "$meta" | jq -r .testsOnly)" >> "$GITHUB_OUTPUT"
+          echo "buildType=$(echo "$meta" | jq -r .buildType)" >> "$GITHUB_OUTPUT"
+          echo "version=$(echo "$meta" | jq -r .version)" >> "$GITHUB_OUTPUT"
+          echo "retentionDays=$(echo "$meta" | jq -r .retentionDays)" >> "$GITHUB_OUTPUT"
+
+          echo "validDeployTargets=$(echo "$artifact" | jq -r .validDeployTargets)" >> "$GITHUB_OUTPUT"
+          echo "requiresCombined=$(echo "$artifact" | jq -r .requiresCombined)" >> "$GITHUB_OUTPUT"
+          echo "skipPerPlatform=$(echo "$artifact" | jq -r .skipPerPlatform)" >> "$GITHUB_OUTPUT"
+          echo "targetPlatforms=$(echo "$artifact" | jq -r .targetPlatforms)" >> "$GITHUB_OUTPUT"
+
   # ─────────────────────────────────────────────────────────────────────────────
   # 1. Run Tests
   # ─────────────────────────────────────────────────────────────────────────────
-  run-tests:
+  run_tests:
     name: Run Tests
-    if: inputs.skipTests != 'true'
+    if: ${{ needs.unpack_inputs.outputs.skipTests != 'true' }}
+    needs: unpack_inputs
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION || 'auto' }}
@@ -88,20 +73,22 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   build:
     name: Build
-    needs: [ run-tests ]
+    needs: 
+      - unpack_inputs
+      - run_tests
     if: >
       always() &&
-      inputs.testsOnly != 'true' &&
-      (needs.run-tests.result == 'success' || needs.run-tests.result == 'skipped')
+      needs.unpack_inputs.outputs.testsOnly != 'true' &&
+      (needs.run_tests.result == 'success' || needs.run_tests.result == 'skipped')
     uses: avalin/unity-ci-templates/.github/workflows/step-2-build.yml@main
     with:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
-      projectName: ${{ inputs.projectName }}
-      version: ${{ inputs.version }}
+      projectName: ${{ needs.unpack_inputs.outputs.projectName }}
+      version: ${{ needs.unpack_inputs.outputs.version }}
       targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
-      combineArtifacts: ${{ inputs.requiresCombined }}
+      combineArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
       timeoutMinutes: ${{ fromJson(vars.TIMEOUT_BUILD_IN_MINUTES || '30') }}
-      retentionDays: ${{ fromJson(inputs.retentionDays) }}
+      retentionDays: ${{ fromJson(needs.unpack_inputs.outputs.retentionDays) }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -112,23 +99,25 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   release:
     name: Release
-    needs: [ build ]
+    needs: 
+      - unpack_inputs
+      - build
     if: > 
       always() &&
-      inputs.testsOnly != 'true' &&
+      needs.unpack_inputs.outputs.testsOnly != 'true' &&
       needs.build.result == 'success' && 
       (
-        inputs.buildType == 'release' || 
-        inputs.buildType == 'release_candidate'
+        needs.unpack_inputs.outputs.buildType == 'release' || 
+        needs.unpack_inputs.outputs.buildType == 'release_candidate'
       )
     uses: avalin/unity-ci-templates/.github/workflows/step-3-release.yml@main
     with:
       buildType: release
-      version: ${{ inputs.version }}
-      projectName: ${{ inputs.projectName }}
+      version: ${{ needs.unpack_inputs.outputs.version }}
+      projectName: ${{ needs.unpack_inputs.outputs.projectName }}
       targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
-      combineArtifacts: ${{ inputs.requiresCombined }}
-      skipPerPlatformArtifacts: ${{ inputs.skipPerPlatform }}
+      combineArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
+      skipPerPlatformArtifacts: ${{ needs.unpack_inputs.outputs.skipPerPlatform }}
     secrets: inherit
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -136,19 +125,22 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy
-    needs: [ build, release ]
+    needs: 
+      - unpack_inputs
+      - build
+      - release
     if: > 
       always() &&
-      inputs.testsOnly != 'true' &&
+       needs.unpack_inputs.outputs.testsOnly != 'true' &&
       needs.release.result == 'success' &&
-      inputs.validDeployTargets != '[]'
+       needs.unpack_inputs.outputs.validDeployTargets != '[]'
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
-      version: ${{ inputs.version }}
-      projectName: ${{ inputs.projectName }}
-      deployTargets: ${{ inputs.validDeployTargets }}
-      hasCombinedArtifacts: ${{ inputs.requiresCombined }}
+      version: ${{ needs.unpack_inputs.outputs.version }}
+      projectName: ${{ needs.unpack_inputs.outputs.projectName }}
+      deployTargets: ${{ needs.unpack_inputs.outputs.validDeployTargets }}
+      hasCombinedArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
       artifactSource: build
     secrets: inherit
 
@@ -157,18 +149,22 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   notify:
     name: Notify
-    needs: [ build, release, deploy ]
+    needs: 
+      - unpack_inputs
+      - build
+      - release
+      - deploy
     if: > 
       always() && 
-      inputs.testsOnly != 'true' &&
+      needs.unpack_inputs.outputs.testsOnly != 'true' &&
       (
-        inputs.buildType == 'release' || 
-        inputs.buildType == 'release_candidate'
+        needs.unpack_inputs.outputs.buildType == 'release' || 
+        needs.unpack_inputs.outputs.buildType == 'release_candidate'
       )
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
       releaseResult: ${{ needs.release.result }}
       releaseErrorMessage: ${{ needs.release.outputs.releaseErrorMessage }}
       deployResult: ${{ needs.deploy.result }}
-      version: ${{ inputs.version }}
+      version: ${{ needs.unpack_inputs.outputs.version }}
     secrets: inherit

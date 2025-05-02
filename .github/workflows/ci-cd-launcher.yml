@@ -176,14 +176,18 @@ jobs:
         run: |
           gh workflow run ci-cd-pipeline.yml \
             --ref "${{ github.ref }}" \
-            --field projectName="${{ vars.PROJECT_NAME }}" \
-            --field triggeredBy="${{ needs.prepare_metadata.outputs.triggeredBy }}" \
-            --field skipTests="${{ needs.prepare_metadata.outputs.skipTests }}" \
-            --field testsOnly="${{ needs.prepare_metadata.outputs.testsOnly }}" \
-            --field buildType="${{ needs.prepare_metadata.outputs.buildType }}" \
-            --field version="${{ needs.prepare_metadata.outputs.version }}" \
-            --field retentionDays="${{ needs.prepare_metadata.outputs.retentionDays }}" \
-            --field targetPlatforms="${{ needs.prepare_metadata.outputs.targetPlatforms }}" \
-            --field validDeployTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.validDeployTargets }}')" \
-            --field requiresCombined="${{ needs.prepare_metadata.outputs.requiresCombined }}" \
-            --field skipPerPlatform="${{ needs.prepare_metadata.outputs.skipPerPlatform }}"
+            --field metadataConfig="$(jq -c -n \
+              --arg projectName "${{ vars.PROJECT_NAME }}" \
+              --arg triggeredBy "${{ needs.prepare_metadata.outputs.triggeredBy }}" \
+              --arg skipTests "${{ needs.prepare_metadata.outputs.skipTests }}" \
+              --arg testsOnly "${{ needs.prepare_metadata.outputs.testsOnly }}" \
+              --arg buildType "${{ needs.prepare_metadata.outputs.buildType }}" \
+              --arg version "${{ needs.prepare_metadata.outputs.version }}" \
+              --arg retentionDays "${{ needs.prepare_metadata.outputs.retentionDays }}" \
+              '{projectName: $projectName, triggeredBy: $triggeredBy, skipTests: $skipTests, testsOnly: $testsOnly, buildType: $buildType, version: $version, retentionDays: $retentionDays}')" \
+            --field artifactConfig="$(jq -c -n \
+              --arg targetPlatforms "${{ needs.prepare_metadata.outputs.targetPlatforms }}" \
+              --arg validDeployTargets "${{ needs.prepare_metadata.outputs.validDeployTargets }}" \
+              --arg requiresCombined "${{ needs.prepare_metadata.outputs.requiresCombined }}" \
+              --arg skipPerPlatform "${{ needs.prepare_metadata.outputs.skipPerPlatform }}" \
+              '{targetPlatforms: $targetPlatforms, validDeployTargets: $validDeployTargets, requiresCombined: $requiresCombined, skipPerPlatform: $skipPerPlatform}')"
