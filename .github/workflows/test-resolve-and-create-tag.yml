@@ -8,6 +8,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write
+
 jobs:
   test-create-tag:
     uses: ./.github/workflows/resolve-and-create-tag.yml
