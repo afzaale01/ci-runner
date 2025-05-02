@@ -21,10 +21,16 @@ jobs:
       - name: Install GitHub CLI
         run: sudo apt-get install gh -y
 
+      - name: Authenticate GitHub CLI with PAT
+        env:
+          GH_TOKEN: ${{ secrets.CICD_PAT }}  # <-- MUST be a PAT with 'repo' + 'workflow' scopes
+        run: |
+          echo "${GH_TOKEN}" | gh auth login --with-token
+
       - name: Trigger downstream workflow using gh
         env:
-          GITHUB_TOKEN: ${{ secrets.CICD_PAT }} # You **must** use a PAT here, not GITHUB_TOKEN
+          GH_TOKEN: ${{ secrets.CICD_PAT }}  # gh CLI uses this env var
         run: |
           gh workflow run resolve-and-create-tag.yml \
-            --ref "${{ github.ref }}" \
+            --ref main \
             --field version="${{ inputs.version }}"
