@@ -6,6 +6,9 @@ on:
       deployTargets:
         type: string
         required: true
+      targetPlatforms:
+        type: string
+        required: false
       buildType:
         type: string
         required: false
@@ -129,6 +132,40 @@ jobs:
             BUILD_TYPE="${{ inputs.buildType || 'preview' }}"
           fi
           echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
+
+  resolve_target_platforms:
+    name: Resolve Target Platforms
+    needs:
+      - resolve_build_type
+    runs-on: ubuntu-latest
+    outputs:
+      targetPlatforms: ${{ steps.set.outputs.targetPlatforms }}
+    steps:
+      - id: set
+        run: |
+          INPUT_PLATFORMS='${{ inputs.targetPlatforms || '' }}'
+          BUILD_TYPE='${{ needs.resolve_build_type.outputs.buildType }}'
+
+          DEFAULT_RELEASE_CANDIDATE='${{ vars.TARGET_PLATFORMS_RC || '[]' }}'
+          DEFAULT_PREVIEW='${{ vars.TARGET_PLATFORMS_PREVIEW || '[]' }}'
+          DEFAULT_RELEASE='${{ vars.TARGET_PLATFORMS_RELEASE || '[]' }}'
+
+          # Validate input (basic check: non-empty + valid JSON array)
+          if [[ -n "$INPUT_PLATFORMS" ]] && echo "$INPUT_PLATFORMS" | jq -e type >/dev/null 2>&1; then
+            CHOSEN="$INPUT_PLATFORMS"
+            echo "✅ Using provided input targetPlatforms: $CHOSEN"
+          else
+            if [[ "$BUILD_TYPE" == "release" ]]; then
+              CHOSEN="$DEFAULT_RELEASE"
+            elif [[ "$BUILD_TYPE" == "release_candidate" ]]; then
+              CHOSEN="$DEFAULT_RELEASE_CANDIDATE"
+            else
+              CHOSEN="$DEFAULT_PREVIEW"
+            fi
+            echo "ℹ️ Using default targetPlatforms for buildType '$BUILD_TYPE': $CHOSEN"
+          fi
+
+          echo "targetPlatforms=$CHOSEN" >> "$GITHUB_OUTPUT"
 
   resolve_retention_days:
     name: Resolve Retention Days
