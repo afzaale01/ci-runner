@@ -122,6 +122,8 @@ jobs:
         run: sudo apt-get install gh -y
 
       - name: Trigger downstream pipeline
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           gh workflow run ci-cd-pipeline.yml \
             --ref "${{ github.ref }}" \
