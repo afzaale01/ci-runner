@@ -19,6 +19,7 @@ on:
         default: "false"
         type: choice
         options:
+          - 'default'
           - 'true'
           - 'false'
       deployTargets:

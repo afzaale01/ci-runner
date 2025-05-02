@@ -96,21 +96,30 @@ jobs:
     steps:
       - id: detect
         run: |
-          # Default to false
+          INPUT_SKIP_TESTS="${{ inputs.skipTests || 'default' }}"
           SKIP_TESTS=false
 
-          # Check vars.EXCLUDE_UNITY_TESTS unless TESTS_ONLY
-          if [ "$TESTS_ONLY" = "true" ]; then
-            SKIP_TESTS="false"
-          elif [[ "${{ vars.EXCLUDE_UNITY_TESTS }}" == "true" ]]; then
-            SKIP_TESTS=true
-          fi
-
-          # Check commit message if this is a push event
-          if [[ "$GITHUB_EVENT_NAME" == "push" && -f "$GITHUB_EVENT_PATH" ]]; then
-            COMMIT_MSG=$(jq -r .head_commit.message < "$GITHUB_EVENT_PATH")
-            if [[ "$COMMIT_MSG" == *"[skip tests]"* ]]; then
+          # Prioritize explicit 'true' or 'false' input
+          if [[ "$INPUT_SKIP_TESTS" == "true" || "$INPUT_SKIP_TESTS" == "false" ]]; then
+            SKIP_TESTS="$INPUT_SKIP_TESTS"
+            echo "✅ Explicit input.skipTests provided: $SKIP_TESTS"
+          else
+            # Auto-detect logic when input is 'default' or anything else
+            if [ "$TESTS_ONLY" = "true" ]; then
+              SKIP_TESTS="false"
+              echo "ℹ️ Tests-only mode detected, forcing skipTests=false"
+            elif [[ "${{ vars.EXCLUDE_UNITY_TESTS }}" == "true" ]]; then
               SKIP_TESTS=true
+              echo "ℹ️ vars.EXCLUDE_UNITY_TESTS is true, setting skipTests=true"
+            fi
+
+            # Check commit message if this is a push event
+            if [[ "$GITHUB_EVENT_NAME" == "push" && -f "$GITHUB_EVENT_PATH" ]]; then
+              COMMIT_MSG=$(jq -r .head_commit.message < "$GITHUB_EVENT_PATH")
+              if [[ "$COMMIT_MSG" == *"[skip tests]"* ]]; then
+                SKIP_TESTS=true
+                echo "ℹ️ Commit message contains [skip tests], setting skipTests=true"
+              fi
             fi
           fi
 
