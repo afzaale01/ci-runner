@@ -47,3 +47,16 @@ jobs:
         id: set_version
         run: |
           echo "version=${{ steps.create.outputs.version || inputs.version }}" >> "$GITHUB_OUTPUT"
+
+      - name: 📋 Summarize Tagging Info
+        if: always()
+        run: |
+          echo "### 🏷️ Tagging Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Requested Version:** \`${{ inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ steps.check.outputs.exists }}" == 'true' ]]; then
+            echo "- ℹ️ Tag already existed — no new tag created." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ✅ New tag created: \`${{ steps.create.outputs.version || inputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
