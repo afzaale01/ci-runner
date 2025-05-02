@@ -38,11 +38,13 @@ jobs:
     steps:
       - name: Validate required secrets
         run: |
-          REQUIRED_SECRETS=$(echo '${{ inputs.requiredSecrets }}' | jq -r '.[]')
+          REQUIRED_SECRETS=("UNITY_PASSWORD" "ANOTHER_SECRET" "SOME_API_KEY")
           MISSING=0
 
-          for SECRET_NAME in $REQUIRED_SECRETS; do
-            VALUE="${{ secrets[SECRET_NAME] }}"
+          for SECRET_NAME in "${REQUIRED_SECRETS[@]}"; do
+            VALUE_VAR="SECRET_${SECRET_NAME}"
+            VALUE="${!VALUE_VAR}"
+
             if [[ -z "$VALUE" || "$VALUE" == "" ]]; then
               echo "❌ Required secret '$SECRET_NAME' is not set!"
               MISSING=1
@@ -55,6 +57,11 @@ jobs:
             echo "❌ One or more required secrets are missing. Failing..."
             exit 1
           fi
+        env:
+          SECRET_UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          SECRET_ANOTHER_SECRET: ${{ secrets.ANOTHER_SECRET }}
+          SECRET_SOME_API_KEY: ${{ secrets.SOME_API_KEY }}
+
 
   prepare-metadata:
     name: ⏳ Prepare Metadata
