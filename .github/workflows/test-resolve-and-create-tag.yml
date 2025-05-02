@@ -23,7 +23,7 @@ jobs:
 
       - name: Trigger downstream workflow using gh
         env:
-          GH_TOKEN: ${{ secrets.CICD_PAT }} # You **must** use a PAT here, not GITHUB_TOKEN
+          GITHUB_TOKEN: ${{ secrets.CICD_PAT }} # You **must** use a PAT here, not GITHUB_TOKEN
         run: |
           gh workflow run resolve-and-create-tag.yml \
             --ref "${{ github.ref }}" \
