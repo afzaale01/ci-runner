@@ -14,6 +14,9 @@ on:
       metadataConfig:
         type: string
         required: true
+      testDataConfig:
+        type: string
+        required: true
       artifactConfig:
         type: string
         required: true
@@ -35,12 +38,28 @@ jobs:
       retentionDays: ${{ steps.unpack.outputs.retentionDays }}
       requiresCombined: ${{ steps.unpack.outputs.requiresCombined }}
       skipPerPlatform: ${{ steps.unpack.outputs.skipPerPlatform }}
+      unityVersion: ${{ steps.unpack.outputs.unityVersion }}
+      useGitLfs: ${{ steps.unpack.outputs.useGitLfs }}
+      editModePath: ${{ steps.unpack.outputs.editModePath }}
+      playModePath: ${{ steps.unpack.outputs.playModePath }}
+      timeoutMinutes: ${{ steps.unpack.outputs.timeoutMinutes }}
+      quietMode: ${{ steps.unpack.outputs.quietMode }}
     steps:
       - id: unpack
         run: |
           meta='${{ inputs.metadataConfig }}'
           artifact='${{ inputs.artifactConfig }}'
+          testData='${{ inputs.testDataConfig }}'
 
+          #Test Data Config
+          echo "unityVersion=$(echo "$testData" | jq -r .unityVersion)" >> "$GITHUB_OUTPUT"
+          echo "useGitLfs=$(echo "$testData" | jq -r .useGitLfs)" >> "$GITHUB_OUTPUT"
+          echo "editModePath=$(echo "$testData" | jq -r .editModePath)" >> "$GITHUB_OUTPUT"
+          echo "playModePath=$(echo "$testData" | jq -r .playModePath)" >> "$GITHUB_OUTPUT"
+          echo "timeoutMinutes=$(echo "$testData" | jq -r .timeoutMinutes)" >> "$GITHUB_OUTPUT"
+          echo "quietMode=$(echo "$testData" | jq -r .quietMode)" >> "$GITHUB_OUTPUT"
+
+          # Metadata Config
           echo "projectName=$(echo "$meta" | jq -r .projectName)" >> "$GITHUB_OUTPUT"
           echo "triggeredBy=$(echo "$meta" | jq -r .triggeredBy)" >> "$GITHUB_OUTPUT"
           echo "skipTests=$(echo "$meta" | jq -r .skipTests)" >> "$GITHUB_OUTPUT"
@@ -49,6 +68,7 @@ jobs:
           echo "version=$(echo "$meta" | jq -r .version)" >> "$GITHUB_OUTPUT"
           echo "retentionDays=$(echo "$meta" | jq -r .retentionDays)" >> "$GITHUB_OUTPUT"
 
+          # Artifacts Config
           echo "requiresCombined=$(echo "$artifact" | jq -r .requiresCombined)" >> "$GITHUB_OUTPUT"
           echo "skipPerPlatform=$(echo "$artifact" | jq -r .skipPerPlatform)" >> "$GITHUB_OUTPUT"
 
@@ -61,12 +81,12 @@ jobs:
     needs: unpack_inputs
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
-      unityVersion: ${{ vars.UNITY_VERSION || 'auto' }}
-      useGitLfs: ${{ vars.USE_GIT_LFS || 'false' }}
-      editModePath: ${{ vars.UNITY_TESTS_EDITMODE_PATH || 'Assets/Tests/Editor' }}
-      playModePath: ${{ vars.UNITY_TESTS_PLAYMODE_PATH || 'Assets/Tests/PlayMode' }}
-      timeoutMinutes: ${{ fromJson(vars.TIMEOUT_TESTS_IN_MINUTES || '15') }}
-      quietMode: ${{ vars.UNITY_TESTS_QUIET_MODE || 'false' }}
+      unityVersion: ${{ needs.unpack_inputs.outputs.unityVersion }}
+      useGitLfs: ${{ needs.unpack_inputs.outputs.useGitLfs }}
+      editModePath: ${{ needs.unpack_inputs.outputs.editModePath }}
+      playModePath: ${{ needs.unpack_inputs.outputs.playModePath }}
+      timeoutMinutes: ${{ needs.unpack_inputs.outputs.timeoutMinutes }}
+      quietMode: ${{ needs.unpack_inputs.outputs.quietMode }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
