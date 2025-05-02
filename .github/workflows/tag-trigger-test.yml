@@ -1,0 +1,14 @@
+name: Tag Trigger Demo
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
+
+jobs:
+  print-message:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print tag message
+        run: echo "Tag push detected: ${{ github.ref }}"

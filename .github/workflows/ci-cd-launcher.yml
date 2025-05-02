@@ -121,7 +121,7 @@ jobs:
       - name: Install GitHub CLI
         run: sudo apt-get install gh -y
 
-      - name: Use GH CLI to call CI/CD
+      - name: Use GH CLI to call CICD
         env:
           GITHUB_TOKEN: ${{ secrets.CICD_PAT }}
         run: |
