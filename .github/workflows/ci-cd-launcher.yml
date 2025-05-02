@@ -172,6 +172,7 @@ jobs:
         run: |
           gh workflow run ci-cd-pipeline.yml \
             --ref "${{ github.ref }}" \
+            --field projectName="${{ vars.PROJECT_NAME }}" \
             --field triggeredBy="${{ needs.prepare_metadata.outputs.triggeredBy }}" \
             --field skipTests="${{ needs.prepare_metadata.outputs.skipTests }}" \
             --field testsOnly="${{ needs.prepare_metadata.outputs.testsOnly }}" \
