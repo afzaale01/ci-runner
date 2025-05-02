@@ -38,7 +38,7 @@ jobs:
 
       - name: Check if Tag Exists
         id: check
-        run: .github/scripts/release/check-tag-exists.sh "${{ inputs.version }}" "${{ github.repository }}"
+        run: .github/scripts/tagging/check-tag-exists.sh "${{ inputs.version }}" "${{ github.repository }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
