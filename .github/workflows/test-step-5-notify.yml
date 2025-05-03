@@ -117,7 +117,7 @@ jobs:
     with:
       simulateResult: ${{ inputs.releaseResult }}
 
-  notify:
+  test_notify:
     name: Notify
     needs: 
       - prepare_metadata
