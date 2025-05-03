@@ -53,7 +53,7 @@ jobs:
       testsOnly: true
       deployTargets: '[]'
       buildType: 'preview'
-      version: 'vTESTS_ONLY'
+      version: 'vTESTING_TESTS'
 
   test-run-tests:
     name: Test Run Tests
