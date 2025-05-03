@@ -219,7 +219,6 @@ jobs:
       targetPlatforms: ${{ inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
 
-
   resolve_retention_days:
     name: Resolve Retention Days
     needs:
