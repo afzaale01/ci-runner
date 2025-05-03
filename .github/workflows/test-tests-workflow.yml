@@ -18,13 +18,13 @@ on:
           - "false"
       editModePath:
         description: "Relative path to Unity Editor tests"
-        required: false
-        default: ""
+        required: true
+        default: "Assets/Tests/Editor"
         type: string
       playModePath:
         description: "Relative path to Unity PlayMode tests"
-        required: false
-        default: ""
+        required: true
+        default: "Assets/Tests/PlayMode"
         type: string
       timeoutMinutes:
         description: "Minutes until tests fail on timeout"
