@@ -89,14 +89,43 @@ jobs:
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
 
+  dry_tests:
+    uses: ./.github/workflows/dry-tests.yml
+    with:
+      editmodeFailedCount: ${{ inputs.editmodeFailedCount }}
+      editmodeTotalCount: ${{ inputs.editmodeTotalCount }}
+      playmodeFailedCount: ${{ inputs.playmodeFailedCount }}
+      playmodeTotalCount: ${{ inputs.playmodeTotalCount }}
+      quietMode: ${{ inputs.quietMode }}
+
   dry_build:
     name: 🧩 Create Dry-Build
     needs: 
         - prepare_metadata
+        - dry_tests
+    if: ${{ needs.dry_tests.outputs.hasFails == 'false' }}
     uses: ./.github/workflows/dry-build.yml
     with:
       version: ${{ needs.prepare_metadata.outputs.version }}
       projectName: ${{ inputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
+    secrets: inherit
+
+  notify:
+    name: Notify
+    needs: 
+      - prepare_metadata
+      - dry_tests
+      - dry_build
+    uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
+    with:
+      version: ${{ needs.prepare_metadata.outputs.version }}
+      releaseResult: ${{ inputs.releaseResult }}
+      releaseErrorMessage: ${{ needs.release.outputs.releaseErrorMessage || '' }}
+      deployResult: ${{ needs.deploy.result || '' }}
+      testsHasFails: ${{ needs.dry_tests.outputs.hasFails }}
+      testsTotal: ${{ needs.dry_tests.outputs.totalTests }}
+      testsPassed: ${{ needs.dry_tests.outputs.passedTests }}
+      testsFailedNames: ${{ needs.dry_tests.outputs.failedTestNames }}
     secrets: inherit
