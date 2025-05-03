@@ -58,22 +58,6 @@ on:
         required: false
         default: '12'
         type: string
-      releaseResult:
-        description: "Whether release failed or succeeded"
-        required: false
-        default: 'true'
-        type: choice
-        options:
-          - 'true'
-          - 'false'
-      quietMode:
-        description: "Simulate quiet mode"
-        required: false
-        default: 'false'
-        type: choice
-        options:
-          - 'true'
-          - 'false'
 
 permissions:
   contents: write
