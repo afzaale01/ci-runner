@@ -43,6 +43,10 @@ jobs:
       releaseErrorMessage: ${{ inputs.releaseErrorMessage }}
       deployResult: ${{ inputs.deployResult }}
       version: ${{ inputs.version }}
+      testsHasFails: ${{ inputs.testsHasFails }}
+      testsTotal: ${{ inputs.testsTotal }}
+      testsPassed: ${{ inputs.testsPassed }}
+      testsFailedNames: ${{ inputs.testsFailedNames }}
 
   notify:
     if: startsWith(inputs.version, 'v') && !contains(inputs.version, '-preview')

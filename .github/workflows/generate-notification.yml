@@ -15,6 +15,22 @@ on:
       version:
         required: true
         type: string
+      testsHasFails:
+        required: false
+        type: string
+        default: "skipped"
+      testsTotal:
+        required: false
+        type: string
+        default: "0"
+      testsPassed:
+        required: false
+        type: string
+        default: "0"
+      testsFailedNames:
+        required: false
+        type: string
+        default: "Skipped (tests were not run)"
     outputs:
       title:
         description: 'Main notification title'
