@@ -100,8 +100,8 @@ jobs:
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
-  validate_inputs:
-    name: Validate Inputs
+  validate_json_inputs:
+    name: Validate JSON Inputs
     runs-on: ubuntu-latest
     needs: skip_ci
     steps:
@@ -119,19 +119,12 @@ jobs:
             exit 1
           }
 
-      - name: Validate Build Type
-        run: |
-          case '${{ inputs.buildType }}' in
-            preview|release_candidate|release) ;;
-            *) echo "❌ Invalid buildType: ${{ inputs.buildType }}"; exit 1 ;;
-          esac
-
   prepare_metadata:
     name: Prepare Metadata
     needs: 
       - skip_ci
       - validate_repository_inputs
-      - validate_inputs
+      - validate_json_inputs
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
