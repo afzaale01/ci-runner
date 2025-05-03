@@ -118,7 +118,7 @@ jobs:
         run: |
           set +e
           HAS_FAILS="false"
-          FAIL_BLOCK=""
+          FAILED_TESTS_SUMMARY=""
 
           for MODE in EditMode PlayMode; do
             XML=$(find downloaded-results -type f -path "*Unity-${MODE}-*" -name "*.xml" | head -n 1)
@@ -127,11 +127,11 @@ jobs:
               FAILS=$(grep -oP 'test-case[^>]+result="Failed"' "$XML" | grep -oP 'fullname="\K[^"]+')
               if [[ -n "$FAILS" ]]; then
                 HAS_FAILS="true"
-                FAIL_BLOCK+="### ❌ ${MODE} Failed Tests"$'\n'
+                FAILED_TESTS_SUMMARY+="### ❌ ${MODE} Failed Tests"$'\n'
                 while read -r fail; do
-                  FAIL_BLOCK+="- \`$fail\`"$'\n'
+                  FAILED_TESTS_SUMMARY+="- \`$fail\`"$'\n'
                 done <<< "$FAILS"
-                FAIL_BLOCK+=$'\n'
+                FAILED_TESTS_SUMMARY+=$'\n'
               fi
             fi
           done
@@ -142,7 +142,7 @@ jobs:
             echo "<details>" >> $GITHUB_STEP_SUMMARY
             echo "<summary>❌ Failed Tests (details)</summary>" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "$FAIL_BLOCK" >> $GITHUB_STEP_SUMMARY
+            echo "$FAILED_TESTS_SUMMARY" >> $GITHUB_STEP_SUMMARY
             echo "</details>" >> $GITHUB_STEP_SUMMARY
           fi
 
@@ -157,10 +157,8 @@ jobs:
 
           if [[ "$HAS_FAILS" == "true" ]]; then
             echo "failed_test_names<<EOF" >> $GITHUB_OUTPUT
-            echo -e "$FAIL_BLOCK" >> $GITHUB_OUTPUT
+            echo -e "$FAILED_TESTS_SUMMARY" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
           else
             echo "failed_test_names=None" >> $GITHUB_OUTPUT
           fi
-
-          echo "failed_test_names
