@@ -122,8 +122,8 @@ jobs:
       playmodeResult: ${{ needs.run_playmode.outputs.result }}
       playmodeDuration: ${{ needs.run_playmode.outputs.duration }}
 
-  fail_if_tests_failed:
-    name: ❌ Fail On Tests Failed
+  test_failure_gatekeeper:
+    name: 🛑 Stop Pipeline on Failed Tests
     needs: summarize_tests
     runs-on: ubuntu-latest
     if: ${{ needs.summarize_tests.outputs.hasFails == 'true' }}
