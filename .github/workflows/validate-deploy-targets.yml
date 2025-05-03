@@ -101,8 +101,8 @@ jobs:
             fi
           done
 
-          echo "✅ Final valid targets: ${FINAL_VALID[*]}"
-          echo "⚠️ Invalid targets: ${INVALID[*]}"
+          echo "✅ Valid targets: ${FINAL_VALID[*]}"
+          echo "❌ Invalid targets: ${INVALID[*]}"
           echo "⚠️ Skipped (minimum buildType not met): ${SKIPPED_MINIMUM[*]}"
 
           # Safely handle empty FINAL_VALID array
