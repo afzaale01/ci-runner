@@ -1,4 +1,4 @@
-name: 🧪 Test Release Workflow
+name: 🧪 Test - Step 3 Release Workflow
 
 on:
   workflow_dispatch:

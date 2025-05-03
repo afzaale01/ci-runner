@@ -1,4 +1,4 @@
-name: 🧪 Test Tests Workflow
+name: 🧪 Test - Step 1 Tests Workflow
 
 on:
   workflow_dispatch:

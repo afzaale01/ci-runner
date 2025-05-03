@@ -1,4 +1,4 @@
-name: 🧪 Test Prepare Metadata
+name: 🧪 Test - Prepare Metadata Workflow
 
 on:
   workflow_dispatch:
