@@ -53,6 +53,7 @@ See a live WebGL build deployed using this CI/CD pipeline:
 ---
 
 ## 📐 Architecture Overview
+```text
 [ Dispatcher ]
     ↓
 [ Metadata Preparation ]
@@ -63,6 +64,9 @@ See a live WebGL build deployed using this CI/CD pipeline:
     ├── 📦 Release (GitHub Releases for tags/RCs)
     ├── 🌍 Deploy (gh-pages, itch.io, etc.)
     └── 🔔 Notify (Discord, Slack)
+```
+
+
 
 ## 🗂️ Repository Structure
 
