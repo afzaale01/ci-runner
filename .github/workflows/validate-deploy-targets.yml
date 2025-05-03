@@ -128,7 +128,9 @@ jobs:
           echo "────────────────────────────────────"
           if [ -n "$FINAL_VALID_TARGETS" ]; then
             echo "✅ Final Valid Targets:"
-            for v in $FINAL_VALID_TARGETS; do echo "  - $v"; done
+            for v in ${FINAL_VALID_TARGETS[@]}; do
+              echo "  - $v"
+            done
           else
             echo "ℹ️ No valid deploy targets remaining after validation."
           fi
@@ -136,11 +138,15 @@ jobs:
           if [ -n "$INVALID_TARGETS" ]; then
             echo ""
             echo "⚠️ Invalid (Unknown) Targets:"
-            for i in $INVALID_TARGETS; do echo "  - $i"; done
+            for i in ${INVALID_TARGETS[@]}; do
+              echo "  - $i"
+            done
           fi
 
           if [ -n "$SKIPPED_MINIMUM" ]; then
             echo ""
             echo "⚠️ Skipped (Minimum BuildType Not Met):"
-            for s in $SKIPPED_MINIMUM; do echo "  - $s"; done
+            for s in "${SKIPPED_MINIMUM[@]}"; do
+              echo "  - $s"
+            done
           fi
