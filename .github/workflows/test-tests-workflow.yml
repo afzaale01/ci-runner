@@ -9,7 +9,7 @@ on:
         default: ""
         type: string
       useGitLFS:
-        description: "Enable quiet mode to suppress uploads/logs unless tests fail"
+        description: "Use GIT LFS?"
         required: true
         default: "false"
         type: choice
