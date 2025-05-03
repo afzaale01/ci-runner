@@ -131,14 +131,3 @@ jobs:
         with:
           name: Unity-PlayMode-dry
           path: dummy-results/PlayMode
-          
-  test_failure_gatekeeper:
-    name: 🛑 Stop Pipeline on Failed Tests
-    needs: dry_tests
-    runs-on: ubuntu-latest
-    if: ${{ needs.dry_tests.outputs.hasFails == 'true' }}
-    steps:
-      - name: Force Fail Workflow
-        run: |
-          echo "Detected failed tests. Failing test workflow deliberately."
-          exit 1

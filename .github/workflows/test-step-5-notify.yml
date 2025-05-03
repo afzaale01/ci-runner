@@ -111,6 +111,7 @@ jobs:
       - prepare_metadata
       - dry_tests
       - dry_build
+    if: always()
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
       version: ${{ needs.prepare_metadata.outputs.version }}
