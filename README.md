@@ -114,9 +114,7 @@ They can be found under:
 | Variable Name               | Required | Description                                                              |
 |----------------------------|----------|--------------------------------------------------------------------------|
 | `DEPLOY_TARGETS`            | ✅        | Deployment targets (JSON array)                                          |
-| `TARGET_PLATFORMS_PREVIEW`  | ✅        | Preview build platforms (JSON)                                           |
-| `TARGET_PLATFORMS_RELEASE`  | ✅        | Release build platforms (JSON)                                           |
-| `TARGET_PLATFORMS_RC`       | ✅        | Release candidate build platforms (JSON)                                 |
+| `TARGET_PLATFORMS`          | ✅        | Target build platforms (JSON)                                           |
 | `PROJECT_NAME`              | ✅        | Name of the Unity project                                                |
 | `EXCLUDE_UNITY_TESTS`       | ❌        | Exclude tests from pipeline (`true`/`false`)                             |
 | `FORCE_COMBINE_ARTIFACTS`   | ❌        | Combine all builds into one artifact (e.g. for internal QA or archiving) |
