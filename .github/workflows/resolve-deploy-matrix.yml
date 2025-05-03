@@ -1,5 +1,5 @@
 # .github/workflows/resolve-deploy-matrix.yaml
-name: 🧠 Resolve Deploy Matrix
+name: 🧮 Resolve Deploy Matrix
 
 on:
   workflow_call:
@@ -13,7 +13,7 @@ on:
 
 jobs:
   resolve:
-    name: 🧠 Resolve Deploy Matrix
+    name: Resolve Deploy Matrix
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
