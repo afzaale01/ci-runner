@@ -5,6 +5,6 @@ public class ExampleEditorTest
     [Test]
     public void ThisTestWillPass()
     {
-        Assert.AreEqual(1 + 1, 2);
+        Assert.AreEqual(1 + 1, 3);
     }
 }
