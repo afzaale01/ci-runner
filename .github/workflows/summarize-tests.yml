@@ -117,7 +117,7 @@ jobs:
         id: collect
         run: |
           set +e
-          HAS_FAILS=0
+          HAS_FAILS="false"
           FAIL_BLOCK=""
 
           for MODE in EditMode PlayMode; do
@@ -126,7 +126,7 @@ jobs:
             if [[ -f "$XML" ]]; then
               FAILS=$(grep -oP 'test-case[^>]+result="Failed"' "$XML" | grep -oP 'fullname="\K[^"]+')
               if [[ -n "$FAILS" ]]; then
-                HAS_FAILS=1
+                HAS_FAILS="true"
                 FAIL_BLOCK+="### ❌ ${MODE} Failed Tests"$'\n'
                 while read -r fail; do
                   FAIL_BLOCK+="- \`$fail\`"$'\n'
@@ -137,7 +137,7 @@ jobs:
           done
 
           # Write to GitHub summary (LEAVE THIS AS IS)
-          if [[ "$HAS_FAILS" == "1" ]]; then
+          if [[ "$HAS_FAILS" == "true" ]]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "<details>" >> $GITHUB_STEP_SUMMARY
             echo "<summary>❌ Failed Tests (details)</summary>" >> $GITHUB_STEP_SUMMARY
@@ -155,7 +155,7 @@ jobs:
           echo "total_tests=$TOTAL_TESTS" >> $GITHUB_OUTPUT
           echo "passed_tests=$PASSED_TESTS" >> $GITHUB_OUTPUT
 
-          if [[ "$HAS_FAILS" == "1" ]]; then
+          if [[ "$HAS_FAILS" == "true" ]]; then
             echo "failed_test_names<<EOF" >> $GITHUB_OUTPUT
             echo -e "$FAIL_BLOCK" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT

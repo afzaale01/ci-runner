@@ -126,7 +126,7 @@ jobs:
     name: ❌ Fail On Tests Failed
     needs: summarize_tests
     runs-on: ubuntu-latest
-    if: ${{ needs.summarize_tests.outputs.hasFails != '0' }}
+    if: ${{ needs.summarize_tests.outputs.hasFails == 'true' }}
     steps:
       - name: Force Fail Workflow
         run: |
