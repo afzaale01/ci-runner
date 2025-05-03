@@ -3,18 +3,21 @@ name: 📣 Step 5 - Notify
 on:
   workflow_call:
     inputs:
-      releaseResult:
-        required: true
-        type: string
-      releaseErrorMessage:
-        required: false
-        type: string
-      deployResult:
-        required: true
-        type: string
       version:
         required: true
         type: string
+      releaseResult:
+        required: false
+        type: string
+        default: "skipped"
+      releaseErrorMessage:
+        required: false
+        type: string
+        default: ""
+      deployResult:
+        required: false
+        type: string
+        default: "skipped"
       hasFails:
         required: false
         type: string
