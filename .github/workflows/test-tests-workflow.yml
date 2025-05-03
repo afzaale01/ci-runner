@@ -5,8 +5,8 @@ on:
     inputs:
       unityVersion:
         description: "Specific unity version to test on"
-        required: true
-        default: "auto"
+        required: false
+        default: ""
         type: string
       useGitLFS:
         description: "Enable quiet mode to suppress uploads/logs unless tests fail"
@@ -50,7 +50,7 @@ jobs:
     needs: prepare_metadata
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
-      unityVersion: ${{ inputs.unityVersion }}
+      unityVersion: ${{ inputs.unityVersion != '' && inputs.unityVersion || needs.prepare_metadata.outputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLFS }}
       editModePath: ${{ needs.prepare_metadata.outputs.editModePath }}
       playModePath: ${{ needs.prepare_metadata.outputs.playModePath }}
