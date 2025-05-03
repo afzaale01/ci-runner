@@ -49,7 +49,7 @@ on:
         default: '0'
         type: string
       releaseResult:
-        description: "Whether release failed or succeeded"
+        description: "Whether release succeeded"
         required: false
         default: 'true'
         type: choice
