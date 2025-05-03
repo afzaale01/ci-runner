@@ -13,30 +13,62 @@ on:
         required: true
         default: '["gh-pages"]'
         type: string
-      hasCombinedArtifacts:
-        description: "Whether release has a combined artifacts folder? (true/false)"
-        required: false
-        default: 'false'
-        type: string
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
-  # 1. Redeploy
+  # 1. Validate Release and Artifacts
+  # ─────────────────────────────────────────────────────────────────────────────
+  validate_release:
+    name: Validate Release Tag and Artifacts
+    runs-on: ubuntu-latest
+    outputs:
+      hasCombinedArtifacts: ${{ steps.check.outputs.hasCombinedArtifacts }}
+    steps:
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
+      - name: Check GitHub Release Exists and Artifacts
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Checking if release '${{ inputs.releaseTag }}' exists..."
+          RELEASE_DATA=$(gh api repos/${{ github.repository }}/releases/tags/${{ inputs.releaseTag }} --jq '.')
+          if [ -z "$RELEASE_DATA" ]; then
+            echo "❌ Release '${{ inputs.releaseTag }}' not found."
+            exit 1
+          fi
+
+          echo "✅ Release found."
+
+          # Check for combined artifact (you can adjust the matching pattern here)
+          COMBINED_FOUND=$(echo "$RELEASE_DATA" | jq -r '.assets[]?.name' | grep -c 'combined-artifacts.zip' || true)
+          if [ "$COMBINED_FOUND" -gt 0 ]; then
+            echo "✅ Combined artifact detected."
+            echo "hasCombinedArtifacts=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ℹ️ No combined artifact detected."
+            echo "hasCombinedArtifacts=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 2. Redeploy
   # ─────────────────────────────────────────────────────────────────────────────
   redeploy:
     name: Redeploy from Release
+    needs: validate_release
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
       version: ${{ inputs.releaseTag }}
       projectName: ${{ vars.PROJECT_NAME }}
       deployTargets: ${{ inputs.deployTargets }}
-      hasCombinedArtifacts: ${{ inputs.hasCombinedArtifacts }}
+      hasCombinedArtifacts: ${{ needs.validate_release.outputs.hasCombinedArtifacts }}
       artifactSource: release
     secrets: inherit
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # 2. Notify
+  # 3. Notify
   # ─────────────────────────────────────────────────────────────────────────────
   notify:
     name: Notify
