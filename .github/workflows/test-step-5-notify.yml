@@ -81,6 +81,8 @@ jobs:
 
   dry_tests:
     name: 📋 Create Dry-Tests
+    needs: 
+        - prepare_metadata
     uses: ./.github/workflows/dry-tests.yml
     with:
       editmodeFailedCount: ${{ inputs.editmodeFailedCount }}
