@@ -139,14 +139,8 @@ jobs:
           # Write outputs for downstream
           echo "has_fails=$HAS_FAILS" >> $GITHUB_OUTPUT
 
-          # Safely extract numbers (default to 0)
-          EDIT_TOTAL=$(echo "${{ inputs.editmodeTotal }}" | grep -Eo '[0-9]+' || echo 0)
-          PLAY_TOTAL=$(echo "${{ inputs.playmodeTotal }}" | grep -Eo '[0-9]+' || echo 0)
-          EDIT_PASSED=$(echo "${{ inputs.editmodePassed }}" | grep -Eo '[0-9]+' || echo 0)
-          PLAY_PASSED=$(echo "${{ inputs.playmodePassed }}" | grep -Eo '[0-9]+' || echo 0)
-
-          TOTAL_TESTS=$(( EDIT_TOTAL + PLAY_TOTAL ))
-          PASSED_TESTS=$(( EDIT_PASSED + PLAY_PASSED ))
+          TOTAL_TESTS=$(( ${{ inputs.editmodeTotal }} + ${{ inputs.playmodeTotal }} ))
+          PASSED_TESTS=$(( ${{ inputs.editmodePassed }} + ${{ inputs.playmodePassed }} ))
 
           echo "total_tests=$TOTAL_TESTS" >> $GITHUB_OUTPUT
           echo "passed_tests=$PASSED_TESTS" >> $GITHUB_OUTPUT
