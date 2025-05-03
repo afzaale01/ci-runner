@@ -299,11 +299,14 @@ jobs:
       version: ${{ inputs.version }}
 
   validate_deploy_targets:
-    name: Validate Deploy Targets    
-    needs: detect_tests_only
+    name: Validate Deploy Targets
+    needs: 
+      - resolve_build_type
+      - detect_tests_only
     if: needs.detect_tests_only.outputs.testsOnly == 'false'
     uses: ./.github/workflows/validate-deploy-targets.yml
     with:
+      buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       deployTargets: ${{ inputs.deployTargets }}
 
   analyze_artifact_strategy:

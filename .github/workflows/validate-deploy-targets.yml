@@ -3,6 +3,9 @@ name: 📚 Validate Deploy Targets
 on:
   workflow_call:
     inputs:
+      buildType:
+        type: string
+        required: true
       deployTargets:
         type: string
         required: true
@@ -32,8 +35,6 @@ jobs:
           if ! echo "$RAW_INPUT" | jq empty 2>/dev/null; then
             echo "❌ Invalid JSON in deployTargets input!"
             echo "validTargets=[]" >> $GITHUB_OUTPUT
-            echo "VALID_TARGETS=" >> $GITHUB_ENV
-            echo "INVALID_TARGETS=" >> $GITHUB_ENV
             echo "skipRest=true" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -42,8 +43,6 @@ jobs:
           if [ "$(echo "$RAW_INPUT" | jq 'length')" -eq 0 ]; then
             echo "ℹ️ No deploy targets provided (empty array). Skipping validation."
             echo "validTargets=[]" >> $GITHUB_OUTPUT
-            echo "VALID_TARGETS=" >> $GITHUB_ENV
-            echo "INVALID_TARGETS=" >> $GITHUB_ENV
             echo "skipRest=true" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -51,17 +50,14 @@ jobs:
           echo "✅ Input is non-empty and valid JSON. Proceeding..."
           echo "skipRest=false" >> $GITHUB_OUTPUT
 
-      - name: 📁 Checkout repo
-        if: steps.early-check.outputs.skipRest != 'true'
-        uses: actions/checkout@v4
-
-      - name: ⚙️ Filter Valid Targets
+      - name: ⚙️ Validate Targets and Minimum Build Type
         id: filter
         if: steps.early-check.outputs.skipRest != 'true'
         run: |
           RAW_INPUT='${{ inputs.deployTargets }}'
           CONFIG_FILE=".github/config/deploy-targets.json"
           FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
+          BUILD_TYPE="${{ inputs.buildType }}"
 
           echo "🔍 Checking for local config file..."
           if [ -f "$CONFIG_FILE" ]; then
@@ -72,53 +68,79 @@ jobs:
             curl -sSL "$FALLBACK_URL" -o "$CONFIG_FILE"
           fi
 
-          VALID_KEYS=$(jq -r 'keys[]' "$CONFIG_FILE")
-          echo "📚 Valid targets from config: $(echo "$VALID_KEYS" | paste -sd ' ' -)"
+          # Define build type rank
+          case "$BUILD_TYPE" in
+            preview) BUILD_RANK=1 ;;
+            release_candidate) BUILD_RANK=2 ;;
+            release) BUILD_RANK=3 ;;
+            *) echo "❌ Unknown build type: $BUILD_TYPE"; exit 1 ;;
+          esac
 
-          INPUTS=$(echo "$RAW_INPUT" | jq -r '.[]')
-          VALID=()
+          FINAL_VALID=()
           INVALID=()
+          SKIPPED_MINIMUM=()
 
-          for TARGET in $INPUTS; do
-            if echo "$VALID_KEYS" | grep -qx "$TARGET"; then
-              VALID+=("$TARGET")
+          for TARGET in $(echo "$RAW_INPUT" | jq -r '.[]'); do
+            if jq -e --arg key "$TARGET" '.[$key]' "$CONFIG_FILE" >/dev/null; then
+              MIN_TYPE=$(jq -r --arg key "$TARGET" '.[$key].minimumBuildType' "$CONFIG_FILE")
+
+              case "$MIN_TYPE" in
+                preview) MIN_RANK=1 ;;
+                release_candidate) MIN_RANK=2 ;;
+                release) MIN_RANK=3 ;;
+                *) echo "❌ Unknown minimumBuildType for $TARGET: $MIN_TYPE"; exit 1 ;;
+              esac
+
+              if [ "$BUILD_RANK" -ge "$MIN_RANK" ]; then
+                FINAL_VALID+=("$TARGET")
+              else
+                SKIPPED_MINIMUM+=("$TARGET (requires $MIN_TYPE)")
+              fi
             else
               INVALID+=("$TARGET")
             fi
           done
 
-          echo "✅ Valid targets: ${VALID[*]}"
+          echo "✅ Final valid targets: ${FINAL_VALID[*]}"
           echo "⚠️ Invalid targets: ${INVALID[*]}"
+          echo "⚠️ Skipped (minimum buildType not met): ${SKIPPED_MINIMUM[*]}"
 
-          # Output validTargets as JSON array for outputs
-          json=$(printf '%s\n' "${VALID[@]}" | jq -R . | jq -s .)
+          # Output validTargets as JSON array
+          json=$(printf '%s\n' "${FINAL_VALID[@]}" | jq -R . | jq -s .)
           echo "validTargets<<EOF" >> $GITHUB_OUTPUT
           echo "$json" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
           # Export for summary step
-          echo "VALID_TARGETS=${VALID[*]}" >> $GITHUB_ENV
+          echo "FINAL_VALID_TARGETS=${FINAL_VALID[*]}" >> $GITHUB_ENV
           echo "INVALID_TARGETS=${INVALID[*]}" >> $GITHUB_ENV
+          echo "SKIPPED_MINIMUM=${SKIPPED_MINIMUM[*]}" >> $GITHUB_ENV
 
       - name: 📋 Summary of Target Validation
         if: always()
         run: |
-          # Safety fallback: define vars if they're unset
-          VALID_TARGETS="${VALID_TARGETS:-}"
+          FINAL_VALID_TARGETS="${FINAL_VALID_TARGETS:-}"
           INVALID_TARGETS="${INVALID_TARGETS:-}"
+          SKIPPED_MINIMUM="${SKIPPED_MINIMUM:-}"
 
           echo ""
           echo "📋 Deploy Target Validation Summary"
           echo "────────────────────────────────────"
-          if [ -n "$VALID_TARGETS" ]; then
-            echo "✅ Valid Targets:"
-            for v in $VALID_TARGETS; do echo "  - $v"; done
+          if [ -n "$FINAL_VALID_TARGETS" ]; then
+            echo "✅ Final Valid Targets:"
+            for v in $FINAL_VALID_TARGETS; do echo "  - $v"; done
           else
-            echo "ℹ️ No valid deploy targets found."
+            echo "ℹ️ No valid deploy targets remaining after validation."
           fi
 
           if [ -n "$INVALID_TARGETS" ]; then
             echo ""
-            echo "⚠️ Invalid Targets:"
+            echo "⚠️ Invalid (Unknown) Targets:"
             for i in $INVALID_TARGETS; do echo "  - $i"; done
+          fi
+
+          if [ -n "$SKIPPED_MINIMUM" ]; then
+            echo ""
+            echo "⚠️ Skipped (Minimum BuildType Not Met):"
+            for s in $SKIPPED_MINIMUM; do echo "  - $s"; done
           fi
