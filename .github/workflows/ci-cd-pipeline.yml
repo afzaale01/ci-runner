@@ -194,8 +194,8 @@ jobs:
       releaseResult: ${{ needs.release.result }}
       releaseErrorMessage: ${{ needs.release.outputs.releaseErrorMessage }}
       deployResult: ${{ needs.deploy.result }}
-      testHasFails: ${{ needs.run_tests.outputs.hasFails }}
-      testTotal: ${{ needs.run_tests.outputs.totalTests }}
-      testPassed: ${{ needs.run_tests.outputs.passedTests }}
-      testFailedList: ${{ needs.run_tests.outputs.failedTestNames }}
+      testsHasFails: ${{ needs.run_tests.outputs.hasFails }}
+      testsTotal: ${{ needs.run_tests.outputs.totalTests }}
+      testsPassed: ${{ needs.run_tests.outputs.passedTests }}
+      testsFailedList: ${{ needs.run_tests.outputs.failedTestNames }}
     secrets: inherit
