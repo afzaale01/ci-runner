@@ -18,7 +18,7 @@ on:
 
 jobs:
   summarize:
-    name: 📄 Deployment Summary
+    name: 📄 Summarize Deployment Results
     runs-on: ubuntu-latest
     steps:
       - name: 👅 Download All Deployment Result Files

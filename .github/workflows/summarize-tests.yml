@@ -54,6 +54,7 @@ on:
 
 jobs:
   summarize:
+    name: 📄 Summarize Tests Results
     runs-on: ubuntu-latest
     outputs:
       has_fails: ${{ steps.collect.outputs.has_fails }}
