@@ -20,20 +20,20 @@ jobs:
     steps:
       - name: Validate Required GitHub Variables
         run: |
-          VARS=$(echo '${{ inputs.requiredVariables }}' | jq -r '.[]')
-          VALUE='${{ toJson(vars) }}'
-          ERRORS=()
+          REQUIRED_VARIABLES=$(echo '${{ inputs.requiredVariables }}' | jq -r '.[]')
+          ALL_VARIABLES_JSON='${{ toJson(vars) }}'
+          MISSING_VARIABLES=()
       
-          for VAR in $VARS; do
-            if ! echo "$VALUE" | jq -e --arg key "$VAR" 'has($key)' > /dev/null; then
-              ERRORS+=("$VAR")
+          for VARIABLE in $REQUIRED_VARIABLES; do
+            if ! echo "$ALL_VARIABLES_JSON" | jq -e --arg key "$VARIABLE" 'has($key)' > /dev/null; then
+              MISSING_VARIABLES+=("$VARIABLE")
             fi
           done
       
-          if [[ ${#ERRORS[@]} -gt 0 ]]; then
+          if [[ ${#MISSING_VARIABLES[@]} -gt 0 ]]; then
             echo "❌ Missing required GitHub Variables:"
-            for V in "${ERRORS[@]}"; do
-              echo "  - $V"
+            for VARIABLE in "${MISSING_VARIABLES[@]}"; do
+              echo "  - $VARIABLE"
             done
             exit 1
           fi
