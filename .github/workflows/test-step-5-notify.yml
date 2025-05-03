@@ -109,6 +109,14 @@ jobs:
     with:
       simulateResult: ${{ inputs.releaseResult }}
 
+  dry_deploy:
+    name: 🌍 Create Dry-Deploy
+    needs: [prepare_metadata, dry_build, dry_tests]
+    uses: ./.github/workflows/dry-deploy.yml
+    with:
+      deployTargets: ${{ inputs.deployTargets }}
+      successfulTargets: '["itch.io", "gh-pages"]'
+
   test_notify:
     name: Notify
     needs: 
@@ -122,7 +130,7 @@ jobs:
       version: ${{ needs.prepare_metadata.outputs.version }}
       releaseResult: ${{ inputs.releaseResult }}
       releaseErrorMessage: ${{ needs.dry_release.outputs.releaseErrorMessage }}
-      deployResult: ${{ needs.deploy.result || '' }}
+      deployResult: ${{ needs.dry_deploy.result || '' }}
       testsHasFails: ${{ needs.dry_tests.outputs.hasFails }}
       testsTotal: ${{ needs.dry_tests.outputs.totalTests }}
       testsPassed: ${{ needs.dry_tests.outputs.passedTests }}
