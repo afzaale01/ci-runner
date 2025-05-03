@@ -197,5 +197,5 @@ jobs:
       testsHasFails: ${{ needs.run_tests.outputs.hasFails }}
       testsTotal: ${{ needs.run_tests.outputs.totalTests }}
       testsPassed: ${{ needs.run_tests.outputs.passedTests }}
-      testsFailedList: ${{ needs.run_tests.outputs.failedTestNames }}
+      testsFailedNames: ${{ needs.run_tests.outputs.failedTestNames }}
     secrets: inherit
