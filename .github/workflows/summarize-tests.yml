@@ -5,54 +5,39 @@ description: Summarizes the results of EditMode and PlayMode Unity test jobs int
 on:
   workflow_call:
     inputs:
-      projectName:
-        required: false
-        type: string
-        default: "My Unity Project"
       quietMode:
-        required: false
+        required: true
         type: string
-        default: "false"
       editmodeFailed:
-        required: false
+        required: true
         type: string
-        default: "false"
       playmodeFailed:
-        required: false
+        required: true
         type: string
-        default: "false"
       editmodeTotal:
-        required: false
+        required: true
         type: string
-        default: ""
       editmodePassed:
-        required: false
+        required: true
         type: string
-        default: ""
       editmodeResult:
-        required: false
+        required: true
         type: string
-        default: ""
       editmodeDuration:
-        required: false
+        required: true
         type: string
-        default: ""
       playmodeTotal:
-        required: false
+        required: true
         type: string
-        default: ""
       playmodePassed:
-        required: false
+        required: true
         type: string
-        default: ""
       playmodeResult:
-        required: false
+        required: true
         type: string
-        default: ""
       playmodeDuration:
-        required: false
+        required: true
         type: string
-        default: ""
     outputs:
       hasFails:
         description: "Whether any test failures occurred"
