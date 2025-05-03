@@ -16,10 +16,10 @@ on:
     outputs:
       deployResult:
         description: "Overall simulated deploy result (success if all succeed, fail otherwise)"
-        value: ${{ jobs.dry.outputs.deployResult }}
+        value: ${{ jobs.dry_deploy.outputs.deployResult }}
 
 jobs:
-  dry:
+  dry_deploy:
     name: 🛠 Simulate Deployments
     runs-on: ubuntu-latest
     outputs:
