@@ -24,7 +24,7 @@ on:
       targetPlatforms:
         description: "JSON array of platforms to build"
         required: true
-        default: '["WebGL", "StandaloneWindows64"]'
+        default: '["Android", "WebGL", "StandaloneLinux64", "StandaloneWindows", "StandaloneWindows64", "StandaloneOSX", "iOS"]'
       deployTargets:
         description: "JSON array of deploy targets (e.g. [\"itch.io\",\"s3\"])"
         required: true
