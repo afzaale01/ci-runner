@@ -67,7 +67,9 @@ jobs:
 
   test_deploy:
     name: Test Deploy
-    needs: [ prepare_metadata ]
+    needs: 
+        - prepare_metadata
+        - dry_build
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: ${{ inputs.buildType }}
