@@ -23,7 +23,7 @@ jobs:
     name: 🛠 Simulate Deployments
     runs-on: ubuntu-latest
     outputs:
-      deployResult: ${{ steps.collect.outputs.deployResult }}
+      deployResult: ${{ steps.simulate.outputs.deployResult }}
     steps:
       - name: Simulate Deployments
         id: simulate
@@ -45,13 +45,8 @@ jobs:
               OVERALL_SUCCESS=false
             fi
 
-            cat <<EOF > simulated-deploy-results/${TARGET}.json
-{
-  "target": "$TARGET",
-  "status": "$STATUS",
-  "note": "$NOTE"
-}
-EOF
+            printf '{\n  "target": "%s",\n  "status": "%s",\n  "note": "%s"\n}\n' \
+            "$TARGET" "$STATUS" "$NOTE" > simulated-deploy-results/${TARGET}.json
           done
 
           echo "Overall deploy result: $OVERALL_SUCCESS"
