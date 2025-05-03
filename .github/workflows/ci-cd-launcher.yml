@@ -148,7 +148,7 @@ jobs:
         run: |
           gh workflow run ci-cd-pipeline.yml \
             --ref "${{ github.ref }}" \
-            --field targetPlatforms="${{ needs.prepare_metadata.outputs.targetPlatforms }}" \
+            --field targetPlatforms="$(printf '%s' '${{ needs.prepare_metadata.outputs.targetPlatforms }}')" \
             --field validDeployTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.validDeployTargets }}')" \
             --field metadataConfig="$(jq -c -n \
               --arg projectName "${{ vars.PROJECT_NAME }}" \
