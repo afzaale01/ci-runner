@@ -52,13 +52,26 @@ See a live WebGL build deployed using this CI/CD pipeline:
 
 ---
 
+## 📐 Architecture Overview
+[ Dispatcher ]
+    ↓
+[ Metadata Preparation ]
+    ↓
+[ CI/CD Pipeline ]
+    ├── 🧪 Tests (EditMode + PlayMode)
+    ├── 🛠️ Build (matrix by platform)
+    ├── 📦 Release (GitHub Releases for tags/RCs)
+    ├── 🌍 Deploy (gh-pages, itch.io, etc.)
+    └── 🔔 Notify (Discord, Slack)
+
 ## 🗂️ Repository Structure
 
 ### 🧠 Main Workflows
 
 | File | Purpose |
 |------|---------|
-| [`ci-cd-full.yml`](.github/workflows/ci-cd-full.yml) | Full pipeline: test, build, release, deploy & notify |
+| [`ci-cd-launcher.yml`](.github/workflows/ci-cd-launcher.yml) | Entry-point launcher: validates inputs, prepares metadata, and triggers the full CI/CD pipeline |
+| [`ci-cd-pipeline.yml`](.github/workflows/ci-cd-pipeline.yml) | Full pipeline: test, build, release, deploy & notify |
 
 ### 🤩 Modular Reusable Templates
 
