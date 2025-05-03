@@ -1,0 +1,107 @@
+name: 🌀 Dry Build
+
+on:
+  workflow_call:
+    inputs:
+      projectName:
+        description: "The name of the built project (placeholder only)"
+        default: "My_Project"
+        type: string
+        required: false
+      version:
+        description: "Optional version string (e.g. v1.2.3 or v1.2.3-rc.1)"
+        required: true
+        type: string
+      targetPlatforms:
+        description: "JSON array of platforms to simulate"
+        type: string
+        default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+        required: false
+      retentionDays:
+        description: "How many days to keep the uploaded placeholder artifacts"
+        type: number
+        default: 7
+        required: false
+      combineArtifacts:
+        description: "Whether to combine all simulated builds into a versioned folder"
+        type: string
+        default: "false"
+        required: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  filter_platforms:
+    uses: avalin/unity-ci-templates/.github/workflows/validate-target-platforms.yml@main
+    with:
+      targetPlatforms: ${{ inputs.targetPlatforms }}
+
+  generate_matrix:
+    name: 🧮 Generate Dry Build Matrix
+    runs-on: ubuntu-latest
+    needs: [ filter_platforms ]
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: 🧮 Create Dry Build Matrix
+        id: set-matrix
+        run: |
+          grouped='${{ needs.filter_platforms.outputs.validTargetPlatforms }}'
+          echo "📦 Grouped platforms: $grouped"
+      
+          matrix=$(echo "$grouped" | jq -c '
+            to_entries
+            | map(.value[] as $p | { os: .key, targetPlatform: $p })
+          ')
+      
+          echo "matrix<<EOF" >> $GITHUB_OUTPUT
+          echo "$matrix" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  dry_build_platforms:
+    name: 🏗️ Simulate Build for ${{ matrix.targetPlatform }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs: [ generate_matrix ]
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.generate_matrix.outputs.matrix) }}
+    steps:
+      - name: Create Placeholder Folder Structure
+        run: |
+          VERSION="${{ inputs.version }}"
+          PLATFORM="${{ matrix.targetPlatform }}"
+          DEST="${{ inputs.projectName }}-${VERSION}/${PLATFORM}"
+
+          echo "Creating dry build structure at $DEST"
+          mkdir -p "$DEST"
+          echo "This is a dry build placeholder for $PLATFORM, version $VERSION" > "$DEST/README.txt"
+
+      - name: Upload Placeholder Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.projectName }}-${{ inputs.version }}-${{ matrix.targetPlatform }}
+          path: ${{ inputs.projectName }}-${{ inputs.version }}/${{ matrix.targetPlatform }}/*
+          retention-days: ${{ inputs.retentionDays }}
+
+  combine_builds:
+    if: ${{ inputs.combineArtifacts == 'true' }}
+    needs: [ dry_build_platforms ]
+    uses: ./.github/workflows/combine-builds.yml
+    with:
+      projectName: ${{ inputs.projectName }}
+      version: ${{ inputs.version }}
+      retentionDays: ${{ inputs.retentionDays }}
+
+  summarize_builds:
+    needs: [ filter_platforms, dry_build_platforms, combine_builds ]
+    if: always()
+    uses: ./.github/workflows/summarize-builds.yml
+    with:
+      projectName: ${{ inputs.projectName }}
+      version: ${{ inputs.version }}
+      groupedPlatforms: ${{ needs.filter_platforms.outputs.validTargetPlatforms }}
+      combineRequested: ${{ inputs.combineArtifacts }}
+      combinedCreated: ${{ (needs.combine_builds.result == 'success' && needs.combine_builds.outputs.created) || 'false' }}
