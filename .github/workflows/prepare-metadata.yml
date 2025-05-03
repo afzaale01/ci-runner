@@ -268,7 +268,9 @@ jobs:
           done
 
           echo "✅ Final valid targetPlatforms: $VALIDATED_PLATFORMS"
-          echo "targetPlatforms=$VALIDATED_PLATFORMS" >> "$GITHUB_OUTPUT"
+          echo "targetPlatforms<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$VALIDATED_PLATFORMS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
   resolve_retention_days:
     name: Resolve Retention Days
