@@ -121,3 +121,14 @@ jobs:
       playmodePassed: ${{ needs.run_playmode.outputs.passed }}
       playmodeResult: ${{ needs.run_playmode.outputs.result }}
       playmodeDuration: ${{ needs.run_playmode.outputs.duration }}
+
+  fail_if_tests_failed:
+    name: ❌ Fail On Tests Failed
+    needs: summarize_tests
+    runs-on: ubuntu-latest
+    if: ${{ needs.summarize_tests.outputs.hasFails != '0' }}
+    steps:
+      - name: Force Fail Workflow
+        run: |
+          echo "Detected failed tests. Failing test workflow deliberately."
+          exit 1
