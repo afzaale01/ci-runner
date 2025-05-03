@@ -11,10 +11,10 @@ on:
     outputs:
       releaseErrorMessage:
         description: "Simulated release error message"
-        value: ${{ jobs.dry.outputs.releaseErrorMessage }}
+        value: ${{ jobs.dry_release.outputs.releaseErrorMessage }}
 
 jobs:
-  dry:
+  dry_release:
     name: 🧪 Simulate Release
     runs-on: ubuntu-latest
     outputs:
