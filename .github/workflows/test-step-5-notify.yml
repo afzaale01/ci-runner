@@ -80,6 +80,7 @@ jobs:
       version: ${{ inputs.version }}
 
   dry_tests:
+    name: 📋 Create Dry-Tests
     uses: ./.github/workflows/dry-tests.yml
     with:
       editmodeFailedCount: ${{ inputs.editmodeFailedCount }}
