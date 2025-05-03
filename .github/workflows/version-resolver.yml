@@ -1,4 +1,4 @@
-name: 🏷️ Version Resolver
+name: 🔖 Version Resolver
 
 on:
   workflow_call:
@@ -18,7 +18,7 @@ on:
 
 jobs:
   version_resolver:
-    name: 🏷️ Generate Build Version
+    name: 🔖 Generate Build Version
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get_version.outputs.version }}
