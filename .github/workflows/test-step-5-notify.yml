@@ -58,6 +58,14 @@ on:
         required: false
         default: '12'
         type: string
+      releaseResult:
+        description: "Whether release failed or succeeded"
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
       quietMode:
         description: "Simulate quiet mode"
         required: false
@@ -81,22 +89,6 @@ jobs:
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
 
-  dry-tests:
-    name: 📋 Run Dry-Tests
-    needs: prepare_metadata
-    uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
-    with:
-      unityVersion: ${{ needs.prepare_metadata.outputs.unityVersion }}
-      useGitLfs: ${{ needs.prepare_metadata.outputs.useGitLFS }}
-      editModePath: ${{ needs.prepare_metadata.outputs.editModePath }}
-      playModePath: ${{ needs.prepare_metadata.outputs.playModePath }}
-      timeoutMinutes: ${{ fromJson(needs.prepare_metadata.outputs.timeoutMinutesTests) }}
-      quietMode: ${{ needs.prepare_metadata.outputs.quietMode }}
-    secrets:
-      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-
   dry_tests:
     uses: ./.github/workflows/dry-tests.yml
     with:
@@ -108,8 +100,10 @@ jobs:
 
   dry_build:
     name: 🧩 Create Dry-Build
-    needs: prepare_metadata
-    if:  ${{ inputs.artifactSource == 'build' }}
+    needs: 
+        - prepare_metadata
+        - dry_tests
+    if: ${{ needs.dry_tests.outputs.hasFails == 'false' }}
     uses: ./.github/workflows/dry-build.yml
     with:
       version: ${{ needs.prepare_metadata.outputs.version }}
@@ -127,9 +121,9 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
       version: ${{ needs.prepare_metadata.outputs.version }}
-      releaseResult: ${{ needs.release.result }}
-      releaseErrorMessage: ${{ needs.release.outputs.releaseErrorMessage }}
-      deployResult: ${{ needs.deploy.result }}
+      releaseResult: ${{ inputs.releaseResult }}
+      releaseErrorMessage: ${{ needs.release.outputs.releaseErrorMessage || '' }}
+      deployResult: ${{ needs.deploy.result || '' }}
       testsHasFails: ${{ needs.dry_tests.outputs.hasFails }}
       testsTotal: ${{ needs.dry_tests.outputs.totalTests }}
       testsPassed: ${{ needs.dry_tests.outputs.passedTests }}
