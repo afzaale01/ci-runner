@@ -208,6 +208,7 @@ jobs:
             BUILD_TYPE="${{ inputs.buildType || 'preview' }}"
           fi
           echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
+          echo "✅ Resolved buildType: $BUILD_TYPE"
 
   resolve_target_platforms:
     needs:
