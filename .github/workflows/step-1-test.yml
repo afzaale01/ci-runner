@@ -121,17 +121,3 @@ jobs:
       playmodePassed: ${{ needs.run_playmode.outputs.passed }}
       playmodeResult: ${{ needs.run_playmode.outputs.result }}
       playmodeDuration: ${{ needs.run_playmode.outputs.duration }}
-
-  debug_outputs:
-    name: 🛠 Debug Outputs
-    needs: summarize_tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print Summarize Outputs
-        run: |
-          echo "=== Debug Summarize Outputs ==="
-          echo "hasFails: ${{ needs.summarize_tests.outputs.hasFails }}"
-          echo "totalTests: ${{ needs.summarize_tests.outputs.totalTests }}"
-          echo "passedTests: ${{ needs.summarize_tests.outputs.passedTests }}"
-          echo "failedTestNames:"
-          echo "${{ needs.summarize_tests.outputs.failedTestNames }}"
