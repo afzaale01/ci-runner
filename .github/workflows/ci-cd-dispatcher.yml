@@ -1,4 +1,4 @@
-name: 🏗️ CI/CD Launcher
+name: ⚙️ CI/CD Dispatcher
 
 on:
   # Allow manual dispatch with a buildType input

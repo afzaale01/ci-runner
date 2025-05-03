@@ -1,0 +1,55 @@
+name: ✈️ CI/CD Redeploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseTag:
+        description: "The release tag to deploy from (e.g., v1.2.3)"
+        required: true
+        default: 'v0.0.0'
+        type: string
+      deployTargets:
+        description: "JSON array of deploy targets (e.g., [\"s3\", \"firebase\"])"
+        required: true
+        default: '["gh-pages"]'
+        type: string
+      hasCombinedArtifacts:
+        description: "Whether release has a combined artifacts folder? (true/false)"
+        required: false
+        default: 'false'
+        type: string
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 1. Redeploy
+  # ─────────────────────────────────────────────────────────────────────────────
+  redeploy:
+    name: Redeploy from Release
+    uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
+    with:
+      buildType: release
+      version: ${{ inputs.releaseTag }}
+      projectName: ${{ vars.PROJECT_NAME }}
+      deployTargets: ${{ inputs.deployTargets }}
+      hasCombinedArtifacts: ${{ inputs.hasCombinedArtifacts }}
+      artifactSource: release
+    secrets: inherit
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 2. Notify
+  # ─────────────────────────────────────────────────────────────────────────────
+  notify:
+    name: Notify
+    needs: 
+      - redeploy
+    uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
+    with:
+      version: ${{ inputs.releaseTag }}
+      releaseResult: 'success'
+      releaseErrorMessage: ''
+      deployResult: ${{ needs.redeploy.result }}
+      testsHasFails: 0
+      testsTotal: 0
+      testsPassed: 0
+      testsFailedNames: ''
+    secrets: inherit
