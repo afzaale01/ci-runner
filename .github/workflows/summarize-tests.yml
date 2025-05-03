@@ -42,6 +42,15 @@ on:
       hasFails:
         description: "Whether any test failures occurred"
         value: ${{ jobs.summarize.outputs.has_fails }}
+      totalTests:
+        description: "Total number of tests run (combined EditMode + PlayMode)"
+        value: ${{ jobs.summarize.outputs.total_tests }}
+      passedTests:
+        description: "Total number of passed tests (combined EditMode + PlayMode)"
+        value: ${{ jobs.summarize.outputs.passed_tests }}
+      failedTestNames:
+        description: "List of failed test names (multiline string or 'None' if no failures)"
+        value: ${{ jobs.summarize.outputs.failed_test_names }}
 
 jobs:
   summarize:
