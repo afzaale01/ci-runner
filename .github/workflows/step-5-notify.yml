@@ -18,19 +18,19 @@ on:
         required: false
         type: string
         default: "skipped"
-      hasFails:
+      testsHasFails:
         required: false
         type: string
         default: "skipped"
-      totalTests:
+      testsTotal:
         required: false
         type: string
         default: "0"
-      passedTests:
+      testsPassed:
         required: false
         type: string
         default: "0"
-      failedTestNames:
+      testsFailed:
         required: false
         type: string
         default: "Skipped (tests were not run)"
