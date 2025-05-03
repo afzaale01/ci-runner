@@ -100,11 +100,54 @@ jobs:
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
+  validate_inputs:
+    name: Validate Inputs
+    runs-on: ubuntu-latest
+    needs: skip_ci
+    steps:
+      - name: Validate Deploy Targets
+        run: |
+          echo '${{ inputs.deployTargets }}' | jq empty || {
+            echo "❌ deployTargets is not valid JSON"
+            exit 1
+          }
+
+          VALID_TARGETS='["gh-pages","itch.io","appcenter","firebase","s3","steam","testflight","custom-server"]'
+          for t in $(echo '${{ inputs.deployTargets }}' | jq -r '.[]'); do
+            echo "$VALID_TARGETS" | jq -e --arg t "$t" 'index($t)' >/dev/null || {
+              echo "❌ Invalid deploy target: $t"
+              exit 1
+            }
+          done
+
+      - name: Validate Target Platforms
+        run: |
+          echo '${{ inputs.targetPlatforms }}' | jq empty || {
+            echo "❌ targetPlatforms is not valid JSON"
+            exit 1
+          }
+
+          VALID_PLATFORMS='["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+          for p in $(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]'); do
+            echo "$VALID_PLATFORMS" | jq -e --arg p "$p" 'index($p)' >/dev/null || {
+              echo "❌ Invalid target platform: $p"
+              exit 1
+            }
+          done
+
+      - name: Validate Build Type
+        run: |
+          case '${{ inputs.buildType }}' in
+            preview|release_candidate|release) ;;
+            *) echo "❌ Invalid buildType: ${{ inputs.buildType }}"; exit 1 ;;
+          esac
+
   prepare_metadata:
     name: Prepare Metadata
     needs: 
       - skip_ci
       - validate_repository_inputs
+      - validate_inputs
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
