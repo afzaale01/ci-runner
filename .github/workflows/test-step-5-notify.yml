@@ -30,6 +30,11 @@ on:
         required: true
         default: '["itch.io", "appcenter", "firebase", "s3", "gh-pages", "steam", "discord", "testflight", "custom-server"]'
         type: string
+      deployTargetsSuccessful:
+        description: "JSON array of deploy targets (e.g. [\"itch.io\",\"s3\"])"
+        required: true
+        default: '["itch.io", "appcenter", "firebase", "s3", "gh-pages", "steam", "discord", "testflight", "custom-server"]'
+        type: string
       editmodeFailedCount:
         description: "Number of simulated EditMode test failures"
         required: false
@@ -115,7 +120,7 @@ jobs:
     uses: ./.github/workflows/dry-deploy.yml
     with:
       deployTargets: ${{ inputs.deployTargets }}
-      successfulTargets: '["itch.io", "gh-pages"]'
+      successfulTargets: ${{ inputs.deployTargetsSuccessful }}
 
   test_notify:
     name: Notify
