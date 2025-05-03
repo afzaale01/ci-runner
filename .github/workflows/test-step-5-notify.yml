@@ -123,6 +123,7 @@ jobs:
       - prepare_metadata
       - dry_tests
       - dry_build
+      - dry_deploy
       - dry_release
     if: always()
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
@@ -130,7 +131,7 @@ jobs:
       version: ${{ needs.prepare_metadata.outputs.version }}
       releaseResult: ${{ inputs.releaseResult }}
       releaseErrorMessage: ${{ needs.dry_release.outputs.releaseErrorMessage }}
-      deployResult: ${{ needs.dry_deploy.result || '' }}
+      deployResult: ${{ needs.dry_deploy.outputs.deployResult }}
       testsHasFails: ${{ needs.dry_tests.outputs.hasFails }}
       testsTotal: ${{ needs.dry_tests.outputs.totalTests }}
       testsPassed: ${{ needs.dry_tests.outputs.passedTests }}
