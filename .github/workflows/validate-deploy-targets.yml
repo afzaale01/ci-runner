@@ -111,10 +111,10 @@ jobs:
           echo "$json" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-          # Export for summary step
+          # Export for summary step (join with | for safe splitting)
           echo "FINAL_VALID_TARGETS=${FINAL_VALID[*]}" >> $GITHUB_ENV
           echo "INVALID_TARGETS=${INVALID[*]}" >> $GITHUB_ENV
-          echo "SKIPPED_MINIMUM=${SKIPPED_MINIMUM[*]}" >> $GITHUB_ENV
+          echo "SKIPPED_MINIMUM=$(IFS='|'; echo "${SKIPPED_MINIMUM[*]}")" >> $GITHUB_ENV
 
       - name: 📋 Summary of Target Validation
         if: always()
