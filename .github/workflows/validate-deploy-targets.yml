@@ -119,34 +119,36 @@ jobs:
       - name: 📋 Summary of Target Validation
         if: always()
         run: |
-          FINAL_VALID_TARGETS="${FINAL_VALID_TARGETS:-}"
-          INVALID_TARGETS="${INVALID_TARGETS:-}"
-          SKIPPED_MINIMUM="${SKIPPED_MINIMUM:-}"
+          # Convert space-separated strings back into arrays
+          read -r -a FINAL_VALID_TARGETS_ARRAY <<< "${FINAL_VALID_TARGETS:-}"
+          read -r -a INVALID_TARGETS_ARRAY <<< "${INVALID_TARGETS:-}"
+          read -r -a SKIPPED_MINIMUM_ARRAY <<< "${SKIPPED_MINIMUM:-}"
 
           echo ""
           echo "📋 Deploy Target Validation Summary"
           echo "────────────────────────────────────"
-          if [ -n "$FINAL_VALID_TARGETS" ]; then
+
+          if [ "${#FINAL_VALID_TARGETS_ARRAY[@]}" -gt 0 ]; then
             echo "✅ Final Valid Targets:"
-            for v in ${FINAL_VALID_TARGETS[@]}; do
+            for v in "${FINAL_VALID_TARGETS_ARRAY[@]}"; do
               echo "  - $v"
             done
           else
             echo "ℹ️ No valid deploy targets remaining after validation."
           fi
 
-          if [ -n "$INVALID_TARGETS" ]; then
+          if [ "${#INVALID_TARGETS_ARRAY[@]}" -gt 0 ]; then
             echo ""
             echo "⚠️ Invalid (Unknown) Targets:"
-            for i in ${INVALID_TARGETS[@]}; do
+            for i in "${INVALID_TARGETS_ARRAY[@]}"; do
               echo "  - $i"
             done
           fi
 
-          if [ -n "$SKIPPED_MINIMUM" ]; then
+          if [ "${#SKIPPED_MINIMUM_ARRAY[@]}" -gt 0 ]; then
             echo ""
             echo "⚠️ Skipped (Minimum BuildType Not Met):"
-            for s in "${SKIPPED_MINIMUM[@]}"; do
+            for s in "${SKIPPED_MINIMUM_ARRAY[@]}"; do
               echo "  - $s"
             done
           fi
