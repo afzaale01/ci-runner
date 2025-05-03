@@ -31,20 +31,20 @@ on:
     outputs:
       hasFails:
         description: "Whether any failures occurred"
-        value: ${{ jobs.dry.outputs.hasFails }}
+        value: ${{ jobs.dry_tests.outputs.hasFails }}
       totalTests:
         description: "Combined total number of simulated tests"
-        value: ${{ jobs.dry.outputs.totalTests }}
+        value: ${{ jobs.dry_tests.outputs.totalTests }}
       passedTests:
         description: "Combined number of simulated passed tests"
-        value: ${{ jobs.dry.outputs.passedTests }}
+        value: ${{ jobs.dry_tests.outputs.passedTests }}
       failedTestNames:
         description: "List of simulated failed test names"
-        value: ${{ jobs.dry.outputs.failedTestNames }}
+        value: ${{ jobs.dry_tests.outputs.failedTestNames }}
 
 jobs:
-  dry:
-    name: 🧪 Simulate EditMode + PlayMode Summary
+  dry_tests:
+    name: 🧪 Simulate Tests Summary
     runs-on: ubuntu-latest
     outputs:
       hasFails: ${{ steps.simulate.outputs.hasFails }}
@@ -52,7 +52,7 @@ jobs:
       passedTests: ${{ steps.simulate.outputs.passedTests }}
       failedTestNames: ${{ steps.simulate.outputs.failedTestNames }}
     steps:
-      - name: Simulate Combined Test Summary
+      - name: Simulate Tests Summary
         id: simulate
         run: |
           EDIT_TOTAL=${{ inputs.editmodeTotalCount }}
@@ -131,3 +131,14 @@ jobs:
         with:
           name: Unity-PlayMode-dry
           path: dummy-results/PlayMode
+          
+  test_failure_gatekeeper:
+    name: 🛑 Stop Pipeline on Failed Tests
+    needs: dry_tests
+    runs-on: ubuntu-latest
+    if: ${{ needs.dry_tests.outputs.hasFails == 'true' }}
+    steps:
+      - name: Force Fail Workflow
+        run: |
+          echo "Detected failed tests. Failing test workflow deliberately."
+          exit 1
