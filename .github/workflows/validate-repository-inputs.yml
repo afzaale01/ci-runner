@@ -4,9 +4,9 @@ on:
   workflow_call:
     inputs:
       requiredVariables:
-        description: 'List of required GitHub vars to validate'
+        description: 'JSON array of required GitHub variables to validate'
         required: true
-        type: string # JSON array
+        type: string
     secrets:
       CICD_PAT: { required: true }
       UNITY_EMAIL: { required: true }
