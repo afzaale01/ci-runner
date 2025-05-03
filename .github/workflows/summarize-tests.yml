@@ -118,7 +118,7 @@ jobs:
         with:
           path: downloaded-results
 
-      - name: 🔍 Collect Raw Summary Outputs
+      - name: 🔍 Append Failed Test Details and Collect Outputs
         id: collect
         run: |
           set +e
@@ -141,6 +141,7 @@ jobs:
             fi
           done
 
+          # Write to GitHub summary (LEAVE THIS AS IS)
           if [[ "$HAS_FAILS" == "1" ]]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "<details>" >> $GITHUB_STEP_SUMMARY
@@ -150,4 +151,25 @@ jobs:
             echo "</details>" >> $GITHUB_STEP_SUMMARY
           fi
 
+          # Write outputs for downstream
           echo "has_fails=$HAS_FAILS" >> $GITHUB_OUTPUT
+
+          # Safely extract numbers (default to 0)
+          EDIT_TOTAL=$(echo "${{ inputs.editmodeTotal }}" | grep -Eo '[0-9]+' || echo 0)
+          PLAY_TOTAL=$(echo "${{ inputs.playmodeTotal }}" | grep -Eo '[0-9]+' || echo 0)
+          EDIT_PASSED=$(echo "${{ inputs.editmodePassed }}" | grep -Eo '[0-9]+' || echo 0)
+          PLAY_PASSED=$(echo "${{ inputs.playmodePassed }}" | grep -Eo '[0-9]+' || echo 0)
+
+          TOTAL_TESTS=$(( EDIT_TOTAL + PLAY_TOTAL ))
+          PASSED_TESTS=$(( EDIT_PASSED + PLAY_PASSED ))
+
+          echo "total_tests=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "passed_tests=$PASSED_TESTS" >> $GITHUB_OUTPUT
+
+          if [[ "$HAS_FAILS" == "1" ]]; then
+            echo "failed_test_names<<EOF" >> $GITHUB_OUTPUT
+            echo -e "$FAIL_BLOCK" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "failed_test_names=None" >> $GITHUB_OUTPUT
+          fi
