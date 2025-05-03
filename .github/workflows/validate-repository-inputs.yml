@@ -15,10 +15,10 @@ on:
 
 jobs:
   validate_github_variables:
-    name: Validate GitHub Variables
+    name: Validate Required GitHub Variables
     runs-on: ubuntu-latest
     steps:
-      - name: 🔍 Validate Required GitHub Variables
+      - name: Validate Required GitHub Variables
         run: |
           VARS=$(echo '${{ inputs.requiredVariables }}' | jq -r '.[]')
           VALUE='${{ toJson(vars) }}'
@@ -41,7 +41,7 @@ jobs:
           echo "✅ All required GitHub Variables are defined."
 
   validate_github_secrets:
-    name: Validate GitHub Secrets
+    name: Validate Required GitHub Secrets
     runs-on: ubuntu-latest
     steps:
       - name: Validate Required GitHub Secrets
