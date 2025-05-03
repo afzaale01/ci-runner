@@ -139,8 +139,10 @@ jobs:
           fi
 
           echo "TITLE=$TITLE" >> $GITHUB_ENV
-          echo "MESSAGE=$MESSAGE" >> $GITHUB_ENV
           echo "STATUS=$STATUS" >> $GITHUB_ENV
+          echo "MESSAGE<<EOF" >> $GITHUB_ENV
+          echo "$MESSAGE" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: 📥 Download Deploy Result Artifacts
         uses: actions/download-artifact@v4
