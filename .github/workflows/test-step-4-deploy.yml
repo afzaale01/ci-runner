@@ -64,3 +64,16 @@ jobs:
       targetPlatforms: ${{ inputs.targetPlatforms }}
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
     secrets: inherit
+
+  test_deploy:
+    name: Test Deploy
+    needs: [ prepare_metadata ]
+    uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
+    with:
+      buildType: ${{ inputs.buildType }}
+      version: ${{ inputs.version }}
+      projectName: ${{ inputs.projectName }}
+      deployTargets: ${{ needs.prepare_metadata.outputs.validDeployTargets }}
+      hasCombinedArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
+      artifactSource: ${{ inputs.artifactSource }}
+    secrets: inherit
