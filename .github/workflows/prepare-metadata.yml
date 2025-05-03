@@ -219,40 +219,56 @@ jobs:
     outputs:
       targetPlatforms: ${{ steps.set.outputs.targetPlatforms }}
     steps:
+      - name: Checkout Repo (to read config)
+        uses: actions/checkout@v4
+
       - id: set
         run: |
-          INPUT_PLATFORMS='${{ inputs.targetPlatforms || '' }}'
+          INPUT_PLATFORMS='${{ inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}'
           BUILD_TYPE='${{ needs.resolve_build_type.outputs.buildType }}'
+          CONFIG_FILE=".github/config/target-platforms.json"
+          FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/target-platforms.json"
 
-          DEFAULT_RELEASE_CANDIDATE='${{ vars.TARGET_PLATFORMS_RC || '[]' }}'
-          DEFAULT_PREVIEW='${{ vars.TARGET_PLATFORMS_PREVIEW || '[]' }}'
-          DEFAULT_RELEASE='${{ vars.TARGET_PLATFORMS_RELEASE || '[]' }}'
-
-          CHOSEN=""
-          INVALID_INPUT="false"
-
-          if [[ -n "$INPUT_PLATFORMS" ]]; then
-            if echo "$INPUT_PLATFORMS" | jq -e type >/dev/null 2>&1; then
-              CHOSEN="$INPUT_PLATFORMS"
-              echo "✅ Using provided input targetPlatforms: $CHOSEN"
-            else
-              echo "⚠️ Provided input targetPlatforms is malformed — falling back to defaults."
-              INVALID_INPUT="true"
-            fi
+          echo "🔍 Checking for local config file..."
+          if [ -f "$CONFIG_FILE" ]; then
+            echo "✅ Found local config file: $CONFIG_FILE"
+          else
+            echo "⚠️ Not found. Downloading from: $FALLBACK_URL"
+            mkdir -p "$(dirname "$CONFIG_FILE")"
+            curl -sSL "$FALLBACK_URL" -o "$CONFIG_FILE"
           fi
 
-          if [[ "$INVALID_INPUT" == "true" || -z "$INPUT_PLATFORMS" ]]; then
-            if [[ "$BUILD_TYPE" == "release" ]]; then
-              CHOSEN="$DEFAULT_RELEASE"
-            elif [[ "$BUILD_TYPE" == "release_candidate" ]]; then
-              CHOSEN="$DEFAULT_RELEASE_CANDIDATE"
-            else
-              CHOSEN="$DEFAULT_PREVIEW"
-            fi
-            echo "ℹ️ Using default targetPlatforms for buildType '$BUILD_TYPE': $CHOSEN"
-          fi
+          # Convert buildType to weight (preview=1, release_candidate=2, release=3)
+          type_weight() {
+            case "$1" in
+              preview) echo 1 ;;
+              release_candidate) echo 2 ;;
+              release) echo 3 ;;
+              *) echo 0 ;;
+            esac
+          }
 
-          echo "targetPlatforms=$CHOSEN" >> "$GITHUB_OUTPUT"
+          BUILD_WEIGHT=$(type_weight "$BUILD_TYPE")
+
+          VALIDATED_PLATFORMS="[]"
+
+          for PLATFORM in $(echo "$INPUT_PLATFORMS" | jq -r '.[]'); do
+            if jq -e --arg p "$PLATFORM" '.[$p]' "$CONFIG_FILE" >/dev/null; then
+              MIN_TYPE=$(jq -r --arg p "$PLATFORM" '.[$p].minimumBuildType' "$CONFIG_FILE")
+              MIN_WEIGHT=$(type_weight "$MIN_TYPE")
+
+              if [ "$BUILD_WEIGHT" -ge "$MIN_WEIGHT" ]; then
+                VALIDATED_PLATFORMS=$(echo "$VALIDATED_PLATFORMS" | jq --arg p "$PLATFORM" '. + [$p]')
+              else
+                echo "⚠️ Skipping $PLATFORM — requires minimumBuildType=$MIN_TYPE"
+              fi
+            else
+              echo "⚠️ Platform $PLATFORM not found in config, skipping"
+            fi
+          done
+
+          echo "✅ Final valid targetPlatforms: $VALIDATED_PLATFORMS"
+          echo "targetPlatforms=$VALIDATED_PLATFORMS" >> "$GITHUB_OUTPUT"
 
   resolve_retention_days:
     name: Resolve Retention Days
