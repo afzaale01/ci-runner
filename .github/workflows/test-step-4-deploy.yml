@@ -1,4 +1,4 @@
-name: 🧪 Test - Step 3 Release Workflow
+name: 🧪 Test - Step 4 Deploy Workflow
 
 on:
   workflow_dispatch:
@@ -58,7 +58,7 @@ jobs:
 
   test_release:
     name: 📦 Test Release Workflow
-    needs: [ prepare_metadata, dry_build ]
+    needs: [ prepare_metadata, build ]
     if: ${{ inputs.buildType == 'release' || inputs.buildType == 'release_candidate' }}
     uses: ./.github/workflows/step-3-release.yml
     with:
