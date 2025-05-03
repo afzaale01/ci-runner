@@ -38,6 +38,42 @@ on:
         required: true
         default: '["itch.io", "appcenter", "firebase", "s3", "gh-pages", "steam", "discord", "testflight", "custom-server"]'
         type: string
+      editmodeFailedCount:
+        description: "Number of simulated EditMode test failures"
+        required: false
+        default: '0'
+        type: string
+      editmodeTotalCount:
+        description: "Simulated total EditMode tests"
+        required: false
+        default: '12'
+        type: string
+      playmodeFailedCount:
+        description: "Number of simulated PlayMode test failures"
+        required: false
+        default: '0'
+        type: string
+      playmodeTotalCount:
+        description: "Simulated total PlayMode tests"
+        required: false
+        default: '12'
+        type: string
+      releaseResult:
+        description: "Whether release failed or succeeded"
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      quietMode:
+        description: "Simulate quiet mode"
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 permissions:
   contents: write
