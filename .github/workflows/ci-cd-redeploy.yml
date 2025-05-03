@@ -39,10 +39,10 @@ jobs:
             exit 1
           fi
 
-          echo "✅ Release found."
+          echo "✅ Release found. Redeploying: '${{ inputs.releaseTag }}'..."
 
-          # Check for combined artifact (you can adjust the matching pattern here)
-          COMBINED_FOUND=$(echo "$RELEASE_DATA" | jq -r '.assets[]?.name' | grep -c 'combined-artifacts.zip' || true)
+          # Check for combined artifact
+          COMBINED_FOUND=$(echo "$RELEASE_DATA" | jq -r '.assets[]?.name' | grep -c 'all-platforms' || true)
           if [ "$COMBINED_FOUND" -gt 0 ]; then
             echo "✅ Combined artifact detected."
             echo "hasCombinedArtifacts=true" >> "$GITHUB_OUTPUT"
