@@ -18,7 +18,7 @@ on:
       testsHasFails:
         required: false
         type: string
-        default: "skipped"
+        default: "false"
       testsTotal:
         required: false
         type: string
@@ -87,7 +87,29 @@ jobs:
           [[ -n "$BRANCH" ]] && TRACE+="${TRACE:+ | }Branch: \`$BRANCH\`"
           [[ -n "$COMMIT" ]] && TRACE+="${TRACE:+ | }Commit: \`$(echo "$COMMIT" | cut -c1-7)\`"
 
-          if [[ "$RELEASE" == "success" ]]; then
+          if [[ "${{ inputs.testsHasFails }}" == "true" && "${{ inputs.testsTotal }}" != "0" ]]; then
+            TITLE="Tests Failed - $VERSION"
+            MESSAGE="❌ Some tests failed on version \`$VERSION\`.\n"
+            MESSAGE+="✅ Passed: ${{ inputs.testsPassed }} / ${{ inputs.testsTotal }}\n"
+
+            # Set max number of failed test names to include
+            MAX_FAILED_TESTS=5
+
+            # Limit to first N failed tests
+            FAILED_LIST=$(echo "${{ inputs.testsFailedNames }}" | head -n $MAX_FAILED_TESTS)
+            TOTAL_FAILED_LINES=$(echo "${{ inputs.testsFailedNames }}" | wc -l)
+
+            if [[ "$TOTAL_FAILED_LINES" -gt $MAX_FAILED_TESTS ]]; then
+                FAILED_LIST+="\n...and $((TOTAL_FAILED_LINES - MAX_FAILED_TESTS)) more"
+            fi
+
+            MESSAGE+="❌ Failed Tests:\n$FAILED_LIST"
+
+            STATUS="failure"
+            [[ -n "$TRACE" ]] && MESSAGE="$MESSAGE\n\n$TRACE"
+            MESSAGE="$MESSAGE\n\n🔗 [View Pipeline]($RUN_URL)"
+
+          elif [[ "$RELEASE" == "success" ]]; then
             if [[ "$DEPLOY" == "success" ]]; then
               TITLE="Release & Deploy Succeeded - $VERSION"
               MESSAGE="✅ Release \`$VERSION\` completed successfully."
@@ -103,6 +125,7 @@ jobs:
             fi
             [[ -n "$TRACE" ]] && MESSAGE="$MESSAGE\n$TRACE"
             MESSAGE="$MESSAGE\n📦 [View Release]($RELEASE_URL)   ·   🔗 [View Pipeline]($RUN_URL)"
+
           else
             TITLE="Release Failed - $VERSION"
             if [[ -n "$ERROR" ]]; then
