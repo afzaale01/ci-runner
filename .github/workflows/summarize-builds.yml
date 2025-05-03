@@ -1,4 +1,4 @@
-name: 📄 Summarize Builds
+name: 📄 Summarize Build Results
 
 description: |
   Writes a summary of the Unity build results, including per-platform status

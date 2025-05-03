@@ -1,4 +1,4 @@
-name: 📄 Summarize Unity Tests
+name: 📄 Summarize Unity Test Results
 
 description: Summarizes the results of EditMode and PlayMode Unity test jobs into the GitHub Actions summary tab.
 
