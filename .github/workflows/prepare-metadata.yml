@@ -276,7 +276,9 @@ jobs:
 
   analyze_artifact_strategy:
     name: Analyze Artifact Strategy
-    needs: validate_deploy_targets
+    needs: 
+      - validate_deploy_targets
+      - version
     if: needs.validate_deploy_targets.outputs.skipAnalysis != 'true'
     uses: ./.github/workflows/analyze-artifact-strategy.yml
     with:
