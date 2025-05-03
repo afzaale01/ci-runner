@@ -62,7 +62,10 @@ jobs:
   summarize:
     runs-on: ubuntu-latest
     outputs:
-      has_fails: ${{ steps.failed_check.outputs.has_fails }}
+      has_fails: ${{ steps.collect.outputs.has_fails }}
+      total_tests: ${{ steps.collect.outputs.total_tests }}
+      passed_tests: ${{ steps.collect.outputs.passed_tests }}
+      failed_test_names: ${{ steps.collect.outputs.failed_test_names }}
     steps:
       - name: 📄 Write Test Summary
         run: |
@@ -115,8 +118,8 @@ jobs:
         with:
           path: downloaded-results
 
-      - name: 🔍 Append Failed Test Details
-        id: failed_check
+      - name: 🔍 Collect Raw Summary Outputs
+        id: collect
         run: |
           set +e
           HAS_FAILS=0
