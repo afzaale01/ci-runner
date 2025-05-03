@@ -226,7 +226,7 @@ jobs:
         run: |
           INPUT_PLATFORMS='${{ inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}'
           BUILD_TYPE='${{ needs.resolve_build_type.outputs.buildType }}'
-          CONFIG_FILE=".github/config/target-platforms.json"
+          CONFIG_FILE=".github/config/target-platformz.json"
           FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/target-platforms.json"
 
           echo "🔍 Checking for local config file..."
