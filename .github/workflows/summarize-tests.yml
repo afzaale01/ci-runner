@@ -162,3 +162,5 @@ jobs:
           else
             echo "failed_test_names=None" >> $GITHUB_OUTPUT
           fi
+
+          echo "failed_test_names
