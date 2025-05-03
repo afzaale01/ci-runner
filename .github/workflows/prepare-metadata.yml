@@ -307,7 +307,7 @@ jobs:
     uses: ./.github/workflows/validate-deploy-targets.yml
     with:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
-      deployTargets: ${{ inputs.deployTargets }}
+      deployTargets: ${{ inputs.deployTargets || vars.DEPLOY_TARGETS }}
 
   analyze_artifact_strategy:
     name: Analyze Artifact Strategy

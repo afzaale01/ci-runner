@@ -110,8 +110,8 @@ jobs:
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
-      skipTests: ${{ inputs.skipTests || vars.EXCLUDE_UNITY_TESTS || false }}
-      deployTargets: ${{ inputs.deployTargets || vars.DEPLOY_TARGETS }}
+      skipTests: ${{ inputs.skipTests }}
+      deployTargets: ${{ inputs.deployTargets }}
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
 
