@@ -70,6 +70,7 @@ jobs:
     needs: 
         - prepare_metadata 
         - dry_build
+    if:  ${{ needs.prepare_metadata.outputs.validDeployTargets != '[]' }}
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: ${{ inputs.buildType }}
