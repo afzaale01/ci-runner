@@ -45,7 +45,7 @@ jobs:
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
 
-  build:
+  test_build:
     name: 🧩 Test Unity Build
     needs: prepare_metadata
     uses: ./.github/workflows/step-2-build.yml

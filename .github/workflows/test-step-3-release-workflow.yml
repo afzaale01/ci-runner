@@ -45,7 +45,7 @@ jobs:
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
 
-  build:
+  dry_build:
     name: 🧩 Create Dry-Build
     needs: prepare_metadata
     uses: ./.github/workflows/dry-build.yml
@@ -56,7 +56,7 @@ jobs:
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
     secrets: inherit
 
-  release:
+  test_release:
     name: 📦 Test Release Workflow
     needs: [ prepare_metadata, build ]
     if: ${{ inputs.buildType == 'release' || inputs.buildType == 'release_candidate' }}
