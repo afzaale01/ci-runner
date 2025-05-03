@@ -58,6 +58,14 @@ on:
         required: false
         default: '12'
         type: string
+      quietMode:
+        description: "Simulate quiet mode"
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 permissions:
   contents: write
