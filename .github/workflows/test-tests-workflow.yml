@@ -3,14 +3,27 @@ name: 🧪 Test Tests Workflow
 on:
   workflow_dispatch:
     inputs:
+      unityVersion:
+        description: "Specific unity version to test on"
+        required: true
+        default: "auto"
+        type: string
+      useGitLFS:
+        description: "Enable quiet mode to suppress uploads/logs unless tests fail"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
       timeoutMinutes:
         description: "Minutes until tests fail on timeout"
-        required: false
+        required: true
         default: "15"
         type: string
       quietMode:
         description: "Enable quiet mode to suppress uploads/logs unless tests fail"
-        required: false
+        required: true
         default: "false"
         type: choice
         options:
@@ -37,8 +50,8 @@ jobs:
     needs: prepare_metadata
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
-      unityVersion: ${{ needs.prepare_metadata.outputs.unityVersion }}
-      useGitLfs: ${{ needs.prepare_metadata.outputs.useGitLfs }}
+      unityVersion: ${{ inputs.unityVersion }}
+      useGitLfs: ${{ inputs.useGitLFS }}
       editModePath: ${{ needs.prepare_metadata.outputs.editModePath }}
       playModePath: ${{ needs.prepare_metadata.outputs.playModePath }}
       timeoutMinutes: ${{ fromJson(inputs.timeoutMinutes) }}
