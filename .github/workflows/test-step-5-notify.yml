@@ -49,13 +49,16 @@ on:
         default: '0'
         type: string
       releaseResult:
-        description: "Whether release succeeded"
+        description: "Simulated release result"
         required: false
-        default: 'true'
+        default: 'success'
         type: choice
         options:
-          - 'true'
-          - 'false'
+          - success
+          - no_artifacts
+          - api_failure
+          - upload_failure
+          - unknown_failure
       quietMode:
         description: "Simulate quiet mode"
         required: false
@@ -105,18 +108,28 @@ jobs:
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
     secrets: inherit
 
+  dry_release:
+    name: 📋 Create Dry-Release
+    needs: 
+        - prepare_metadata
+        - dry_build
+    uses: ./.github/workflows/dry-release.yml
+    with:
+      simulateResult: ${{ inputs.releaseResult }}
+
   notify:
     name: Notify
     needs: 
       - prepare_metadata
       - dry_tests
       - dry_build
+      - dry_release
     if: always()
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
       version: ${{ needs.prepare_metadata.outputs.version }}
       releaseResult: ${{ inputs.releaseResult }}
-      releaseErrorMessage: ${{ needs.release.outputs.releaseErrorMessage || '' }}
+      releaseErrorMessage: ${{ needs.dry_release.outputs.releaseErrorMessage }}
       deployResult: ${{ needs.deploy.result || '' }}
       testsHasFails: ${{ needs.dry_tests.outputs.hasFails }}
       testsTotal: ${{ needs.dry_tests.outputs.totalTests }}
