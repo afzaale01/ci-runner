@@ -1,0 +1,78 @@
+name: 📄 Summarize Metadata
+
+description: |
+  Writes a summary of resolved build metadata to the GitHub job summary.
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      buildType:
+        required: true
+        type: string
+      skipTests:
+        required: true
+        type: string
+      testsOnly:
+        required: true
+        type: string
+      triggeredBy:
+        required: true
+        type: string
+      retentionDays:
+        required: true
+        type: string
+      timeoutMinutesTests:
+        required: true
+        type: string
+      timeoutMinutesBuild:
+        required: true
+        type: string
+      targetPlatforms:
+        required: true
+        type: string
+      validDeployTargets:
+        required: true
+        type: string
+      requiresCombined:
+        required: true
+        type: string
+      skipPerPlatform:
+        required: true
+        type: string
+
+jobs:
+  summarize:
+    name: 📄 Summarize Metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write Summary
+        run: |
+          TARGET_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' | jq -c '.')
+          DEPLOY_TARGETS=$(echo '${{ inputs.validDeployTargets }}' | jq -c '.')
+
+          if [[ -z "$DEPLOY_TARGETS" || "$DEPLOY_TARGETS" == 'null' ]]; then
+            DEPLOY_TARGETS='[]'
+          fi
+
+          if [[ -z "$TARGET_PLATFORMS" || "$TARGET_PLATFORMS" == 'null' ]]; then
+            TARGET_PLATFORMS='[]'
+          fi
+
+          echo "## ⏳ Build Metadata Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Key                          | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------------------------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Version                      | ${{ inputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Type                   | ${{ inputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Skip Tests                   | ${{ inputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests Only                   | ${{ inputs.testsOnly }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered by                 | ${{ inputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Retention Days               | ${{ inputs.retentionDays }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests Timeout (minutes)      | ${{ inputs.timeoutMinutesTests }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Timeout (minutes)      | ${{ inputs.timeoutMinutesBuild }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Target Platforms             | \`$TARGET_PLATFORMS\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Requires Combined Artifacts  | ${{ inputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Skip Per-Platform Artifacts  | ${{ inputs.skipPerPlatform }} |" >> $GITHUB_STEP_SUMMARY

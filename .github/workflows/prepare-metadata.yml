@@ -41,25 +41,25 @@ on:
       quietMode:
         value: ${{ jobs.prepare_test_data.outputs.quietMode }}
       buildType:
-        value: ${{ jobs.metadata.outputs.buildType }}
+        value: ${{ jobs.resolve_build_type.outputs.buildType }}
       triggeredBy:
-        value: ${{ jobs.metadata.outputs.triggeredBy }}
+        value: ${{ jobs.resolve_trigger.outputs.triggeredBy }}
       testsOnly:
-        value: ${{ jobs.metadata.outputs.testsOnly }}
+        value: ${{ jobs.detect_tests_only.outputs.testsOnly }}
       skipTests:
-        value: ${{ jobs.metadata.outputs.skipTests }}
+        value: ${{ jobs.detect_skip_tests.outputs.skipTests }}
       version:
-        value: ${{ jobs.metadata.outputs.version }}
+        value: ${{ jobs.version.outputs.version || (inputs.version != '' && inputs.version) || 'N/A' }}
       retentionDays:
-        value: ${{ jobs.metadata.outputs.retentionDays }}
+        value: ${{ jobs.resolve_retention_days.outputs.retentionDays }}
       targetPlatforms:
-        value: ${{ jobs.metadata.outputs.targetPlatforms }}
+        value: ${{ jobs.resolve_target_platforms.outputs.targetPlatforms || '[]' }}
       validDeployTargets:
-        value: ${{ jobs.metadata.outputs.validDeployTargets }}
+        value: ${{ jobs.validate_deploy_targets.outputs.validTargets || '[]' }}
       requiresCombined:
-        value: ${{ jobs.metadata.outputs.requiresCombined }}
+        value: ${{ jobs.analyze_artifact_strategy.outputs.requiresCombined || false }}
       skipPerPlatform:
-        value: ${{ jobs.metadata.outputs.skipPerPlatform }}
+        value: ${{ jobs.analyze_artifact_strategy.outputs.skipPerPlatform || false }}
 
 jobs:
   detect_tests_only:
@@ -334,10 +334,8 @@ jobs:
       artifactSource: build
       deployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets }}
 
-  metadata:
+  summarize_metadata:
     name: 📄 Summarize Metadata
-    runs-on: ubuntu-latest
-    if: always()
     needs:
       - detect_skip_tests
       - detect_tests_only
@@ -349,7 +347,9 @@ jobs:
       - version
       - validate_deploy_targets
       - analyze_artifact_strategy
-    outputs:
+    if: always()
+    uses: ./.github/workflows/summarize-metadata.yml
+    with:
       version: ${{ needs.version.outputs.version || (inputs.version != '' && inputs.version) || 'N/A' }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
@@ -362,34 +362,3 @@ jobs:
       validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets || '[]' }}
       requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }}
       skipPerPlatform: ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform || false }}
-    steps:
-      - name: Summarize
-        run: |
-          TARGET_PLATFORMS=$(echo '${{ needs.resolve_target_platforms.outputs.targetPlatforms }}' | jq -c '.')
-          DEPLOY_TARGETS=$(echo '${{ needs.validate_deploy_targets.outputs.validTargets }}' | jq -c '.')
-
-          # If after jq we get an empty or blank result, replace it with []
-          if [[ -z "$DEPLOY_TARGETS" || "$DEPLOY_TARGETS" == 'null' ]]; then
-            DEPLOY_TARGETS='[]'
-          fi
-
-          # If after jq we get an empty or blank result, replace it with []
-          if [[ -z "$TARGET_PLATFORMS" || "$TARGET_PLATFORMS" == 'null' ]]; then
-            TARGET_PLATFORMS='[]'
-          fi
-
-          echo "## ⏳ Build Metadata Summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Key                          | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|------------------------------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Version                      | ${{ needs.version.outputs.version || (inputs.version != '' && inputs.version) || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Type                   | ${{ needs.resolve_build_type.outputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Skip Tests                   | ${{ needs.detect_skip_tests.outputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tests Only                   | ${{ needs.detect_tests_only.outputs.testsOnly }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Triggered by                 | ${{ needs.resolve_trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Retention Days               | ${{ needs.resolve_retention_days.outputs.retentionDays }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tests Timeout (minutes)      | ${{ needs.prepare_timeouts.outputs.timeoutMinutesTests }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Timeout (minutes)      | ${{ needs.prepare_timeouts.outputs.timeoutMinutesBuild }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Target Platforms             | \`$TARGET_PLATFORMS\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Requires Combined Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Skip Per-Platform Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform || false }} |" >> $GITHUB_STEP_SUMMARY
