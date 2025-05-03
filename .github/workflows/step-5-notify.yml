@@ -21,7 +21,7 @@ on:
       testsHasFails:
         required: false
         type: string
-        default: "skipped"
+        default: "false"
       testsTotal:
         required: false
         type: string
@@ -33,7 +33,7 @@ on:
       testsFailedNames:
         required: false
         type: string
-        default: "Skipped (tests were not run)"
+        default: "None (tests were not run)"
 
 jobs:
   generate-notification:
