@@ -56,7 +56,7 @@ jobs:
       version: 'TESTING_TESTS_WORKFLOW'
 
   test-run-tests:
-    name: Test Run Tests
+    name: 📋 Test Run Tests
     needs: prepare_metadata
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
