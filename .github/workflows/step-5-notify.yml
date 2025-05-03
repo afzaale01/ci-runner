@@ -15,6 +15,22 @@ on:
       version:
         required: true
         type: string
+      hasFails:
+        required: false
+        type: string
+        default: "skipped"
+      totalTests:
+        required: false
+        type: string
+        default: "0"
+      passedTests:
+        required: false
+        type: string
+        default: "0"
+      failedTestNames:
+        required: false
+        type: string
+        default: "Skipped (tests were not run)"
 
 jobs:
   generate-notification:
