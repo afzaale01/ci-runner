@@ -94,7 +94,9 @@ jobs:
 
             # Set max number of failed test names to include
             MAX_FAILED_TESTS=5
-
+            
+            echo "AAAHHH: ${{ inputs.testsFailedNames }}"
+            
             # Limit to first N failed tests
             FAILED_LIST=$(echo "${{ inputs.testsFailedNames }}" | head -n $MAX_FAILED_TESTS)
             TOTAL_FAILED_LINES=$(echo "${{ inputs.testsFailedNames }}" | wc -l)
