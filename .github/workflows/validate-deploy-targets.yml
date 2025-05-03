@@ -105,8 +105,13 @@ jobs:
           echo "⚠️ Invalid targets: ${INVALID[*]}"
           echo "⚠️ Skipped (minimum buildType not met): ${SKIPPED_MINIMUM[*]}"
 
-          # Output validTargets as JSON array
-          json=$(printf '%s\n' "${FINAL_VALID[@]}" | jq -R . | jq -s .)
+          # Safely handle empty FINAL_VALID array
+          if [ "${#FINAL_VALID[@]}" -eq 0 ]; then
+            json='[]'
+          else
+            json=$(printf '%s\n' "${FINAL_VALID[@]}" | jq -R . | jq -s .)
+          fi
+
           echo "validTargets<<EOF" >> $GITHUB_OUTPUT
           echo "$json" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
