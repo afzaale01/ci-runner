@@ -92,9 +92,7 @@ jobs:
         [
           "PROJECT_NAME",
           "DEPLOY_TARGETS",
-          "TARGET_PLATFORMS_PREVIEW",
-          "TARGET_PLATFORMS_RC",
-          "TARGET_PLATFORMS_RELEASE"
+          "TARGET_PLATFORMS"
         ]
     secrets:
       CICD_PAT: ${{ secrets.CICD_PAT }}
