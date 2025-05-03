@@ -177,6 +177,7 @@ jobs:
     name: Notify
     needs: 
       - unpack_inputs
+      - run_tests
       - build
       - release
       - deploy
@@ -189,8 +190,12 @@ jobs:
       )
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
+      version: ${{ needs.unpack_inputs.outputs.version }}
       releaseResult: ${{ needs.release.result }}
       releaseErrorMessage: ${{ needs.release.outputs.releaseErrorMessage }}
       deployResult: ${{ needs.deploy.result }}
-      version: ${{ needs.unpack_inputs.outputs.version }}
+      testHasFails: ${{ needs.run_tests.outputs.hasFails }}
+      testTotal: ${{ needs.run_tests.outputs.totalTests }}
+      testPassed: ${{ needs.run_tests.outputs.passedTests }}
+      testFailedList: ${{ needs.run_tests.outputs.failedTestNames }}
     secrets: inherit
