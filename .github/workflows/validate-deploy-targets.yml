@@ -149,3 +149,6 @@ jobs:
               echo "  - $s"
             done
           fi
+
+          echo "✅ Final JSON array:"
+          echo "$json"
