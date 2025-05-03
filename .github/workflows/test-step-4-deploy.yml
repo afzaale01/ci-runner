@@ -66,7 +66,7 @@ jobs:
     secrets: inherit
 
   test_deploy:
-    name: Test Deploy
+    name: 🌍 Test Deploy
     needs: 
         - prepare_metadata 
         - dry_build
