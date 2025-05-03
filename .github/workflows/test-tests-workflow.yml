@@ -16,6 +16,16 @@ on:
         options:
           - "true"
           - "false"
+      editModePath:
+        description: "Relative path to Unity Editor tests"
+        required: false
+        default: ""
+        type: string
+      playModePath:
+        description: "Relative path to Unity PlayMode tests"
+        required: false
+        default: ""
+        type: string
       timeoutMinutes:
         description: "Minutes until tests fail on timeout"
         required: true
@@ -52,8 +62,8 @@ jobs:
     with:
       unityVersion: ${{ inputs.unityVersion != '' && inputs.unityVersion || needs.prepare_metadata.outputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLFS }}
-      editModePath: ${{ needs.prepare_metadata.outputs.editModePath }}
-      playModePath: ${{ needs.prepare_metadata.outputs.playModePath }}
+      editModePath: ${{ inputs.editModePath != '' && inputs.editModePath || needs.prepare_metadata.outputs.editModePath }}
+      playModePath: ${{ inputs.playModePath != '' && inputs.playModePath || needs.prepare_metadata.outputs.playModePath }}
       timeoutMinutes: ${{ fromJson(inputs.timeoutMinutes) }}
       quietMode: ${{ inputs.quietMode }}
     secrets:
