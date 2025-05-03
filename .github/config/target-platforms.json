@@ -25,6 +25,6 @@
   },
   "iOS": {
     "os": "macos-latest",
-    "minimumBuildType": "release"
+    "minimumBuildType": "preview"
   }
 }
