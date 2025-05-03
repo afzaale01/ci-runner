@@ -10,8 +10,8 @@ on:
         type: string
         required: true
     outputs:
-      validTargets:
-        value: ${{ jobs.validate.outputs.validTargets }}
+      validatedTargets:
+        value: ${{ jobs.validate.outputs.validatedTargets }}
       skipAnalysis:
         value: ${{ jobs.validate.outputs.skipAnalysis }}
 
@@ -20,7 +20,7 @@ jobs:
     name: ✅ Validate Deploy Targets
     runs-on: ubuntu-latest
     outputs:
-      validTargets: ${{ steps.filter.outputs.validTargets }}
+      validatedTargets: ${{ steps.filter.outputs.validTargets }}
       skipAnalysis: ${{ steps.early-check.outputs.skipRest }}
 
     steps:

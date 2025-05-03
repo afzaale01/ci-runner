@@ -53,9 +53,9 @@ on:
       retentionDays:
         value: ${{ jobs.resolve_retention_days.outputs.retentionDays }}
       targetPlatforms:
-        value: ${{ jobs.resolve_target_platforms.outputs.targetPlatforms || '[]' }}
+        value: ${{ jobs.resolve_target_platforms.outputs.validatedTargetPlatforms || '[]' }}
       validDeployTargets:
-        value: ${{ jobs.validate_deploy_targets.outputs.validTargets || '[]' }}
+        value: ${{ jobs.validate_deploy_targets.outputs.validatedTargets || '[]' }}
       requiresCombined:
         value: ${{ jobs.analyze_artifact_strategy.outputs.requiresCombined || false }}
       skipPerPlatform:
@@ -210,67 +210,15 @@ jobs:
           echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
 
   resolve_target_platforms:
-    name: Resolve Target Platforms
     needs:
       - detect_tests_only
       - resolve_build_type
     if: ${{ needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false' }}
-    runs-on: ubuntu-latest
-    outputs:
-      targetPlatforms: ${{ steps.set.outputs.targetPlatforms }}
-    steps:
-      - name: Checkout Repo (to read config)
-        uses: actions/checkout@v4
+    uses: ./.github/workflows/resolve-target-platforms.yml
+    with:
+      targetPlatforms: ${{ inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}
+      buildType: ${{ needs.resolve_build_type.outputs.buildType }}
 
-      - id: set
-        run: |
-          INPUT_PLATFORMS='${{ inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}'
-          BUILD_TYPE='${{ needs.resolve_build_type.outputs.buildType }}'
-          CONFIG_FILE=".github/config/target-platforms.json"
-          FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/target-platforms.json"
-
-          echo "🔍 Checking for local config file..."
-          if [ -f "$CONFIG_FILE" ]; then
-            echo "✅ Found local config file: $CONFIG_FILE"
-          else
-            echo "⚠️ Not found. Downloading from: $FALLBACK_URL"
-            mkdir -p "$(dirname "$CONFIG_FILE")"
-            curl -sSL "$FALLBACK_URL" -o "$CONFIG_FILE"
-          fi
-
-          # Convert buildType to weight (preview=1, release_candidate=2, release=3)
-          type_weight() {
-            case "$1" in
-              preview) echo 1 ;;
-              release_candidate) echo 2 ;;
-              release) echo 3 ;;
-              *) echo 0 ;;
-            esac
-          }
-
-          BUILD_WEIGHT=$(type_weight "$BUILD_TYPE")
-
-          VALIDATED_PLATFORMS="[]"
-
-          for PLATFORM in $(echo "$INPUT_PLATFORMS" | jq -r '.[]'); do
-            if jq -e --arg p "$PLATFORM" '.[$p]' "$CONFIG_FILE" >/dev/null; then
-              MIN_TYPE=$(jq -r --arg p "$PLATFORM" '.[$p].minimumBuildType' "$CONFIG_FILE")
-              MIN_WEIGHT=$(type_weight "$MIN_TYPE")
-
-              if [ "$BUILD_WEIGHT" -ge "$MIN_WEIGHT" ]; then
-                VALIDATED_PLATFORMS=$(echo "$VALIDATED_PLATFORMS" | jq --arg p "$PLATFORM" '. + [$p]')
-              else
-                echo "⚠️ Skipping $PLATFORM — requires minimumBuildType=$MIN_TYPE"
-              fi
-            else
-              echo "⚠️ Platform $PLATFORM not found in config, skipping"
-            fi
-          done
-
-          echo "✅ Final valid targetPlatforms: $VALIDATED_PLATFORMS"
-          echo "targetPlatforms<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$VALIDATED_PLATFORMS" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
 
   resolve_retention_days:
     name: Resolve Retention Days
@@ -334,7 +282,7 @@ jobs:
     uses: ./.github/workflows/analyze-artifact-strategy.yml
     with:
       artifactSource: build
-      deployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets }}
+      deployTargets: ${{ needs.validate_deploy_targets.outputs.validatedTargets }}
 
   summarize_metadata:
     name: 📄 Summarize Metadata
@@ -360,7 +308,7 @@ jobs:
       retentionDays: ${{ needs.resolve_retention_days.outputs.retentionDays }}
       timeoutMinutesTests: ${{ needs.prepare_timeouts.outputs.timeoutMinutesTests }}
       timeoutMinutesBuild: ${{ needs.prepare_timeouts.outputs.timeoutMinutesBuild }}
-      targetPlatforms: ${{ needs.resolve_target_platforms.outputs.targetPlatforms || '[]' }}
-      validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validTargets || '[]' }}
+      targetPlatforms: ${{ needs.resolve_target_platforms.outputs.validatedTargetPlatforms || '[]' }}
+      validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validatedTargets || '[]' }}
       requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }}
       skipPerPlatform: ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform || false }}

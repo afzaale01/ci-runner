@@ -1,0 +1,73 @@
+name: 🧮 Resolve Target Platforms
+
+on:
+  workflow_call:
+    inputs:
+      targetPlatforms:
+        type: string
+        required: false
+      buildType:
+        type: string
+        required: true
+    outputs:
+      validatedTargetPlatforms:
+        value: ${{ jobs.resolve.outputs.validatedTargetPlatforms }}
+
+jobs:
+  resolve:
+    name: Resolve Target Platforms
+    runs-on: ubuntu-latest
+    outputs:
+      validatedTargetPlatforms: ${{ steps.set.outputs.validatedTargetPlatforms }}
+    steps:
+      - name: Checkout Repository (for local config)
+        uses: actions/checkout@v4
+
+      - id: set
+        run: |
+          INPUT_PLATFORMS='${{ inputs.targetPlatforms || '[]' }}'
+          BUILD_TYPE='${{ inputs.buildType }}'
+          CONFIG_FILE=".github/config/target-platforms.json"
+          FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/target-platforms.json"
+
+          echo "🔍 Checking for local config file..."
+          if [ -f "$CONFIG_FILE" ]; then
+            echo "✅ Found local config: $CONFIG_FILE"
+          else
+            echo "⚠️ Not found. Downloading fallback from: $FALLBACK_URL"
+            mkdir -p "$(dirname "$CONFIG_FILE")"
+            curl -sSL "$FALLBACK_URL" -o "$CONFIG_FILE"
+          fi
+
+          # Convert buildType to numeric priority
+          type_weight() {
+            case "$1" in
+              preview) echo 1 ;;
+              release_candidate) echo 2 ;;
+              release) echo 3 ;;
+              *) echo 0 ;;
+            esac
+          }
+
+          BUILD_WEIGHT=$(type_weight "$BUILD_TYPE")
+          VALIDATED="[]"
+
+          for PLATFORM in $(echo "$INPUT_PLATFORMS" | jq -r '.[]'); do
+            if jq -e --arg p "$PLATFORM" '.[$p]' "$CONFIG_FILE" >/dev/null; then
+              MIN_TYPE=$(jq -r --arg p "$PLATFORM" '.[$p].minimumBuildType' "$CONFIG_FILE")
+              MIN_WEIGHT=$(type_weight "$MIN_TYPE")
+
+              if [ "$BUILD_WEIGHT" -ge "$MIN_WEIGHT" ]; then
+                VALIDATED=$(echo "$VALIDATED" | jq --arg p "$PLATFORM" '. + [$p]')
+              else
+                echo "⚠️ Skipping $PLATFORM — needs $MIN_TYPE"
+              fi
+            else
+              echo "⚠️ Unknown platform $PLATFORM — skipping"
+            fi
+          done
+
+          echo "✅ Final validated platforms: $VALIDATED"
+          echo "validatedTargetPlatforms<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$VALIDATED" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
