@@ -368,8 +368,8 @@ jobs:
           echo "| Tests Only                   | ${{ needs.detect_tests_only.outputs.testsOnly }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered by                 | ${{ needs.resolve_trigger.outputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Retention Days               | ${{ needs.resolve_retention_days.outputs.retentionDays }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tests Timeout                | ${{ needs.prepare_timeouts.outputs.timeoutMinutesTests }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Timeout                | ${{ needs.prepare_timeouts.outputs.timeoutMinutesBuild }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests Timeout (minutes)      | ${{ needs.prepare_timeouts.outputs.timeoutMinutesTests }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Timeout (minutes)      | ${{ needs.prepare_timeouts.outputs.timeoutMinutesBuild }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Target Platforms             | \`$TARGET_PLATFORMS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }} |" >> $GITHUB_STEP_SUMMARY
