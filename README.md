@@ -50,9 +50,26 @@ See a live WebGL build deployed using this CI/CD pipeline:
 - 🔗 [Steam Setup Guide](https://partner.steamgames.com/doc/sdk/uploading)
 - 🔗 [Firebase Setup Guide](https://firebase.google.com/docs/hosting)
 
+## ⚠ Current Limitations
+
+While the pipeline is production-ready and modular, some deploy integrations are still marked as **experimental**:
+
+- 🚧 **Deploy targets like Steam, TestFlight, App Center**  
+  These are implemented but have not yet been fully validated in live release pipelines.
+
+- 🔗 **External platforms may require manual setup**  
+  Some targets (like itch.io, Firebase, S3) require correctly configured secrets and accounts - be sure to test deploy flows in a safe sandbox environment before pushing to production.
+
+- 🧪 **Unity version compatibility**  
+  Currently optimized for Unity 2022.3+, but older versions may work with minor adjustments.
+
+> **Contributions and testing feedback are welcome!**  
+> If you successfully validate additional targets or add new ones, please consider opening a PR to improve support for the community.
+
 ---
 
 ## 📐 Architecture Overview
+```text
 [ Dispatcher ]
     ↓
 [ Metadata Preparation ]
@@ -63,6 +80,9 @@ See a live WebGL build deployed using this CI/CD pipeline:
     ├── 📦 Release (GitHub Releases for tags/RCs)
     ├── 🌍 Deploy (gh-pages, itch.io, etc.)
     └── 🔔 Notify (Discord, Slack)
+```
+
+
 
 ## 🗂️ Repository Structure
 
