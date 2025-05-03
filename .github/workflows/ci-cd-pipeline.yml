@@ -57,7 +57,6 @@ jobs:
           echo "useGitLfs=$(echo "$testData" | jq -r .useGitLfs)" >> "$GITHUB_OUTPUT"
           echo "editModePath=$(echo "$testData" | jq -r .editModePath)" >> "$GITHUB_OUTPUT"
           echo "playModePath=$(echo "$testData" | jq -r .playModePath)" >> "$GITHUB_OUTPUT"
-          echo "timeoutMinutes=$(echo "$testData" | jq -r .timeoutMinutes)" >> "$GITHUB_OUTPUT"
           echo "quietMode=$(echo "$testData" | jq -r .quietMode)" >> "$GITHUB_OUTPUT"
 
           # Metadata Config
@@ -68,6 +67,8 @@ jobs:
           echo "buildType=$(echo "$meta" | jq -r .buildType)" >> "$GITHUB_OUTPUT"
           echo "version=$(echo "$meta" | jq -r .version)" >> "$GITHUB_OUTPUT"
           echo "retentionDays=$(echo "$meta" | jq -r .retentionDays)" >> "$GITHUB_OUTPUT"
+          echo "timeoutMinutesTests=$(echo "$meta" | jq -r .timeoutMinutesTests)" >> "$GITHUB_OUTPUT"
+          echo "timeoutMinutesBuild=$(echo "$meta" | jq -r .timeoutMinutesBuild)" >> "$GITHUB_OUTPUT"
 
           # Artifacts Config
           echo "requiresCombined=$(echo "$artifact" | jq -r .requiresCombined)" >> "$GITHUB_OUTPUT"
@@ -86,7 +87,7 @@ jobs:
       useGitLfs: ${{ needs.unpack_inputs.outputs.useGitLfs }}
       editModePath: ${{ needs.unpack_inputs.outputs.editModePath }}
       playModePath: ${{ needs.unpack_inputs.outputs.playModePath }}
-      timeoutMinutes: ${{ fromJson(needs.unpack_inputs.outputs.timeoutMinutes) }}
+      timeoutMinutes: ${{ fromJson(needs.unpack_inputs.outputs.timeoutMinutesTests) }}
       quietMode: ${{ needs.unpack_inputs.outputs.quietMode }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -110,9 +111,9 @@ jobs:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
       version: ${{ needs.unpack_inputs.outputs.version }}
-      targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
+      targetPlatforms: ${{ inputs.targetPlatforms }}
       combineArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
-      timeoutMinutes: ${{ fromJson(vars.TIMEOUT_BUILD_IN_MINUTES || '30') }}
+      timeoutMinutes: ${{ fromJson(needs.unpack_inputs.outputs.timeoutMinutesBuild) }}
       retentionDays: ${{ fromJson(needs.unpack_inputs.outputs.retentionDays) }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -137,10 +138,10 @@ jobs:
       )
     uses: avalin/unity-ci-templates/.github/workflows/step-3-release.yml@main
     with:
-      buildType: release
+      buildType: ${{ needs.unpack_inputs.outputs.buildType }}
       version: ${{ needs.unpack_inputs.outputs.version }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
-      targetPlatforms: ${{ (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) && vars.TARGET_PLATFORMS_RELEASE || vars.TARGET_PLATFORMS_PREVIEW }}
+      targetPlatforms: ${{ inputs.targetPlatforms }}
       combineArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
       skipPerPlatformArtifacts: ${{ needs.unpack_inputs.outputs.skipPerPlatform }}
     secrets: inherit
@@ -161,7 +162,7 @@ jobs:
        inputs.validDeployTargets != '[]'
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
-      buildType: release
+      buildType: ${{ needs.unpack_inputs.outputs.buildType }}
       version: ${{ needs.unpack_inputs.outputs.version }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
       deployTargets: ${{ inputs.validDeployTargets }}
