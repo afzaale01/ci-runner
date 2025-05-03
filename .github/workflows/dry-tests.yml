@@ -5,27 +5,27 @@ on:
     inputs:
       editmodeFailedCount:
         description: "Number of simulated failed EditMode tests"
-        required: false
+        required: true
         default: '0'
         type: string
       editmodeTotalCount:
         description: "Total number of simulated EditMode tests"
-        required: false
+        required: true
         default: '42'
         type: string
       playmodeFailedCount:
         description: "Number of simulated failed PlayMode tests"
-        required: false
+        required: true
         default: '0'
         type: string
       playmodeTotalCount:
         description: "Total number of simulated PlayMode tests"
-        required: false
+        required: true
         default: '42'
         type: string
       quietMode:
         description: "Whether to simulate quiet mode"
-        required: false
+        required: true
         default: 'false'
         type: string
     outputs:
