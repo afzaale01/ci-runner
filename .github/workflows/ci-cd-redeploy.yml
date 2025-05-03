@@ -35,24 +35,33 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "🔍 Checking if release '${{ inputs.releaseTag }}' exists..."
+          echo "🔍 Checking if release '${{ inputs.releaseTag }}' exists..." | tee -a "$GITHUB_STEP_SUMMARY"
           RELEASE_DATA=$(gh api repos/${{ github.repository }}/releases/tags/${{ inputs.releaseTag }} --jq '.')
+          
           if [ -z "$RELEASE_DATA" ]; then
-            echo "❌ Release '${{ inputs.releaseTag }}' not found."
+            echo "❌ Release '${{ inputs.releaseTag }}' not found." | tee -a "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 
-          echo "✅ Release found. Redeploying: '${{ inputs.releaseTag }}'..."
+          echo "✅ Release found. Redeploying: '${{ inputs.releaseTag }}'..." | tee -a "$GITHUB_STEP_SUMMARY"
 
           # Check for combined artifact
           COMBINED_FOUND=$(echo "$RELEASE_DATA" | jq -r '.assets[]?.name' | grep -c 'all-platforms' || true)
           if [ "$COMBINED_FOUND" -gt 0 ]; then
-            echo "✅ Combined artifact detected."
+            echo "✅ Combined artifact detected." | tee -a "$GITHUB_STEP_SUMMARY"
             echo "hasCombinedArtifacts=true" >> "$GITHUB_OUTPUT"
           else
-            echo "ℹ️ No combined artifact detected."
+            echo "ℹ️ No combined artifact detected." | tee -a "$GITHUB_STEP_SUMMARY"
             echo "hasCombinedArtifacts=false" >> "$GITHUB_OUTPUT"
           fi
+          
+          # Final summary block
+          {
+            echo ""
+            echo "### 🚀 Release Check Summary"
+            echo "- Release tag: \`${{ inputs.releaseTag }}\`"
+            echo "- Combined artifact: $([ "$COMBINED_FOUND" -gt 0 ] && echo '✅ Yes' || echo '❌ No')"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # ─────────────────────────────────────────────────────────────────────────────
   # 2. Redeploy
