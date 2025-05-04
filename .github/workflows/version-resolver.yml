@@ -147,8 +147,8 @@ jobs:
           elif [[ "${GITHUB_REF}" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
             echo "- 🏷️ This was a **tag push** - tag already exists by design."
           else
-            if git rev-parse "${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
-              echo "- ⚠️ Release with tag \`${{ steps.get_version.outputs.version }}\` **already exists** - run will fail on purpose to avoid overwrite." >> $GITHUB_STEP_SUMMARY
+            if [[ "${{ steps.check_release.outputs.exists }}" == "true" ]]; then
+              echo "- ⚠️ GitHub Release with tag \`${{ steps.get_version.outputs.version }}\` **already exists** - run will fail on purpose to avoid overwrite." >> $GITHUB_STEP_SUMMARY
             else
               echo "- ✅ Tag \`${{ steps.get_version.outputs.version }}\` **does not exist yet** - good to go!" >> $GITHUB_STEP_SUMMARY
             fi
