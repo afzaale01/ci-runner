@@ -77,7 +77,8 @@ jobs:
           .github/scripts/deploy/download-from-build.sh \
             "${{ inputs.projectName }}" \
             "${{ inputs.version }}" \
-            "${{ inputs.hasCombinedArtifacts }}"
+            "${{ inputs.hasCombinedArtifacts }}" \
+            "${{ inputs.targetPlatforms }}"
 
       # ───── Release Artifact Download ─────
       - name: 📥 Download Artifacts from GitHub Release
