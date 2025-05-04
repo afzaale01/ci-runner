@@ -61,7 +61,6 @@ jobs:
           BUILD_TYPE="${{ inputs.buildType }}"
 
           IS_PRERELEASE=$([[ "$VERSION" == *-* ]] && echo true || echo false)
-          IS_DRAFT=$([[ "$BUILD_TYPE" == "preview" ]] && echo true || echo false)
 
           echo "📝 Creating GitHub release for tag: $VERSION (prerelease: $IS_PRERELEASE, draft: $IS_DRAFT)"
 
@@ -69,7 +68,7 @@ jobs:
             --arg tag_name "$VERSION" \
             --arg name "Release $VERSION" \
             --argjson prerelease "$IS_PRERELEASE" \
-            --argjson draft "$IS_DRAFT" \
+            --argjson draft "false" \
             '{ tag_name: $tag_name, name: $name, draft: $draft, prerelease: $prerelease }')
 
           RESPONSE=$(curl -s -X POST \
