@@ -133,7 +133,7 @@ jobs:
         run: chmod +x .github/scripts/deploy/*.sh
 
       - name: 🛠️ Normalize Artifact Layout
-        if: ${{ inputs.hasCombinedArtifacts == 'true' }}
+        if: ${{ inputs.hasCombinedArtifacts == 'false' }}
         run: |
           .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.ARTIFACT_DIR }}"
 
