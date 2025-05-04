@@ -102,24 +102,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p "${{ env.ARTIFACT_DIR }}"
-
-          echo "🔍 Required platforms for target: ${{ matrix.target }}"
-          echo '${{ toJson(matrix.requiredPlatforms) }}' | jq
-
-          for platform in $(echo '${{ toJson(matrix.requiredPlatforms) }}' | jq -r '.[]'); do
-            ARTIFACT_NAME="${{ inputs.projectName }}-${{ inputs.version }}-${platform}"
-            PLATFORM_DIR="${{ env.ARTIFACT_DIR }}/${platform}"
-
-            echo "⬇️ Downloading artifact: $ARTIFACT_NAME"
-            mkdir -p "$PLATFORM_DIR"
-
-            gh run download \
-              --name "$ARTIFACT_NAME" \
-              --dir "$PLATFORM_DIR" \
-              || echo "⚠️ Warning: Artifact $ARTIFACT_NAME not found or failed to download."
-          done
-          echo "✅ All required platform artifacts downloaded into: ${{ env.ARTIFACT_DIR }}"
+          .github/scripts/deploy/download-per-platform-from-build.sh \
+            "${{ env.ARTIFACT_DIR }}" \
+            "${{ inputs.projectName }}" \
+            "${{ inputs.version }}" \
+            '${{ toJson(matrix.requiredPlatforms) }}'
 
       - name: 🛠️ Normalize Artifact Layout (Release Per-Platform Only)
         if: ${{ inputs.artifactSource == 'release' && inputs.hasCombinedArtifacts == 'false' }}
