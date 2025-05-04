@@ -98,7 +98,7 @@ jobs:
             "${{ inputs.hasCombinedArtifacts }}"
 
       - name: 🛠️ Normalize Artifact Layout
-        if: inputs.hasCombinedArtifacts == 'true'
+        if: ${{ inputs.hasCombinedArtifacts == 'true' || (inputs.hasCombinedArtifacts == 'false' && inputs.artifactSource == 'build') }}
         run: |
           .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.DEPLOY_DIR }}/${{ env.PROJECT_DIR }}"
 
@@ -148,7 +148,7 @@ jobs:
           fi
 
       - name: 🩹 Patch & Decompress Unity WebGL for GitHub Pages
-        if: matrix.target == 'gh-pages' && steps.detect-compression.outputs.needs_patch == 'true'
+        if: ${{ matrix.target == 'gh-pages' && steps.detect-compression.outputs.needs_patch == 'true' }}
         run: |
           echo "🔧 Patching Unity WebGL files for GitHub Pages (remove .br/.gz + references)..."
 
