@@ -80,6 +80,9 @@ jobs:
               BASE_TAG=${BASE_TAG:-v0.0.0}
               echo "👀 Using latest base tag: $BASE_TAG"
               VERSION=$(./.github/scripts/versioning/version-generator-for-rc.sh "$BASE_TAG" 2>&1 | tee /dev/stderr | tail -n 1)
+            elif [[ "$INPUT_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
+              echo "🔢 Using provided RC version directly: $INPUT_VERSION"
+              VERSION="$INPUT_VERSION"
             else
               echo "🔢 Using provided version as RC base: $INPUT_VERSION"
               VERSION=$(./.github/scripts/versioning/version-generator-for-rc.sh "$INPUT_VERSION" 2>&1 | tee /dev/stderr | tail -n 1)
