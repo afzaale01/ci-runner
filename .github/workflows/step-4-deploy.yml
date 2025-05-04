@@ -50,6 +50,45 @@ on:
       CUSTOM_SERVER_KEY: { required: false }
 
 jobs:
+  prepare-deploy-artifacts:
+    name: 📦 Prepare Deploy Artifacts
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-name: ${{ steps.set-output.outputs.artifact_name }}
+    steps:
+      - name: 📁 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🧰 Setup Helper Scripts
+        run: chmod +x .github/scripts/deploy/*.sh
+
+      - name: 📥 Download Artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ inputs.hasCombinedArtifacts }}" == "true" ]; then
+            DEST_DIR="deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}"
+          else
+            DEST_DIR="deployment-artifacts"
+          fi
+
+          .github/scripts/deploy/download-from-${{ inputs.artifactSource }}.sh \
+            "${{ inputs.projectName }}" \
+            "${{ inputs.version }}" \
+            "${{ inputs.hasCombinedArtifacts }}" \
+            "${DEST_DIR}"
+
+      - name: 📤 Upload Prepared Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: prepared-deployment-artifacts
+          path: deployment-artifacts
+          retention-days: 1
+
+      - name: 📍 Set Output Artifact Name
+        id: set-output
+        run: echo "artifact_name=prepared-deployment-artifacts" >> $GITHUB_OUTPUT
+
   resolve-deploy-matrix:
     uses: ./.github/workflows/resolve-deploy-matrix.yml
     if: ${{ inputs.deployTargets != '[]' }}
@@ -58,7 +97,7 @@ jobs:
 
   deploy:
     name: 🚀 Deploy ${{ matrix.target }} on ${{ matrix.os }}
-    needs: resolve-deploy-matrix
+    needs: [prepare-deploy-artifacts, resolve-deploy-matrix]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -72,35 +111,11 @@ jobs:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 🧰 Setup Helper Scripts
-        run: chmod +x .github/scripts/deploy/*.sh
-
-      # ───── Build Artifact Download ─────
-      - name: 📥 Download Artifacts from Build
-        if: inputs.artifactSource == 'build'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          .github/scripts/deploy/download-from-build.sh \
-            "${{ inputs.projectName }}" \
-            "${{ inputs.version }}" \
-            "${{ inputs.hasCombinedArtifacts }}"
-
-      # ───── Release Artifact Download ─────
-      - name: 📥 Download Artifacts from GitHub Release
-        if: inputs.artifactSource == 'release'
-        run: |
-          .github/scripts/deploy/download-from-release.sh \
-            "${{ inputs.projectName }}" \
-            "${{ inputs.version }}" \
-            "${{ github.repository }}" \
-            "${{ secrets.GITHUB_TOKEN }}" \
-            "${{ inputs.hasCombinedArtifacts }}"
-
-      - name: 🛠️ Normalize Artifact Layout
-        if: ${{ inputs.hasCombinedArtifacts == 'true' }}
-        run: |
-          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.DEPLOY_DIR }}/${{ env.PROJECT_DIR }}"
+      - name: 📥 Download Prepared Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.prepare-deploy-artifacts.outputs.artifact-name }}
+          path: deployment-artifacts
 
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
