@@ -64,7 +64,7 @@ jobs:
             TARGET_PLATFORMS='[]'
           fi
 
-          echo "## ⏳ Build Metadata Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## ⏳ Metadata Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Key                          | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|------------------------------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Version                      | ${{ inputs.version }} |" >> $GITHUB_STEP_SUMMARY
