@@ -64,22 +64,23 @@ jobs:
               exit 1
             fi
 
-          # For release_candidate without manual version → auto-generate vX.Y.Z-rc.N
-          elif [[ "$BUILD_TYPE" == "release_candidate" && -z "$INPUT_VERSION" ]]; then
-            echo "🔍 No version provided — generating next available RC version..."
-
-            BASE_TAG=$(git tag | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | sed -E 's/^((v[0-9]+\.[0-9]+\.[0-9]+)).*/\1/' | sort -V | uniq | tail -n 1)
-            BASE_TAG=${BASE_TAG:-v0.0.0}
-            echo "👀 Using latest base tag: $BASE_TAG"
-
-            chmod +x .github/scripts/build/version-generator-for-rc.sh
-            VERSION=$(./.github/scripts/build/version-generator-for-rc.sh "$BASE_TAG" 2>&1 | tee /dev/stderr | tail -n 1)
-
-          # For release_candidate with manual version → use as base
-          elif [[ "$BUILD_TYPE" == "release_candidate" && -n "$INPUT_VERSION" ]]; then
-            echo "🔢 Using provided version as RC base: $INPUT_VERSION"
-            chmod +x .github/scripts/build/version-generator-for-rc.sh
-            VERSION=$(./.github/scripts/build/version-generator-for-rc.sh "$INPUT_VERSION" 2>&1 | tee /dev/stderr | tail -n 1)
+          # For release_candidate builds
+          elif [[ "$BUILD_TYPE" == "release_candidate" ]]; then
+            if [[ "$REF" =~ ^refs/tags/(v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+)$ ]]; then
+              VERSION="${BASH_REMATCH[1]}"
+              echo "🏷️ Detected RC tag push: $VERSION"
+            elif [[ -z "$INPUT_VERSION" ]]; then
+              echo "🔍 No version provided — generating next available RC version..."
+              BASE_TAG=$(git tag | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | sed -E 's/^((v[0-9]+\.[0-9]+\.[0-9]+)).*/\1/' | sort -V | uniq | tail -n 1)
+              BASE_TAG=${BASE_TAG:-v0.0.0}
+              echo "👀 Using latest base tag: $BASE_TAG"
+              chmod +x .github/scripts/versioning/version-generator-for-rc.sh
+              VERSION=$(./.github/scripts/versioning/version-generator-for-rc.sh "$BASE_TAG" 2>&1 | tee /dev/stderr | tail -n 1)
+            else
+              echo "🔢 Using provided version as RC base: $INPUT_VERSION"
+              chmod +x .github/scripts/versioning/version-generator-for-rc.sh
+              VERSION=$(./.github/scripts/versioning/version-generator-for-rc.sh "$INPUT_VERSION" 2>&1 | tee /dev/stderr | tail -n 1)
+            fi
 
           # Manual override for non-RC builds (e.g. preview)
           elif [[ "$BUILD_TYPE" != "release" && -n "$INPUT_VERSION" ]]; then
