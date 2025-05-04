@@ -225,7 +225,7 @@ jobs:
     needs:
       - detect_tests_only
       - resolve_build_type
-    if: needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
+    if: ${{ needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false' }}
     runs-on: ubuntu-latest
     outputs:
       retentionDays: ${{ steps.set.outputs.retentionDays }}
@@ -288,7 +288,7 @@ jobs:
       - check_release_blocker
       - resolve_build_type
       - detect_tests_only
-    if: needs.detect_tests_only.outputs.testsOnly == 'false'
+    if: ${{ needs.detect_tests_only.outputs.testsOnly == 'false' }}
     uses: ./.github/workflows/validate-deploy-targets.yml
     with:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
@@ -300,7 +300,7 @@ jobs:
       - check_release_blocker
       - validate_deploy_targets
       - version
-    if: needs.validate_deploy_targets.outputs.skipAnalysis != 'true'
+    if: ${{ needs.validate_deploy_targets.outputs.skipAnalysis != 'true' }}
     uses: ./.github/workflows/analyze-artifact-strategy.yml
     with:
       artifactSource: build
