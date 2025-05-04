@@ -54,7 +54,7 @@ else
 
     for zipfile in "${DEST_DIR}"/*.zip; do
       base_name="$(basename "${zipfile}" .zip)"  # Remove .zip
-      platform_dir="${DEST_DIR}-${base_name##*-}"  # Use suffix after last hyphen
+      platform_dir="${DEST_DIR}/${PROJECT_NAME}-${VERSION}-${base_name##*-}"
       echo "📂 Extracting ${zipfile} to ${platform_dir}"
       mkdir -p "${platform_dir}"
       unzip -q "${zipfile}" -d "${platform_dir}"
