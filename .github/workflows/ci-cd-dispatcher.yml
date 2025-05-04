@@ -150,7 +150,6 @@ jobs:
             --field validDeployTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.validDeployTargets }}')" \
             --field metadataConfig="$(jq -c -n \
               --arg projectName "${{ vars.PROJECT_NAME }}" \
-              --arg triggeredBy "${{ needs.prepare_metadata.outputs.triggeredBy }}" \
               --arg skipTests "${{ needs.prepare_metadata.outputs.skipTests }}" \
               --arg testsOnly "${{ needs.prepare_metadata.outputs.testsOnly }}" \
               --arg buildType "${{ needs.prepare_metadata.outputs.buildType }}" \
@@ -158,7 +157,7 @@ jobs:
               --arg retentionDays "${{ needs.prepare_metadata.outputs.retentionDays }}" \
               --arg timeoutMinutesTests "${{ needs.prepare_metadata.outputs.timeoutMinutesTests }}" \
               --arg timeoutMinutesBuild "${{ needs.prepare_metadata.outputs.timeoutMinutesBuild }}" \
-              '{projectName: $projectName, triggeredBy: $triggeredBy, skipTests: $skipTests, testsOnly: $testsOnly, buildType: $buildType, version: $version, retentionDays: $retentionDays, timeoutMinutesTests: $timeoutMinutesTests, timeoutMinutesBuild: $timeoutMinutesBuild}')" \
+              '{projectName: $projectName, skipTests: $skipTests, testsOnly: $testsOnly, buildType: $buildType, version: $version, retentionDays: $retentionDays, timeoutMinutesTests: $timeoutMinutesTests, timeoutMinutesBuild: $timeoutMinutesBuild}')" \
             --field artifactConfig="$(jq -c -n \
               --arg requiresCombined "${{ needs.prepare_metadata.outputs.requiresCombined }}" \
               --arg skipPerPlatform "${{ needs.prepare_metadata.outputs.skipPerPlatform }}" \

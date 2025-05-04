@@ -30,7 +30,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       projectName: ${{ steps.unpack.outputs.projectName }}
-      triggeredBy: ${{ steps.unpack.outputs.triggeredBy }}
       skipTests: ${{ steps.unpack.outputs.skipTests }}
       testsOnly: ${{ steps.unpack.outputs.testsOnly }}
       buildType: ${{ steps.unpack.outputs.buildType }}
@@ -61,7 +60,6 @@ jobs:
 
           # Metadata Config
           echo "projectName=$(echo "$meta" | jq -r .projectName)" >> "$GITHUB_OUTPUT"
-          echo "triggeredBy=$(echo "$meta" | jq -r .triggeredBy)" >> "$GITHUB_OUTPUT"
           echo "skipTests=$(echo "$meta" | jq -r .skipTests)" >> "$GITHUB_OUTPUT"
           echo "testsOnly=$(echo "$meta" | jq -r .testsOnly)" >> "$GITHUB_OUTPUT"
           echo "buildType=$(echo "$meta" | jq -r .buildType)" >> "$GITHUB_OUTPUT"

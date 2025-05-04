@@ -18,9 +18,6 @@ on:
       testsOnly:
         required: true
         type: string
-      triggeredBy:
-        required: true
-        type: string
       retentionDays:
         required: true
         type: string
@@ -71,7 +68,6 @@ jobs:
           echo "| Build Type                   | ${{ inputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Tests                   | ${{ inputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Tests Only                   | ${{ inputs.testsOnly }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Triggered by                 | ${{ inputs.triggeredBy }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Retention Days               | ${{ inputs.retentionDays }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Tests Timeout (minutes)      | ${{ inputs.timeoutMinutesTests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build Timeout (minutes)      | ${{ inputs.timeoutMinutesBuild }} |" >> $GITHUB_STEP_SUMMARY

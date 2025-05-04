@@ -42,8 +42,6 @@ on:
         value: ${{ jobs.prepare_test_data.outputs.quietMode }}
       buildType:
         value: ${{ jobs.resolve_build_type.outputs.buildType }}
-      triggeredBy:
-        value: ${{ jobs.resolve_trigger.outputs.triggeredBy }}
       testsOnly:
         value: ${{ jobs.detect_tests_only.outputs.testsOnly }}
       skipTests:
@@ -178,15 +176,6 @@ jobs:
           echo "timeoutMinutesTests=$TIMEOUT_MINUTES_TESTS" >> "$GITHUB_OUTPUT"
           echo "timeoutMinutesBuild=$TIMEOUT_MINUTES_BUILD" >> "$GITHUB_OUTPUT"
 
-  resolve_trigger:
-    name: Resolve Github Event Trigger
-    runs-on: ubuntu-latest
-    outputs:
-      triggeredBy: ${{ steps.event.outputs.triggeredBy }}
-    steps:
-      - id: event
-        run: echo "triggeredBy=$GITHUB_EVENT_NAME" >> "$GITHUB_OUTPUT"
-
   resolve_build_type:
     name: Resolve Build Type (Preview, RC, Release)
     needs: detect_tests_only
@@ -316,7 +305,6 @@ jobs:
     needs:
       - detect_skip_tests
       - detect_tests_only
-      - resolve_trigger
       - resolve_build_type
       - resolve_retention_days
       - prepare_timeouts
@@ -332,7 +320,6 @@ jobs:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
       testsOnly: ${{ needs.detect_tests_only.outputs.testsOnly }}
-      triggeredBy: ${{ needs.resolve_trigger.outputs.triggeredBy }}
       retentionDays: ${{ needs.resolve_retention_days.outputs.retentionDays }}
       timeoutMinutesTests: ${{ needs.prepare_timeouts.outputs.timeoutMinutesTests }}
       timeoutMinutesBuild: ${{ needs.prepare_timeouts.outputs.timeoutMinutesBuild }}
