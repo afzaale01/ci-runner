@@ -110,7 +110,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.resolve_deploy_matrix.outputs.matrix) }}
     env:
-      DEPLOY_DIR: deployment-artifacts
+      DEPLOY_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}
       PROJECT_DIR: ${{ inputs.projectName }}-${{ inputs.version }}
     steps:
       - name: 📁 Checkout Repository
