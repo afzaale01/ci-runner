@@ -17,6 +17,12 @@ for artifact_dir in "${DEPLOY_DIR}"/*; do
   platform_name="${base_name##*-}"
   target_dir="${DEPLOY_DIR}/${platform_name}"
 
+  # 🛡 Skip if already named correctly
+  if [ "$artifact_dir" == "$target_dir" ]; then
+    echo "⚠️ Skipping '${artifact_dir}' (already normalized)"
+    continue
+  fi
+
   echo "➡️ Renaming '${artifact_dir}' → '${target_dir}'"
   mv "$artifact_dir" "$target_dir"
 done
