@@ -50,9 +50,11 @@ on:
       CUSTOM_SERVER_KEY: { required: false }
 
 jobs:
-  prepare-deploy-artifacts:
+  prepare_deploy_artifacts:
     name: 📦 Prepare Deploy Artifacts
     runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: ${{ inputs.projectName }}-${{ inputs.version }}
     outputs:
       artifact-name: ${{ steps.set-output.outputs.artifact_name }}
     steps:
@@ -62,21 +64,32 @@ jobs:
       - name: 🧰 Setup Helper Scripts
         run: chmod +x .github/scripts/deploy/*.sh
 
-      - name: 📥 Download Artifacts
+      # ───── Build Artifact Download ─────
+      - name: 📥 Download Artifacts from Build
+        if: inputs.artifactSource == 'build'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "${{ inputs.hasCombinedArtifacts }}" == "true" ]; then
-            DEST_DIR="deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}"
-          else
-            DEST_DIR="deployment-artifacts"
-          fi
-
-          .github/scripts/deploy/download-from-${{ inputs.artifactSource }}.sh \
+          .github/scripts/deploy/download-from-build.sh \
             "${{ inputs.projectName }}" \
             "${{ inputs.version }}" \
-            "${{ inputs.hasCombinedArtifacts }}" \
-            "${DEST_DIR}"
+            "${{ inputs.hasCombinedArtifacts }}"
+
+      # ───── Release Artifact Download ─────
+      - name: 📥 Download Artifacts from GitHub Release
+        if: inputs.artifactSource == 'release'
+        run: |
+          .github/scripts/deploy/download-from-release.sh \
+            "${{ inputs.projectName }}" \
+            "${{ inputs.version }}" \
+            "${{ github.repository }}" \
+            "${{ secrets.GITHUB_TOKEN }}" \
+            "${{ inputs.hasCombinedArtifacts }}"
+  
+      - name: 🛠️ Normalize Artifact Layout
+        if: ${{ inputs.hasCombinedArtifacts == 'true' }}
+        run: |
+          .github/scripts/deploy/normalize-artifact-layout.sh "deployment-artifacts/${{ env.PROJECT_DIR }}"
 
       - name: 📤 Upload Prepared Artifacts
         uses: actions/upload-artifact@v4
@@ -89,7 +102,8 @@ jobs:
         id: set-output
         run: echo "artifact_name=prepared-deployment-artifacts" >> $GITHUB_OUTPUT
 
-  resolve-deploy-matrix:
+  resolve_deploy_matrix:
+    needs: 
     uses: ./.github/workflows/resolve-deploy-matrix.yml
     if: ${{ inputs.deployTargets != '[]' }}
     with:
@@ -97,12 +111,12 @@ jobs:
 
   deploy:
     name: 🚀 Deploy ${{ matrix.target }} on ${{ matrix.os }}
-    needs: [prepare-deploy-artifacts, resolve-deploy-matrix]
+    needs: [prepare_deploy_artifacts, resolve_deploy_matrix]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.resolve-deploy-matrix.outputs.matrix) }}
+        include: ${{ fromJson(needs.resolve_deploy_matrix.outputs.matrix) }}
     env:
       DEPLOY_DIR: deployment-artifacts
       PROJECT_DIR: ${{ inputs.projectName }}-${{ inputs.version }}
@@ -114,7 +128,7 @@ jobs:
       - name: 📥 Download Prepared Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.prepare-deploy-artifacts.outputs.artifact-name }}
+          name: ${{ needs.prepare_deploy_artifacts.outputs.artifact-name }}
           path: deployment-artifacts
 
       - name: 🧾 List Artifacts
