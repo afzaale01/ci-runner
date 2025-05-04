@@ -36,7 +36,7 @@ on:
       deployTargets:
         description: "JSON array of deploy targets (e.g. [\"itch.io\",\"s3\"])"
         required: true
-        default: '["itch.io", "appcenter", "firebase", "s3", "gh-pages", "steam", "discord", "testflight", "custom-server"]'
+        default: '["itch.io", "appcenter", "firebase", "s3", "gh-pages", "steam", "testflight", "custom-server"]'
         type: string
 
 permissions:
