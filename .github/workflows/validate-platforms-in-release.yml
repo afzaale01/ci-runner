@@ -1,0 +1,76 @@
+name: 🎯 Validate Platforms In Release
+
+on:
+  workflow_call:
+    inputs:
+      tagVersion:
+        required: true
+        type: string
+      targetPlatforms:
+        required: true
+        type: string
+    outputs:
+      validatedTargetPlatforms:
+        value: ${{ jobs.validate.outputs.validatedTargetPlatforms }}
+
+jobs:
+  validate:
+    name: Validate Platforms in Release
+    runs-on: ubuntu-latest
+    env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
+    outputs:
+      validatedTargetPlatforms: ${{ steps.filter.outputs.validatedTargetPlatforms }}
+    steps:
+      - name: Install GitHub CLI + jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install gh jq -y
+
+      - name: Load Release Metadata
+        run: |
+          echo "🔍 Fetching release data for tag: ${{ inputs.tagVersion }}"
+          gh api repos/${{ github.repository }}/releases/tags/${{ inputs.tagVersion }} > release.json
+
+      - name: Extract Available Platforms
+        id: extract
+        run: |
+          RELEASE_ASSETS=$(jq -r '.assets[].name' release.json)
+          echo "Found assets:"
+          echo "$RELEASE_ASSETS"
+
+          AVAILABLE_PLATFORMS=()
+          while IFS= read -r asset; do
+            if [[ "$asset" =~ -([^-]+)\.zip$ ]]; then
+              PLATFORM="${BASH_REMATCH[1]}"
+              AVAILABLE_PLATFORMS+=("$PLATFORM")
+            fi
+          done <<< "$RELEASE_ASSETS"
+
+          echo "AVAILABLE_PLATFORMS=${AVAILABLE_PLATFORMS[*]}" >> $GITHUB_ENV
+
+      - name: Filter Input Platforms
+        id: filter
+        run: |
+          INPUT_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]')
+          AVAILABLE=(${AVAILABLE_PLATFORMS})
+          VALIDATED=()
+
+          for input in $INPUT_PLATFORMS; do
+            for avail in "${AVAILABLE[@]}"; do
+              if [[ "$input" == "$avail" ]]; then
+                VALIDATED+=("$input")
+                break
+              fi
+            done
+          done
+
+          if [ ${#VALIDATED[@]} -eq 0 ]; then
+            echo "⚠ No matching platforms found in release. Falling back to empty list."
+            VALIDATED_JSON="[]"
+          else
+            VALIDATED_JSON=$(printf '%s\n' "${VALIDATED[@]}" | jq -R . | jq -s .)
+          fi
+
+          echo "✅ Validated platforms: $VALIDATED_JSON"
+          echo "validatedTargetPlatforms=$VALIDATED_JSON" >> $GITHUB_OUTPUT
