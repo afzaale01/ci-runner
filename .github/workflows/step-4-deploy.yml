@@ -104,13 +104,13 @@ jobs:
         run: |
           mkdir -p "${{ env.ARTIFACT_DIR }}"
 
-          echo "🔍 Required platforms:"
-          echo '${{ needs.resolve_deploy_matrix.outputs.requiredPlatforms }}' | jq
+          echo "🔍 Required platforms for target: ${{ matrix.target }}"
+          echo '${{ toJson(matrix.requiredPlatforms) }}' | jq
 
-          for platform in $(echo '${{ needs.resolve_deploy_matrix.outputs.requiredPlatforms }}' | jq -r '.[]'); do
+          for platform in $(echo '${{ toJson(matrix.requiredPlatforms) }}' | jq -r '.[]'); do
             ARTIFACT_NAME="${{ inputs.projectName }}-${{ inputs.version }}-${platform}"
             PLATFORM_DIR="${{ env.ARTIFACT_DIR }}/${platform}"
-            
+
             echo "⬇️ Downloading artifact: $ARTIFACT_NAME"
             mkdir -p "$PLATFORM_DIR"
 
@@ -119,7 +119,6 @@ jobs:
               --dir "$PLATFORM_DIR" \
               || echo "⚠️ Warning: Artifact $ARTIFACT_NAME not found or failed to download."
           done
-
           echo "✅ All required platform artifacts downloaded into: ${{ env.ARTIFACT_DIR }}"
 
       - name: 🛠️ Normalize Artifact Layout (Per-Platform Only)

@@ -52,17 +52,18 @@ jobs:
           for TARGET in $(echo "$DEPLOY_TARGETS" | jq -r '.[]'); do
             OS=$(jq -r --arg t "$TARGET" '.[$t].os // "ubuntu-latest"' "$CONFIG_FILE")
             COMBINED=$(jq -r --arg t "$TARGET" '.[$t].requiresCombinedArtifact // false' "$CONFIG_FILE")
-            PLATFORMS=$(jq -r --arg t "$TARGET" '.[$t].compatiblePlatforms[]?' "$CONFIG_FILE")
+            # pull compatible platforms as compact JSON array
+            PLATFORMS=$(jq -c --arg t "$TARGET" '.[$t].compatiblePlatforms' "$CONFIG_FILE")
 
-            MATRIX+='{"target":"'"$TARGET"'","os":"'"$OS"'","requiresCombinedArtifact":"'"$COMBINED"'"},'
+            MATRIX+='{"target":"'"$TARGET"'","os":"'"$OS"'","requiresCombinedArtifact":"'"$COMBINED"'","requiredPlatforms":'"$PLATFORMS"'},'
 
-            # Check if combined artifact is needed
+            # Track if any target overall requires combined artifact
             if [ "$COMBINED" = "true" ]; then
               COMBINED_NEEDED=true
             fi
 
-            # Aggregate unique platforms
-            for p in $PLATFORMS; do
+            # Aggregate unique platforms across all targets (for the global list)
+            for p in $(echo "$PLATFORMS" | jq -r '.[]'); do
               if ! contains "$p" "${PLATFORM_SET[@]}"; then
                 PLATFORM_SET+=("$p")
               fi
