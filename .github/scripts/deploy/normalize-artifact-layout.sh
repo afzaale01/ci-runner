@@ -9,7 +9,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "🔹 Source Directory: ${DEPLOY_DIR}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-for artifact_dir in "${DEPLOY_DIR}"/*/; do
+for artifact_dir in "${DEPLOY_DIR}"-*; do
   [[ -d "$artifact_dir" ]] || continue
   base_name="$(basename "$artifact_dir")"
 
