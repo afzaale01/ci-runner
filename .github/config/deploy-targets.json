@@ -2,41 +2,49 @@
   "gh-pages": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": false,
-    "minimumBuildType": "release"
+    "minimumBuildType": "release",
+    "compatiblePlatforms": ["WebGL"]
   },
   "itch.io": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": false,
-    "minimumBuildType": "release"
+    "minimumBuildType": "release",
+    "compatiblePlatforms": ["WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
   },
   "s3": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
-    "minimumBuildType": "preview"
+    "minimumBuildType": "preview",
+    "compatiblePlatforms": ["Android", "iOS", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
   },
   "custom-server": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
-    "minimumBuildType": "preview"
+    "minimumBuildType": "preview",
+    "compatiblePlatforms": ["Android", "iOS", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
   },
   "steam": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
-    "minimumBuildType": "release"
+    "minimumBuildType": "release",
+    "compatiblePlatforms": ["StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
   },
   "testflight": {
     "os": "macos-latest",
     "requiresCombinedArtifact": false,
-    "minimumBuildType": "release_candidate"
+    "minimumBuildType": "release_candidate",
+    "compatiblePlatforms": ["iOS"]
   },
   "appcenter": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
-    "minimumBuildType": "preview"
+    "minimumBuildType": "preview",
+    "compatiblePlatforms": ["Android", "iOS"]
   },
   "firebase": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
-    "minimumBuildType": "release"
+    "minimumBuildType": "release",
+    "compatiblePlatforms": ["WebGL"]
   }
 }
