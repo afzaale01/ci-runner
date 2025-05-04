@@ -41,6 +41,7 @@ jobs:
     with:
       skipTests: true
       testsOnly: false
+      targetPlatforms: ${{ inputs.targetPlatforms }}
       deployTargets: ${{ inputs.deployTargets }}
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}

@@ -110,6 +110,7 @@ jobs:
     with:
       skipTests: ${{ inputs.skipTests }}
       deployTargets: ${{ inputs.deployTargets }}
+      targetPlatforms: ${{ inputs.targetPlatforms }}
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
 

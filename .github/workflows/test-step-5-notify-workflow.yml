@@ -75,6 +75,7 @@ jobs:
     with:
       skipTests: false
       testsOnly: false
+      targetPlatforms: ${{ inputs.targetPlatforms }}
       deployTargets: ${{ inputs.deployTargets }}
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
@@ -101,7 +102,7 @@ jobs:
     with:
       version: ${{ needs.prepare_metadata.outputs.version }}
       projectName: ${{ inputs.projectName }}
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      targetPlatforms: ${{ needs.prepare_metadata.outputs.targetPlatforms }}
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
     secrets: inherit
 
