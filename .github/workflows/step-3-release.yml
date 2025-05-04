@@ -61,7 +61,7 @@ jobs:
           BUILD_TYPE="${{ inputs.buildType }}"
 
           IS_PRERELEASE=$([[ "$VERSION" == *-* ]] && echo true || echo false)
-          IS_DRAFT=$([[ "$BUILD_TYPE" == "release_candidate" ]] && echo true || echo false)
+          IS_DRAFT=$([[ "$BUILD_TYPE" == "preview" ]] && echo true || echo false)
 
           echo "📝 Creating GitHub release for tag: $VERSION (prerelease: $IS_PRERELEASE, draft: $IS_DRAFT)"
 
