@@ -138,7 +138,7 @@ jobs:
             echo "- 🏷️ This was a **tag push** - tag already exists by design." >> $GITHUB_STEP_SUMMARY
           else
             if git rev-parse "${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
-              echo "- ⚠️ Release with tag \`${{ steps.get_version.outputs.version }}\` **already exists** - run failed on purpose to avoid overwrite." >> $GITHUB_STEP_SUMMARY
+              echo "- ⚠️ Release with tag \`${{ steps.get_version.outputs.version }}\` **already exists** - run will fail on purpose to avoid overwrite." >> $GITHUB_STEP_SUMMARY
             else
               echo "- ✅ Tag \`${{ steps.get_version.outputs.version }}\` **does not exist yet** - good to go!" >> $GITHUB_STEP_SUMMARY
             fi
