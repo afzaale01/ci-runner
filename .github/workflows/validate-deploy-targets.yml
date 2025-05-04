@@ -61,6 +61,7 @@ jobs:
           CONFIG_FILE=".github/config/deploy-targets.json"
           FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
           BUILD_TYPE="${{ inputs.buildType }}"
+          TARGET_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]')
 
           echo "🔍 Checking for local config file..."
           if [ -f "$CONFIG_FILE" ]; then
@@ -71,7 +72,6 @@ jobs:
             curl -sSL "$FALLBACK_URL" -o "$CONFIG_FILE"
           fi
 
-          # Define build type rank
           case "$BUILD_TYPE" in
             preview) BUILD_RANK=1 ;;
             release_candidate) BUILD_RANK=2 ;;
@@ -82,10 +82,12 @@ jobs:
           FINAL_VALID=()
           INVALID=()
           SKIPPED_MINIMUM=()
+          SKIPPED_PLATFORM=()
 
           for TARGET in $(echo "$RAW_INPUT" | jq -r '.[]'); do
             if jq -e --arg key "$TARGET" '.[$key]' "$CONFIG_FILE" >/dev/null; then
               MIN_TYPE=$(jq -r --arg key "$TARGET" '.[$key].minimumBuildType' "$CONFIG_FILE")
+              COMPATIBLE_PLATFORMS=$(jq -r --arg key "$TARGET" '.[$key].compatiblePlatforms[]' "$CONFIG_FILE")
 
               case "$MIN_TYPE" in
                 preview) MIN_RANK=1 ;;
@@ -94,10 +96,23 @@ jobs:
                 *) echo "❌ Unknown minimumBuildType for $TARGET: $MIN_TYPE"; exit 1 ;;
               esac
 
-              if [ "$BUILD_RANK" -ge "$MIN_RANK" ]; then
+              if [ "$BUILD_RANK" -lt "$MIN_RANK" ]; then
+                SKIPPED_MINIMUM+=("$TARGET (requires $MIN_TYPE)")
+                continue
+              fi
+
+              MATCH_FOUND=false
+              for plat in $TARGET_PLATFORMS; do
+                if echo "$COMPATIBLE_PLATFORMS" | grep -q "^$plat$"; then
+                  MATCH_FOUND=true
+                  break
+                fi
+              done
+
+              if [ "$MATCH_FOUND" = true ]; then
                 FINAL_VALID+=("$TARGET")
               else
-                SKIPPED_MINIMUM+=("$TARGET (requires $MIN_TYPE)")
+                SKIPPED_PLATFORM+=("$TARGET (no compatible platforms)")
               fi
             else
               INVALID+=("$TARGET")
@@ -107,8 +122,8 @@ jobs:
           echo "✅ Valid targets: ${FINAL_VALID[*]}"
           echo "❌ Invalid targets: ${INVALID[*]}"
           echo "⚠️ Skipped (minimum buildType not met): ${SKIPPED_MINIMUM[*]}"
+          echo "⚠️ Skipped (no compatible platforms): ${SKIPPED_PLATFORM[*]}"
 
-          # Safely handle empty FINAL_VALID array
           if [ "${#FINAL_VALID[@]}" -eq 0 ]; then
             json='[]'
           else
@@ -119,10 +134,10 @@ jobs:
           echo "$json" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-          # Export for summary step (join with | for safe splitting)
           echo "FINAL_VALID_TARGETS=${FINAL_VALID[*]}" >> $GITHUB_ENV
           echo "INVALID_TARGETS=${INVALID[*]}" >> $GITHUB_ENV
           echo "SKIPPED_MINIMUM=$(IFS='|'; echo "${SKIPPED_MINIMUM[*]}")" >> $GITHUB_ENV
+          echo "SKIPPED_PLATFORM=$(IFS='|'; echo "${SKIPPED_PLATFORM[*]}")" >> $GITHUB_ENV
 
       - name: 📋 Summary of Target Validation
         if: always()
@@ -130,9 +145,10 @@ jobs:
           FINAL_VALID_TARGETS="${FINAL_VALID_TARGETS:-}"
           INVALID_TARGETS="${INVALID_TARGETS:-}"
           SKIPPED_MINIMUM="${SKIPPED_MINIMUM:-}"
+          SKIPPED_PLATFORM="${SKIPPED_PLATFORM:-}"
 
-          # Convert skipped list back to array using | delimiter
           IFS='|' read -r -a SKIPPED_MINIMUM_ARRAY <<< "$SKIPPED_MINIMUM"
+          IFS='|' read -r -a SKIPPED_PLATFORM_ARRAY <<< "$SKIPPED_PLATFORM"
 
           echo ""
           echo "📋 Deploy Target Validation Summary"
@@ -154,6 +170,14 @@ jobs:
             echo ""
             echo "⚠️ Skipped (Minimum BuildType Not Met):"
             for s in "${SKIPPED_MINIMUM_ARRAY[@]}"; do
+              echo "  - $s"
+            done
+          fi
+
+          if [ "${#SKIPPED_PLATFORM_ARRAY[@]}" -gt 0 ]; then
+            echo ""
+            echo "⚠️ Skipped (No Compatible Platforms):"
+            for s in "${SKIPPED_PLATFORM_ARRAY[@]}"; do
               echo "  - $s"
             done
           fi
