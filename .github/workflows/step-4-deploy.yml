@@ -212,7 +212,7 @@ jobs:
             echo "⚠️ Missing itch.io credentials."; 
             exit 1;
           fi
-          butler push "$DEPLOY_DIR" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
+          butler push "$ARTIFACT_DIR" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
         env:
           BUTLER_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
 
@@ -224,7 +224,7 @@ jobs:
             echo "⚠️ Missing App Center credentials."; 
             exit 1;
           fi
-          FILES=$(find "$DEPLOY_DIR" -type f \( -name "*.apk" -o -name "*.aab" -o -name "*.ipa" \))
+          FILES=$(find "$ARTIFACT_DIR" -type f \( -name "*.apk" -o -name "*.aab" -o -name "*.ipa" \))
           if [ -z "$FILES" ]; then echo "❌ No mobile artifacts found."; exit 1; fi
 
           for file in $FILES; do
@@ -266,7 +266,7 @@ jobs:
         run: |
           VDF_PATH="${{ secrets.STEAM_DEPOT_VDF_PATH }}"
           if [ -z "$VDF_PATH" ]; then
-            VDF_PATH="$DEPLOY_DIR/steam/app_build.vdf"
+            VDF_PATH="$ARTIFACT_DIR/steam/app_build.vdf"
           fi
 
           if [ -z "${{ secrets.STEAM_USERNAME }}" ] || [ -z "${{ secrets.STEAM_PASSWORD }}" ] || [ -z "${{ secrets.STEAM_APP_ID }}" ]; then
@@ -296,7 +296,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ secrets.CUSTOM_SERVER_HOST }}" >> ~/.ssh/known_hosts
 
-          rsync -avz "$DEPLOY_DIR/" "${{ secrets.CUSTOM_SERVER_USER }}@${{ secrets.CUSTOM_SERVER_HOST }}:/var/www/mygame/"
+          rsync -avz "$ARTIFACT_DIR/" "${{ secrets.CUSTOM_SERVER_USER }}@${{ secrets.CUSTOM_SERVER_HOST }}:/var/www/mygame/"
         env:
           CUSTOM_SERVER_HOST: ${{ secrets.CUSTOM_SERVER_HOST }}
           CUSTOM_SERVER_USER: ${{ secrets.CUSTOM_SERVER_USER }}
@@ -311,7 +311,7 @@ jobs:
             exit 1;
           fi
 
-          FILE=$(find "$DEPLOY_DIR" -type f -name "*.ipa" | head -n 1)
+          FILE=$(find "$ARTIFACT_DIR" -type f -name "*.ipa" | head -n 1)
           if [ -z "$FILE" ]; then echo "❌ No .ipa found to upload."; exit 1; fi
 
           echo "${{ secrets.APPSTORE_API_PRIVATE_KEY }}" > private_key.p8
@@ -341,7 +341,7 @@ jobs:
           if [ "${{ job.status }}" != "success" ]; then
             STATUS="❌"
             NOTE="Deployment failed or incomplete"
-          elif [ ! -d "$DEPLOY_DIR" ]; then
+          elif [ ! -d "$ARTIFACT_DIR" ]; then
             STATUS="❌"
             NOTE="No deployment artifacts found"
           fi
