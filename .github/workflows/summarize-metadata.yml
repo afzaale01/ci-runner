@@ -42,6 +42,9 @@ on:
       skipPerPlatform:
         required: true
         type: string
+      releaseAlreadyExists:
+        required: true
+        type: string
 
 jobs:
   summarize:
@@ -76,3 +79,7 @@ jobs:
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ inputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Per-Platform Artifacts  | ${{ inputs.skipPerPlatform }} |" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ inputs.releaseAlreadyExists }}" == 'true' ]]; then
+            echo "❌ **Pipeline was blocked because a GitHub release already exists for version \`${{ inputs.version }}\`.**" >> $GITHUB_STEP_SUMMARY
+          fi
