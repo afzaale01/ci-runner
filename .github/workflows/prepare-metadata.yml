@@ -295,7 +295,7 @@ jobs:
     with:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       targetPlatforms: ${{ needs.resolve_target_platforms.outputs.validatedTargetPlatforms }}
-      deployTargets: ${{ inputs.deployTargets || vars.DEPLOY_TARGETS }}
+      deployTargets: ${{ inputs.deployTargets || vars.DEPLOY_TARGETS || '[]'}}
 
   analyze_artifact_strategy:
     name: Analyze Artifact Strategy
