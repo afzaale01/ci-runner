@@ -206,6 +206,40 @@ jobs:
           echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
           echo "✅ Resolved buildType: $BUILD_TYPE"
 
+  version:
+    name: Create versioning
+    needs: 
+      - resolve_build_type
+      - detect_tests_only
+    if: needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
+    uses: ./.github/workflows/version-resolver.yml
+    with:
+      buildType: ${{ needs.resolve_build_type.outputs.buildType }}
+      version: ${{ inputs.version }}
+
+  check_release_blocker:
+    name: Check for Existing Release Blocker
+    needs: 
+      - version
+      - resolve_build_type
+    runs-on: ubuntu-latest
+    outputs:
+      release_already_existed: ${{ steps.set.outputs.should_continue }}
+    steps:
+      - id: set
+        run: |
+          if [[ "${{ needs.resolve_build_type.outputs.buildType }}" == "preview" ]]; then
+            echo "✅ Preview builds ignore releases - continuing pipeline."
+            echo "release_already_existed=false" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ needs.version.outputs.release_existed }}" == "true" ]]; then
+            echo "❌ A release already exists for version '${{ needs.version.outputs.version }}'. Stopping pipeline early."
+            echo "release_already_existed=true" >> "$GITHUB_OUTPUT"
+            exit 1
+          else
+            echo "✅ No existing release detected - continuing pipeline."
+            echo "release_already_existed=false" >> "$GITHUB_OUTPUT"
+          fi
+
   resolve_target_platforms:
     needs:
       - detect_tests_only
@@ -248,40 +282,6 @@ jobs:
 
           echo "✅ Retention days resolved to: $RETENTION_DAYS"
           echo "retentionDays=$RETENTION_DAYS" >> "$GITHUB_OUTPUT"
-
-  version:
-    name: Create versioning
-    needs: 
-      - resolve_build_type
-      - detect_tests_only
-    if: needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
-    uses: ./.github/workflows/version-resolver.yml
-    with:
-      buildType: ${{ needs.resolve_build_type.outputs.buildType }}
-      version: ${{ inputs.version }}
-
-  check_release_blocker:
-    name: Check for Existing Release Blocker
-    needs: 
-      - version
-      - resolve_build_type
-    runs-on: ubuntu-latest
-    outputs:
-      release_already_existed: ${{ steps.set.outputs.should_continue }}
-    steps:
-      - id: set
-        run: |
-          if [[ "${{ needs.resolve_build_type.outputs.buildType }}" == "preview" ]]; then
-            echo "✅ Preview builds ignore releases - continuing pipeline."
-            echo "release_already_existed=false" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ needs.version.outputs.release_existed }}" == "true" ]]; then
-            echo "❌ A release already exists for version '${{ needs.version.outputs.version }}'. Stopping pipeline early."
-            echo "release_already_existed=true" >> "$GITHUB_OUTPUT"
-            exit 1
-          else
-            echo "✅ No existing release detected - continuing pipeline."
-            echo "release_already_existed=false" >> "$GITHUB_OUTPUT"
-          fi
 
   validate_deploy_targets:
     name: Validate Deploy Targets
