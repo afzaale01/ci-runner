@@ -98,7 +98,7 @@ jobs:
             "${{ inputs.hasCombinedArtifacts }}"
 
       - name: 🛠️ Normalize Artifact Layout
-        if: ${{ inputs.hasCombinedArtifacts == 'true' || (inputs.hasCombinedArtifacts == 'false' && inputs.artifactSource == 'build') }}
+        if: ${{ inputs.hasCombinedArtifacts == 'true' }}
         run: |
           .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.DEPLOY_DIR }}/${{ env.PROJECT_DIR }}"
 
