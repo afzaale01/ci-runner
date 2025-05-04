@@ -121,8 +121,8 @@ jobs:
           done
           echo "✅ All required platform artifacts downloaded into: ${{ env.ARTIFACT_DIR }}"
 
-      - name: 🛠️ Normalize Artifact Layout (Per-Platform Only)
-        if: ${{ inputs.hasCombinedArtifacts == 'false' }}
+      - name: 🛠️ Normalize Artifact Layout (Release Per-Platform Only)
+        if: ${{ inputs.artifactSource == 'release' && inputs.hasCombinedArtifacts == 'false' }}
         run: |
           .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.ARTIFACT_DIR }}"
 
