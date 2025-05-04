@@ -46,7 +46,19 @@ if [[ "${HAS_COMBINED_ARTIFACTS}" == "true" ]]; then
 else
   echo "📦 Downloading per-platform artifacts..."
 
-  gh run download --dir "${DEST_DIR}"
+  FOUND_ANY=false
+
+  while read -r artifact_name; do
+    if [ -n "$artifact_name" ]; then
+      echo "⬇️ Downloading artifact: ${artifact_name}"
+      gh run download --name "${artifact_name}" --dir "${DEST_DIR}"
+      FOUND_ANY=true
+    fi
+  done < <(gh run list-artifacts --json name --jq '.[] | .name' | grep "${PROJECT_NAME}-${VERSION}-" || true)
+
+  if ! $FOUND_ANY; then
+    echo "⚠️ No matching per-platform artifacts found for ${PROJECT_NAME}-${VERSION}-*"
+  fi
 
   # Extract each platform artifact into its own folder
   if ls "${DEST_DIR}"/*.zip &>/dev/null; then
