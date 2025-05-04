@@ -89,6 +89,13 @@ jobs:
             "${{ secrets.GITHUB_TOKEN }}" \
             "${{ inputs.hasCombinedArtifacts }}"
 
+      - name: 📥 Retrieve Artifacts from Build
+        if: inputs.artifactSource == 'build'
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ env.DEPLOY_DIR }}
+          name: ${{ env.PROJECT_DIR }}
+
       - name: 🛠️ Normalize Artifact Layout (Per-Platform Only)
         if: ${{ inputs.hasCombinedArtifacts == 'false' }}
         run: |
