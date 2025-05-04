@@ -60,7 +60,7 @@ jobs:
                 exit 1
               fi
             else
-              echo "❌ For 'release' builds, either push a Git tag or provide a version input."
+              echo "❌ For 'release' builds, either push a Git tag or provide a Semver version input."
               exit 1
             fi
 
