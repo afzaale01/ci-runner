@@ -2,22 +2,23 @@
 set -euo pipefail
 
 DEPLOY_DIR="${1:?Missing deployment directory}"
-PROJECT_DIR="${2:?Missing project directory}"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🛠️ Starting Artifact Folder Renaming"
+echo "🛠️ Starting Artifact Layout Normalization"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔹 Deploy Directory: ${DEPLOY_DIR}"
-echo "🔹 Project Directory: ${PROJECT_DIR}"
+echo "🔹 Source Directory: ${DEPLOY_DIR}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-for platform_dir in "${DEPLOY_DIR}"/*/; do
-  [[ -d "$platform_dir" ]] || continue
-  platform_name="$(basename "$platform_dir")"
-  new_dir="${DEPLOY_DIR}/${PROJECT_DIR}-${platform_name}"
+for artifact_dir in "${DEPLOY_DIR}"/*/; do
+  [[ -d "$artifact_dir" ]] || continue
+  base_name="$(basename "$artifact_dir")"
 
-  echo "➡️ Renaming '${platform_dir}' → '${new_dir}'"
-  mv "$platform_dir" "$new_dir"
+  # Extract platform part after last hyphen
+  platform_name="${base_name##*-}"
+  target_dir="${DEPLOY_DIR}/${platform_name}"
+
+  echo "➡️ Renaming '${artifact_dir}' → '${target_dir}'"
+  mv "$artifact_dir" "$target_dir"
 done
 
-echo "✅ Artifact folders renamed."
+echo "✅ Artifact layout normalized."
