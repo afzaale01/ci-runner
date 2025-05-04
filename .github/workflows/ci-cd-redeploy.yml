@@ -13,6 +13,10 @@ on:
         required: true
         default: '["gh-pages"]'
         type: string
+      targetPlatforms:
+        description: "JSON array of target platforms (e.g. [\"WebGL\",\"iOS\"]) - Optional (leave empty)"
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -70,6 +74,7 @@ jobs:
       version: ${{ inputs.tagVersion }}
       projectName: ${{ vars.PROJECT_NAME }}
       deployTargets: ${{ inputs.deployTargets }}
+      targetPlatforms: ${{ inputs.targetPlatforms != '' && inputs.targetPlatforms || vars.TARGET_PLATFORMS }}
       hasCombinedArtifacts: ${{ needs.validate_release.outputs.hasCombinedArtifacts }}
       artifactSource: release
     secrets: inherit
