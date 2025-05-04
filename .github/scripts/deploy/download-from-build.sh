@@ -7,12 +7,14 @@ set -euo pipefail
 PROJECT_NAME="${1:?Missing project name}"
 VERSION="${2:?Missing version}"
 HAS_COMBINED_ARTIFACTS="${3:?Missing hasCombinedArtifacts flag (true/false)}"
+TARGET_PLATFORMS="${4:?Missing target platforms (JSON array)}"
 
 PROJECT_NAME="$(echo "$PROJECT_NAME" | xargs)"
 VERSION="$(echo "$VERSION" | xargs)"
 HAS_COMBINED_ARTIFACTS="$(echo "$HAS_COMBINED_ARTIFACTS" | xargs)"
+TARGET_PLATFORMS="$(echo "$TARGET_PLATFORMS" | xargs)"
 
-DEST_DIR="${4:-deployment-artifacts/${PROJECT_NAME}-${VERSION}}"
+DEST_DIR="deployment-artifacts/${PROJECT_NAME}-${VERSION}"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📦 Starting Build Artifact Download"
@@ -21,6 +23,7 @@ echo "🔹 Project                   : ${PROJECT_NAME}"
 echo "🔹 Version                   : ${VERSION}"
 echo "🔹 Has Combined Artifacts    : ${HAS_COMBINED_ARTIFACTS}"
 echo "🔹 Target Download Directory : ${DEST_DIR}"
+echo "🔹 Target Platforms          : ${TARGET_PLATFORMS}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 mkdir -p "${DEST_DIR}"
@@ -36,7 +39,6 @@ if [[ "${HAS_COMBINED_ARTIFACTS}" == "true" ]]; then
   echo "⬇️ Downloading artifact: ${ARTIFACT_NAME}"
   gh run download --name "${ARTIFACT_NAME}" --dir "${DEST_DIR}"
 
-  # If a zip exists, extract and clean up
   if ls "${DEST_DIR}"/*.zip &>/dev/null; then
     echo "📂 Extracting combined artifact..."
     unzip -q "${DEST_DIR}"/*.zip -d "${DEST_DIR}"
@@ -48,19 +50,24 @@ else
 
   FOUND_ANY=false
 
-  while read -r artifact_name; do
-    if [ -n "$artifact_name" ]; then
-      echo "⬇️ Downloading artifact: ${artifact_name}"
-      gh run download --name "${artifact_name}" --dir "${DEST_DIR}"
+  # Convert JSON array → bash-safe list
+  PLATFORM_LIST=$(echo "${TARGET_PLATFORMS}" | jq -r '.[]')
+
+  for platform in ${PLATFORM_LIST}; do
+    ARTIFACT_NAME="${PROJECT_NAME}-${VERSION}-${platform}"
+    echo "⬇️ Downloading artifact: ${ARTIFACT_NAME}"
+
+    if gh run download --name "${ARTIFACT_NAME}" --dir "${DEST_DIR}"; then
       FOUND_ANY=true
+    else
+      echo "⚠️ Artifact ${ARTIFACT_NAME} not found, skipping."
     fi
-  done < <(gh run list-artifacts --json name --jq '.[] | .name' | grep "${PROJECT_NAME}-${VERSION}-" || true)
+  done
 
   if ! $FOUND_ANY; then
     echo "⚠️ No matching per-platform artifacts found for ${PROJECT_NAME}-${VERSION}-*"
   fi
 
-  # Extract each platform artifact into its own folder
   if ls "${DEST_DIR}"/*.zip &>/dev/null; then
     echo "📂 Extracting platform-specific artifacts..."
 
