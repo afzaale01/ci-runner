@@ -266,14 +266,19 @@ jobs:
 
   check_release_blocker:
     name: Check for Existing Release Blocker
-    needs: version
+    needs: 
+      - version
+      - resolve_build_type
     runs-on: ubuntu-latest
     outputs:
       release_already_existed: ${{ steps.set.outputs.should_continue }}
     steps:
       - id: set
         run: |
-          if [[ "${{ needs.version.outputs.release_existed }}" == "true" ]]; then
+          if [[ "${{ needs.resolve_build_type.outputs.buildType }}" == "preview" ]]; then
+            echo "✅ Preview builds ignore releases - continuing pipeline."
+            echo "release_already_existed=false" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ needs.version.outputs.release_existed }}" == "true" ]]; then
             echo "❌ A release already exists for version '${{ needs.version.outputs.version }}'. Stopping pipeline early."
             echo "release_already_existed=true" >> "$GITHUB_OUTPUT"
             exit 1
