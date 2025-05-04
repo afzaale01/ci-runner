@@ -164,6 +164,7 @@ jobs:
       version: ${{ needs.unpack_inputs.outputs.version }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
       deployTargets: ${{ inputs.validDeployTargets }}
+      targetPlatforms: ${{ inputs.targetPlatforms }}
       hasCombinedArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
       artifactSource: build
     secrets: inherit
