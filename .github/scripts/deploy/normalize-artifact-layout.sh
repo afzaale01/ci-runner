@@ -5,22 +5,19 @@ DEPLOY_DIR="${1:?Missing deployment directory}"
 PROJECT_DIR="${2:?Missing project directory}"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🛠️ Starting Artifact Layout Normalization"
+echo "🛠️ Starting Artifact Folder Renaming"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔹 Source Directory: ${DEPLOY_DIR}"
+echo "🔹 Deploy Directory: ${DEPLOY_DIR}"
 echo "🔹 Project Directory: ${PROJECT_DIR}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-mkdir -p "${DEPLOY_DIR}/${PROJECT_DIR}"
 
 for platform_dir in "${DEPLOY_DIR}"/*/; do
   [[ -d "$platform_dir" ]] || continue
   platform_name="$(basename "$platform_dir")"
-  target_dir="${DEPLOY_DIR}/${PROJECT_DIR}/${platform_name}"
+  new_dir="${DEPLOY_DIR}/${PROJECT_DIR}-${platform_name}"
 
-  echo "➡️ Moving platform '${platform_name}' into '${target_dir}'"
-
-  mv "$platform_dir" "$target_dir"
+  echo "➡️ Renaming '${platform_dir}' → '${new_dir}'"
+  mv "$platform_dir" "$new_dir"
 done
 
-echo "✅ Artifact layout normalized into: ${DEPLOY_DIR}/${PROJECT_DIR}"
+echo "✅ Artifact folders renamed."
