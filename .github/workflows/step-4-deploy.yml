@@ -115,6 +115,9 @@ jobs:
           name: ${{ env.PROJECT_DIR }}
           path: ${{ env.DEPLOY_DIR }}
 
+      - name: 🧰 Setup Helper Scripts
+        run: chmod +x .github/scripts/deploy/*.sh
+
       - name: 🛠️ Normalize Artifact Layout
         if: ${{ inputs.hasCombinedArtifacts == 'true' }}
         run: |
