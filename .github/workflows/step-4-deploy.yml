@@ -102,7 +102,6 @@ jobs:
   resolve_deploy_matrix:
     needs: prepare_deploy_artifacts
     uses: ./.github/workflows/resolve-deploy-matrix.yml
-    if: ${{ inputs.deployTargets != '[]' }}
     with:
       validTargets: ${{ inputs.deployTargets }}
 
