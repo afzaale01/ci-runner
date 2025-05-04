@@ -93,13 +93,6 @@ jobs:
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
 
-      - name: 📤 Upload Prepared Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.PROJECT_DIR }}
-          path: ${{ env.DEPLOY_DIR }}
-          retention-days: 1
-
   resolve_deploy_matrix:
     needs: prepare_deploy_artifacts
     uses: ./.github/workflows/resolve-deploy-matrix.yml
@@ -117,7 +110,6 @@ jobs:
     env:
       DEPLOY_DIR: deployment-artifacts
       PROJECT_DIR: ${{ inputs.projectName }}-${{ inputs.version }}
-
     steps:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
@@ -127,17 +119,6 @@ jobs:
         with:
           name: ${{ env.PROJECT_DIR }}
           path: ${{ env.DEPLOY_DIR }}
-
-      - name: 📦 Unwrap All Downloaded Artifacts
-        run: |
-          shopt -s dotglob
-          for dir in "${DEPLOY_DIR}/"*/; do
-            if [ -d "$dir" ]; then
-              echo "➡️ Unwrapping: $dir"
-              mv "$dir"* "${DEPLOY_DIR}/"
-              rmdir "$dir" || true
-            fi
-          done
 
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
