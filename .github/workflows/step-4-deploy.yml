@@ -80,7 +80,7 @@ jobs:
         run: chmod +x .github/scripts/deploy/*.sh
 
       - name: 📥 Retrieve Artifacts from Release
-        if: inputs.artifactSource == 'release'
+        if: ${{ inputs.artifactSource == 'release' }}
         run: |
           .github/scripts/deploy/download-from-release.sh \
             "${{ inputs.projectName }}" \
@@ -91,14 +91,14 @@ jobs:
 
       # Download combined artifact (single)
       - name: 📥 Retrieve Artifacts from Build (Combined)
-        if: inputs.artifactSource == 'build' && inputs.hasCombinedArtifacts == 'true'
+        if: ${{ inputs.artifactSource == 'build' && inputs.hasCombinedArtifacts == 'true' }}
         uses: actions/download-artifact@v4
         with:
           path: ${{ env.ARTIFACT_DIR }}
           name: ${{ env.PROJECT_DIR }}
 
       - name: 📥 Retrieve Artifacts from Build (Per-Platform)
-        if: inputs.artifactSource == 'build' && inputs.hasCombinedArtifacts == 'false'
+        if: ${{ inputs.artifactSource == 'build' && inputs.hasCombinedArtifacts == 'false' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
