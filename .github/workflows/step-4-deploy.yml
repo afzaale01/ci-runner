@@ -125,7 +125,7 @@ jobs:
       - name: 📥 Download Prepared Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: deployment-artifacts
+          path: deployment-artifacts/*
 
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
