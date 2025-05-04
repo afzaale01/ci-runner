@@ -3,8 +3,8 @@ name: ✈️ CI/CD Redeploy
 on:
   workflow_dispatch:
     inputs:
-      releaseTag:
-        description: "The release tag to deploy from (e.g., v1.2.3)"
+      tagVersion:
+        description: "The release tag version to deploy from (e.g., v1.2.3)"
         required: true
         default: 'v0.0.0'
         type: string
@@ -35,15 +35,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "🔍 Checking if release '${{ inputs.releaseTag }}' exists..." | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "🔍 Checking if release '${{ inputs.tagVersion }}' exists..." | tee -a "$GITHUB_STEP_SUMMARY"
 
           # Attempt to fetch release data and save to file
-          if ! gh api repos/${{ github.repository }}/releases/tags/${{ inputs.releaseTag }} --jq '.' > release.json; then
-            echo "❌ Release '${{ inputs.releaseTag }}' not found or API call failed." | tee -a "$GITHUB_STEP_SUMMARY"
+          if ! gh api repos/${{ github.repository }}/releases/tags/${{ inputs.tagVersion }} --jq '.' > release.json; then
+            echo "❌ Release '${{ inputs.tagVersion }}' not found or API call failed." | tee -a "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 
-          echo "✅ Release found. Redeploying: '${{ inputs.releaseTag }}'..." | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "✅ Release found. Redeploying: '${{ inputs.tagVersion }}'..." | tee -a "$GITHUB_STEP_SUMMARY"
 
           # Load release data
           RELEASE_DATA=$(cat release.json)
@@ -67,7 +67,7 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
-      version: ${{ inputs.releaseTag }}
+      version: ${{ inputs.tagVersion }}
       projectName: ${{ vars.PROJECT_NAME }}
       deployTargets: ${{ inputs.deployTargets }}
       hasCombinedArtifacts: ${{ needs.validate_release.outputs.hasCombinedArtifacts }}
@@ -83,7 +83,7 @@ jobs:
       - redeploy
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
-      version: ${{ inputs.releaseTag }}
+      version: ${{ inputs.tagVersion }}
       releaseResult: 'success'
       releaseErrorMessage: ''
       deployResult: ${{ needs.redeploy.result }}

@@ -43,8 +43,53 @@ permissions:
   contents: write
 
 jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Release Deployment Preparation
+  # ─────────────────────────────────────────────────────────────────────────────
+  validate_release:
+    name: Validate Release Tag and Artifacts
+    runs-on: ubuntu-latest
+    if:  ${{ inputs.artifactSource == 'release' }}
+    outputs:
+      hasCombinedArtifacts: ${{ steps.check.outputs.hasCombinedArtifacts }}
+    steps:
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
+      - name: Check GitHub Release Exists and Artifacts
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Checking if release '${{ inputs.version }}' exists..." | tee -a "$GITHUB_STEP_SUMMARY"
+
+          # Attempt to fetch release data and save to file
+          if ! gh api repos/${{ github.repository }}/releases/tags/${{ inputs.version }} --jq '.' > release.json; then
+            echo "❌ Release '${{ inputs.version }}' not found or API call failed." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          echo "✅ Release found. Redeploying: '${{ inputs.version }}'..." | tee -a "$GITHUB_STEP_SUMMARY"
+
+          # Load release data
+          RELEASE_DATA=$(cat release.json)
+
+          # Check for combined artifact
+          COMBINED_FOUND=$(echo "$RELEASE_DATA" | jq -r '.assets[]?.name' | grep -c 'all-platforms' || true)
+          if [ "$COMBINED_FOUND" -gt 0 ]; then
+            echo "✅ Combined artifact detected." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "hasCombinedArtifacts=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ℹ️ No combined artifact detected." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "hasCombinedArtifacts=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Build Deployment Preparation
+  # ─────────────────────────────────────────────────────────────────────────────
   prepare_metadata:
     name: ⏳ Prepare Metadata
+    if:  ${{ inputs.artifactSource == 'build' }}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
       skipTests: true
@@ -65,12 +110,15 @@ jobs:
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
     secrets: inherit
 
-  test_deploy:
-    name: 🌍 Test Deploy
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Test Deployment Steps
+  # ─────────────────────────────────────────────────────────────────────────────
+  test_deploy_from_build:
+    name: 🌍 Test Deploy From Build
     needs: 
         - prepare_metadata 
         - dry_build
-    if:  ${{ needs.prepare_metadata.outputs.validDeployTargets != '[]' }}
+    if:  ${{ needs.prepare_metadata.outputs.validDeployTargets != '[]' && inputs.artifactSource == 'build' }}
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: ${{ inputs.buildType }}
@@ -79,4 +127,18 @@ jobs:
       deployTargets: ${{ needs.prepare_metadata.outputs.validDeployTargets }}
       hasCombinedArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
       artifactSource: ${{ inputs.artifactSource }}
+    secrets: inherit
+
+  test_deploy_from_release:
+    name: 🌍 Test Deploy From Release
+    needs: validate_release
+    if:  ${{ inputs.artifactSource == 'release' }}
+    uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
+    with:
+      buildType: ${{ inputs.buildType }}
+      version: ${{ inputs.version }}
+      projectName: ${{ vars.PROJECT_NAME }}
+      deployTargets: ${{ inputs.deployTargets }}
+      hasCombinedArtifacts: ${{ needs.validate_release.outputs.hasCombinedArtifacts }}
+      artifactSource: release
     secrets: inherit
