@@ -110,8 +110,9 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.resolve_deploy_matrix.outputs.matrix) }}
     env:
-      DEPLOY_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}
+      DEPLOY_DIR: deployment-artifacts
       PROJECT_DIR: ${{ inputs.projectName }}-${{ inputs.version }}
+      FULL_ARTIFACT_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}/${{ inputs.projectName }}-${{ inputs.version }}
     steps:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
@@ -137,7 +138,7 @@ jobs:
       - name: 🔍 Check WebGL Build Exists
         if: matrix.target == 'gh-pages'
         run: |
-          if [ ! -d "${DEPLOY_DIR}/${PROJECT_DIR}-WebGL" ]; then
+          if [ ! -d "${FULL_ARTIFACT_DIR}-WebGL" ]; then
             echo "❌ WebGL build not found. Cannot deploy to GitHub Pages."
             exit 1
           fi
@@ -146,7 +147,7 @@ jobs:
         id: detect-compression
         if: matrix.target == 'gh-pages'
         run: |
-          cd "${DEPLOY_DIR}/${PROJECT_DIR}-WebGL"
+          cd "${FULL_ARTIFACT_DIR}-WebGL"
 
           echo "🔍 Checking for compression in WebGL build..."
 
