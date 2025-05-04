@@ -84,11 +84,6 @@ jobs:
             "${{ github.repository }}" \
             "${{ secrets.GITHUB_TOKEN }}" \
             "${{ inputs.hasCombinedArtifacts }}"
-  
-      - name: 🛠️ Normalize Artifact Layout
-        if: ${{ inputs.hasCombinedArtifacts == 'true' }}
-        run: |
-          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.DEPLOY_DIR }}/${{ env.PROJECT_DIR }}"
 
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
@@ -119,6 +114,11 @@ jobs:
         with:
           name: ${{ env.PROJECT_DIR }}
           path: ${{ env.DEPLOY_DIR }}
+
+      - name: 🛠️ Normalize Artifact Layout
+        if: ${{ inputs.hasCombinedArtifacts == 'true' }}
+        run: |
+          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.DEPLOY_DIR }}/${{ env.PROJECT_DIR }}"
 
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
