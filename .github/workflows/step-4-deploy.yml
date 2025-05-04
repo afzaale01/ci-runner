@@ -94,13 +94,12 @@ jobs:
       - name: 📤 Upload Prepared Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: prepared-deployment-artifacts
           path: deployment-artifacts
           retention-days: 1
 
       - name: 📍 Set Output Artifact Name
         id: set-output
-        run: echo "artifact_name=prepared-deployment-artifacts" >> $GITHUB_OUTPUT
+        run: echo "artifact_name=deployment-artifacts" >> $GITHUB_OUTPUT
 
   resolve_deploy_matrix:
     needs: prepare_deploy_artifacts
