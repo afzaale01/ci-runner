@@ -76,6 +76,9 @@ jobs:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
 
+      - name: 🧰 Setup Helper Scripts
+        run: chmod +x .github/scripts/deploy/*.sh
+
       - name: 📥 Retrieve Artifacts from Release
         if: inputs.artifactSource == 'release'
         run: |
