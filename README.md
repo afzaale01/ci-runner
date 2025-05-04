@@ -165,7 +165,7 @@ They can be found under:
 
 | Variable Name               | Full JSON strings |
 |-----------------------------|-------------|
-| `DEPLOY_TARGETS`  | ["itch.io", "appcenter", "firebase", "s3", "gh-pages", "steam", "discord", "testflight", "custom-server"]  
+| `DEPLOY_TARGETS`  | ["itch.io", "appcenter", "firebase", "s3", "gh-pages", "steam", "testflight", "custom-server"]  
 | `TARGET_PLATFORMS`  | ["Android", "WebGL", "StandaloneLinux64", "StandaloneWindows", "StandaloneWindows64", "StandaloneOSX", "iOS"]
 
 ---
