@@ -96,7 +96,7 @@ jobs:
       - name: 📤 Upload Prepared Artifacts
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ env.DEPLOY_DIR }}
+          path: ${{ env.DEPLOY_DIR }}/*
           retention-days: 1
 
   resolve_deploy_matrix:
@@ -125,7 +125,7 @@ jobs:
       - name: 📥 Download Prepared Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: deployment-artifacts/*
+          path: ${{ env.DEPLOY_DIR }}
 
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
