@@ -89,12 +89,38 @@ jobs:
             "${{ secrets.GITHUB_TOKEN }}" \
             "${{ inputs.hasCombinedArtifacts }}"
 
-      - name: 📥 Retrieve Artifacts from Build
-        if: inputs.artifactSource == 'build'
+      # Download combined artifact (single)
+      - name: 📥 Retrieve Artifacts from Build (Combined)
+        if: inputs.artifactSource == 'build' && inputs.hasCombinedArtifacts == 'true'
         uses: actions/download-artifact@v4
         with:
           path: ${{ env.ARTIFACT_DIR }}
           name: ${{ env.PROJECT_DIR }}
+
+      - name: 📥 Retrieve Artifacts from Build (Per-Platform)
+        if: inputs.artifactSource == 'build' && inputs.hasCombinedArtifacts == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p "${{ env.ARTIFACT_DIR }}"
+
+          echo "🔍 Required platforms:"
+          echo '${{ needs.resolve_deploy_matrix.outputs.requiredPlatforms }}' | jq
+
+          for platform in $(echo '${{ needs.resolve_deploy_matrix.outputs.requiredPlatforms }}' | jq -r '.[]'); do
+            ARTIFACT_NAME="${{ inputs.projectName }}-${{ inputs.version }}-${platform}"
+            PLATFORM_DIR="${{ env.ARTIFACT_DIR }}/${platform}"
+            
+            echo "⬇️ Downloading artifact: $ARTIFACT_NAME"
+            mkdir -p "$PLATFORM_DIR"
+
+            gh run download \
+              --name "$ARTIFACT_NAME" \
+              --dir "$PLATFORM_DIR" \
+              || echo "⚠️ Warning: Artifact $ARTIFACT_NAME not found or failed to download."
+          done
+
+          echo "✅ All required platform artifacts downloaded into: ${{ env.ARTIFACT_DIR }}"
 
       - name: 🛠️ Normalize Artifact Layout (Per-Platform Only)
         if: ${{ inputs.hasCombinedArtifacts == 'false' }}
