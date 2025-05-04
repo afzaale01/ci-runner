@@ -54,9 +54,8 @@ jobs:
     name: 📦 Prepare Deploy Artifacts
     runs-on: ubuntu-latest
     env:
+      DEPLOY_DIR: deployment-artifacts
       PROJECT_DIR: ${{ inputs.projectName }}-${{ inputs.version }}
-    outputs:
-      artifact-name: ${{ steps.set-output.outputs.artifact_name }}
     steps:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
@@ -89,17 +88,16 @@ jobs:
       - name: 🛠️ Normalize Artifact Layout
         if: ${{ inputs.hasCombinedArtifacts == 'true' }}
         run: |
-          .github/scripts/deploy/normalize-artifact-layout.sh "deployment-artifacts/${{ env.PROJECT_DIR }}"
+          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.DEPLOY_DIR }}/${{ env.PROJECT_DIR }}"
+
+      - name: 🧾 List Artifacts
+        run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
 
       - name: 📤 Upload Prepared Artifacts
         uses: actions/upload-artifact@v4
         with:
-          path: deployment-artifacts
+          path: ${{ env.DEPLOY_DIR }}
           retention-days: 1
-
-      - name: 📍 Set Output Artifact Name
-        id: set-output
-        run: echo "artifact_name=deployment-artifacts" >> $GITHUB_OUTPUT
 
   resolve_deploy_matrix:
     needs: prepare_deploy_artifacts
@@ -127,7 +125,6 @@ jobs:
       - name: 📥 Download Prepared Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.prepare_deploy_artifacts.outputs.artifact-name }}
           path: deployment-artifacts
 
       - name: 🧾 List Artifacts
