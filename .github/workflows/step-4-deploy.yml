@@ -88,6 +88,13 @@ jobs:
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
 
+      - name: 📤 Upload Prepared Deploy Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PROJECT_DIR }}
+          path: ${{ env.DEPLOY_DIR }}
+          retention-days: 1
+
   resolve_deploy_matrix:
     needs: prepare_deploy_artifacts
     uses: ./.github/workflows/resolve-deploy-matrix.yml
