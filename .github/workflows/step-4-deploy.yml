@@ -62,7 +62,7 @@ jobs:
 
   deploy:
     name: 🚀 Deploy ${{ matrix.target }} on ${{ matrix.os }}
-    needs: [resolve_deploy_matrix]
+    needs: resolve_deploy_matrix
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
