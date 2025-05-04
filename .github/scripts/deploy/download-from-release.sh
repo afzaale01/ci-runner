@@ -9,6 +9,7 @@ VERSION="${2:?Missing version}"
 GITHUB_REPOSITORY="${3:?Missing repository}"
 GITHUB_TOKEN="${4:?Missing GitHub token}"
 HAS_COMBINED_ARTIFACTS="${5:?Missing hasCombinedArtifacts flag (true/false)}"
+REQUIRED_PLATFORMS_JSON="${6:?Missing required platforms JSON}"
 
 PROJECT_NAME="$(echo "$PROJECT_NAME" | xargs)"
 VERSION="$(echo "$VERSION" | xargs)"
@@ -77,23 +78,26 @@ if [[ "${HAS_COMBINED_ARTIFACTS}" == "true" ]]; then
 else
   echo "📦 Downloading and extracting per-platform artifacts..."
 
-  while read -r NAME URL; do
-    if [[ "$NAME" == *-all-platforms.zip ]]; then
-      echo "⏭️ Skipping combined artifact: $NAME"
+  # Convert REQUIRED_PLATFORMS_JSON into a bash array
+  REQUIRED_PLATFORMS=($(echo "${REQUIRED_PLATFORMS_JSON}" | jq -r '.[]'))
+
+  for PLATFORM in "${REQUIRED_PLATFORMS[@]}"; do
+    ARTIFACT_NAME="${PROJECT_NAME}-${VERSION}-${PLATFORM}.zip"
+    ARTIFACT_URL=$(echo "${ASSETS}" | awk -v name="${ARTIFACT_NAME}" '$1 == name {print $2}')
+
+    if [[ -z "${ARTIFACT_URL}" ]]; then
+      echo "⚠️ Warning: Artifact ${ARTIFACT_NAME} not found in release assets."
       continue
     fi
 
-    echo "⬇️ Downloading: ${NAME}"
-    curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${URL}" -o "${DEST_DIR}/${NAME}"
+    echo "⬇️ Downloading: ${ARTIFACT_NAME}"
+    curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${ARTIFACT_URL}" -o "${DEST_DIR}/${ARTIFACT_NAME}"
 
-    TARGET="${NAME##*-}"       # e.g. WebGL.zip
-    PLATFORM="${TARGET%.zip}"  # e.g. WebGL
-
-    echo "📂 Extracting $NAME to ${DEST_DIR}-${PLATFORM}"
+    echo "📂 Extracting ${ARTIFACT_NAME} to ${DEST_DIR}/${PROJECT_NAME}-${VERSION}-${PLATFORM}"
     mkdir -p "${DEST_DIR}/${PROJECT_NAME}-${VERSION}-${PLATFORM}"
-    unzip -q "${DEST_DIR}/${NAME}" -d "${DEST_DIR}/${PROJECT_NAME}-${VERSION}-${PLATFORM}"
-    rm "${DEST_DIR}/${NAME}"
-  done <<< "${ASSETS}"
+    unzip -q "${DEST_DIR}/${ARTIFACT_NAME}" -d "${DEST_DIR}/${PROJECT_NAME}-${VERSION}-${PLATFORM}"
+    rm "${DEST_DIR}/${ARTIFACT_NAME}"
+  done
 fi
 
 echo "✅ Finished downloading release assets to: ${DEST_DIR}"

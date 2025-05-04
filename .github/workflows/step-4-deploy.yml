@@ -87,7 +87,8 @@ jobs:
             "${{ inputs.version }}" \
             "${{ github.repository }}" \
             "${{ secrets.GITHUB_TOKEN }}" \
-            "${{ inputs.hasCombinedArtifacts }}"
+            "${{ inputs.hasCombinedArtifacts }}" \
+            '${{ toJson(matrix.requiredPlatforms) }}'
 
       # Download combined artifact (single)
       - name: 📥 Retrieve Artifacts from Build (Combined)
