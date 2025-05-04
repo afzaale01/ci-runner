@@ -126,7 +126,7 @@ jobs:
       - name: 📄 Summarize Build Version Info
         if: ${{ always() && inputs.buildType != 'preview' }}
         run: |
-          echo "### 🏷️ Build Version Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔖 Version Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Build Type:** \`${{ inputs.buildType }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Trigger:** \`${{ github.event_name }}\` → \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
