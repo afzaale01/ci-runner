@@ -73,8 +73,8 @@ jobs:
       buildType: release
       version: ${{ inputs.tagVersion }}
       projectName: ${{ vars.PROJECT_NAME }}
-      deployTargets: ${{ inputs.deployTargets }}
-      targetPlatforms: ${{ inputs.targetPlatforms != '' && inputs.targetPlatforms || vars.TARGET_PLATFORMS }}
+      deployTargets: ${{ inputs.deployTargets || '[]' }}
+      targetPlatforms: ${{ inputs.targetPlatforms != '' && inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}
       hasCombinedArtifacts: ${{ needs.validate_release.outputs.hasCombinedArtifacts }}
       artifactSource: release
     secrets: inherit
