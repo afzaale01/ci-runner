@@ -105,16 +105,6 @@ jobs:
             VERSION="commit-${SHORT_SHA}"
           fi
 
-          # If version already exists as a tag, outside of a tag-push, fail early
-          if [[ ! "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            if git rev-parse "$VERSION" >/dev/null 2>&1; then
-              echo "❌ Version '$VERSION' already exists as a tag!"
-              echo "🧩 Existing tags:"
-              git tag --list "${VERSION%%-*}*" || true
-              exit 1
-            fi
-          fi
-
           if [[ -z "$VERSION" ]]; then
             VERSION="N/A"
             echo "⚠️ No valid version determined, using fallback: $VERSION"
@@ -127,7 +117,7 @@ jobs:
       - name: 🧰 Setup Helper Scripts
         run: chmod +x .github/scripts/release/*.sh
 
-      - name: 📝 Check if Release Already Exists
+      - name: 📝 Check if Release Version Already Exists
         id: check_release
         run: .github/scripts/release/check-release-exists.sh "${{ steps.get_version.outputs.version }}" "${{ github.repository }}" "$GITHUB_TOKEN"
         env:
@@ -148,7 +138,7 @@ jobs:
             echo "- 🏷️ This was a **tag push** - tag already exists by design." >> $GITHUB_STEP_SUMMARY
           else
             if git rev-parse "${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
-              echo "- ⚠️ Tag \`${{ steps.get_version.outputs.version }}\` **already exists** - run failed on purpose to avoid overwrite." >> $GITHUB_STEP_SUMMARY
+              echo "- ⚠️ Release with tag \`${{ steps.get_version.outputs.version }}\` **already exists** - run failed on purpose to avoid overwrite." >> $GITHUB_STEP_SUMMARY
             else
               echo "- ✅ Tag \`${{ steps.get_version.outputs.version }}\` **does not exist yet** - good to go!" >> $GITHUB_STEP_SUMMARY
             fi
