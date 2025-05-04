@@ -288,11 +288,13 @@ jobs:
     needs: 
       - check_release_blocker
       - resolve_build_type
+      - resolve_target_platforms
       - detect_tests_only
     if: ${{ needs.detect_tests_only.outputs.testsOnly == 'false' }}
     uses: ./.github/workflows/validate-deploy-targets.yml
     with:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
+      targetPlatforms: ${{ needs.resolve_target_platforms.outputs.validatedTargetPlatforms }}
       deployTargets: ${{ inputs.deployTargets || vars.DEPLOY_TARGETS }}
 
   analyze_artifact_strategy:

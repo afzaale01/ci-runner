@@ -9,6 +9,9 @@ on:
       deployTargets:
         type: string
         required: true
+      targetPlatforms:
+        type: string
+        required: true
     outputs:
       validatedTargets:
         value: ${{ jobs.validate.outputs.validatedTargets }}
