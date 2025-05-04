@@ -55,61 +55,14 @@ on:
       CUSTOM_SERVER_KEY: { required: false }
 
 jobs:
-  prepare_deploy_artifacts:
-    name: 📦 Prepare Deploy Artifacts
-    runs-on: ubuntu-latest
-    env:
-      DEPLOY_DIR: deployment-artifacts
-      PROJECT_DIR: ${{ inputs.projectName }}-${{ inputs.version }}
-    steps:
-      - name: 📁 Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: 🧰 Setup Helper Scripts
-        run: chmod +x .github/scripts/deploy/*.sh
-
-      # ───── Build Artifact Download ─────
-      - name: 📥 Download Artifacts from Build
-        if: inputs.artifactSource == 'build'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          .github/scripts/deploy/download-from-build.sh \
-            "${{ inputs.projectName }}" \
-            "${{ inputs.version }}" \
-            "${{ inputs.hasCombinedArtifacts }}" \
-            "${{ inputs.targetPlatforms }}"
-
-      # ───── Release Artifact Download ─────
-      - name: 📥 Download Artifacts from GitHub Release
-        if: inputs.artifactSource == 'release'
-        run: |
-          .github/scripts/deploy/download-from-release.sh \
-            "${{ inputs.projectName }}" \
-            "${{ inputs.version }}" \
-            "${{ github.repository }}" \
-            "${{ secrets.GITHUB_TOKEN }}" \
-            "${{ inputs.hasCombinedArtifacts }}"
-
-      - name: 🧾 List Artifacts
-        run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
-
-      - name: 📤 Upload Prepared Deploy Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.PROJECT_DIR }}
-          path: ${{ env.DEPLOY_DIR }}
-          retention-days: 1
-
   resolve_deploy_matrix:
-    needs: prepare_deploy_artifacts
     uses: ./.github/workflows/resolve-deploy-matrix.yml
     with:
       validTargets: ${{ inputs.deployTargets }}
 
   deploy:
     name: 🚀 Deploy ${{ matrix.target }} on ${{ matrix.os }}
-    needs: [prepare_deploy_artifacts, resolve_deploy_matrix]
+    needs: [resolve_deploy_matrix]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -123,22 +76,23 @@ jobs:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 📥 Download Prepared Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ${{ env.DEPLOY_DIR }}
-          name: ${{ env.PROJECT_DIR }}
-
-      - name: 🧰 Setup Helper Scripts
-        run: chmod +x .github/scripts/deploy/*.sh
-
-      - name: 🛠️ Normalize Artifact Layout
-        if: ${{ inputs.hasCombinedArtifacts == 'false' }}
+      - name: 📥 Retrieve Artifacts from Release
+        if: inputs.artifactSource == 'release'
         run: |
-          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.ARTIFACT_DIR }}"
+          .github/scripts/deploy/download-from-release.sh \
+            "${{ inputs.projectName }}" \
+            "${{ inputs.version }}" \
+            "${{ github.repository }}" \
+            "${{ secrets.GITHUB_TOKEN }}" \
+            "${{ inputs.hasCombinedArtifacts }}"
 
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
+
+      - name: 🛠️ Normalize Artifact Layout (Per-Platform Only)
+        if: ${{ inputs.hasCombinedArtifacts == 'false' }}
+        run: |
+          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.ARTIFACT_DIR }}"
 
       # ───── GitHub Pages ─────
       - name: 🔍 Check WebGL Build Exists
