@@ -90,8 +90,8 @@ else
     PLATFORM="${TARGET%.zip}"  # e.g. WebGL
 
     echo "📂 Extracting $NAME to ${DEST_DIR}-${PLATFORM}"
-    mkdir -p "${DEST_DIR}-${PLATFORM}"
-    unzip -q "${DEST_DIR}/${NAME}" -d "${DEST_DIR}-${PLATFORM}"
+    mkdir -p "${DEST_DIR}/${PROJECT_NAME}-${VERSION}-${PLATFORM}"
+    unzip -q "${DEST_DIR}/${NAME}" -d "${DEST_DIR}/${PROJECT_NAME}-${VERSION}-${PLATFORM}"
     rm "${DEST_DIR}/${NAME}"
   done <<< "${ASSETS}"
 fi
