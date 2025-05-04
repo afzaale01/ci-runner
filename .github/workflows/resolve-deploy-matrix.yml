@@ -78,10 +78,13 @@ jobs:
             REQUIRED_PLATFORMS=$(printf '%s\n' "${PLATFORM_SET[@]}" | jq -R . | jq -s .)
           fi
 
+          # Compact JSON (no newlines) for GitHub output
+          REQUIRED_PLATFORMS_COMPACT=$(echo "$REQUIRED_PLATFORMS" | jq -c .)
+
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
           echo "requiresCombinedArtifact=$COMBINED_NEEDED" >> $GITHUB_OUTPUT
-          echo "requiredPlatforms=$REQUIRED_PLATFORMS" >> $GITHUB_OUTPUT
+          echo "requiredPlatforms=$REQUIRED_PLATFORMS_COMPACT" >> $GITHUB_OUTPUT
 
           echo "✅ Resolved matrix: $MATRIX"
           echo "✅ Requires combined artifact: $COMBINED_NEEDED"
-          echo "✅ Required platforms: $REQUIRED_PLATFORMS"
+          echo "✅ Required platforms: $REQUIRED_PLATFORMS_COMPACT"
