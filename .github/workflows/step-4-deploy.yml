@@ -89,13 +89,13 @@ jobs:
             "${{ secrets.GITHUB_TOKEN }}" \
             "${{ inputs.hasCombinedArtifacts }}"
 
-      - name: 🧾 List Artifacts
-        run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
-
       - name: 🛠️ Normalize Artifact Layout (Per-Platform Only)
         if: ${{ inputs.hasCombinedArtifacts == 'false' }}
         run: |
           .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.ARTIFACT_DIR }}"
+
+      - name: 🧾 List Artifacts
+        run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
 
       # ───── GitHub Pages ─────
       - name: 🔍 Check WebGL Build Exists
