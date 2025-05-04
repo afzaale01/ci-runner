@@ -103,7 +103,7 @@ jobs:
         run: echo "artifact_name=prepared-deployment-artifacts" >> $GITHUB_OUTPUT
 
   resolve_deploy_matrix:
-    needs: 
+    needs: prepare_deploy_artifacts
     uses: ./.github/workflows/resolve-deploy-matrix.yml
     if: ${{ inputs.deployTargets != '[]' }}
     with:
