@@ -118,6 +118,7 @@ jobs:
     env:
       DEPLOY_DIR: deployment-artifacts
       PROJECT_DIR: ${{ inputs.projectName }}-${{ inputs.version }}
+      ARTIFACT_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}
     steps:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
@@ -132,9 +133,9 @@ jobs:
         run: chmod +x .github/scripts/deploy/*.sh
 
       - name: 🛠️ Normalize Artifact Layout
-        if: ${{ inputs.hasCombinedArtifacts == 'false' }}
+        if: ${{ inputs.hasCombinedArtifacts == 'true' }}
         run: |
-          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.DEPLOY_DIR }}/${{ env.PROJECT_DIR }}"
+          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.ARTIFACT_DIR }}"
 
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
@@ -143,7 +144,7 @@ jobs:
       - name: 🔍 Check WebGL Build Exists
         if: matrix.target == 'gh-pages'
         run: |
-          if [ ! -d "WebGL" ]; then
+          if [ ! -d "${ARTIFACT_DIR}/WebGL" ]; then
             echo "❌ WebGL build not found. Cannot deploy to GitHub Pages."
             exit 1
           fi
@@ -152,7 +153,7 @@ jobs:
         id: detect-compression
         if: matrix.target == 'gh-pages'
         run: |
-          cd "WebGL"
+          cd "${ARTIFACT_DIR}/WebGL"
 
           echo "🔍 Checking for compression in WebGL build..."
 
@@ -189,7 +190,7 @@ jobs:
           # Install brotli/gzip tools if needed
           sudo apt-get update && sudo apt-get install -y brotli gzip
 
-          cd "WebGL"
+          cd "$${DEPLOY_DIR}/${PROJECT_DIR}-WebGL"
 
           # 1) Decompress any .br → original
           find . -type f -name "*.br" | while read f; do
