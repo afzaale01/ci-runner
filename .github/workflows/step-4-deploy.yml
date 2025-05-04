@@ -126,11 +126,6 @@ jobs:
       - name: 🧰 Setup Helper Scripts
         run: chmod +x .github/scripts/deploy/*.sh
 
-      - name: 🛠️ Normalize Artifact Layout
-        if: ${{ inputs.hasCombinedArtifacts == 'true' }}
-        run: |
-          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.DEPLOY_DIR }}/${{ env.PROJECT_DIR }}"
-
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
 
