@@ -68,7 +68,7 @@ jobs:
   redeploy:
     name: Redeploy from Release
     needs: validate_release
-    uses: -/.github/workflows/step-4-deploy.yml
+    uses: ./.github/workflows/step-4-deploy.yml
     with:
       buildType: release
       version: ${{ inputs.tagVersion }}
