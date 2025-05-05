@@ -256,29 +256,24 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       retentionDays: ${{ steps.set.outputs.retentionDays }}
+    env:
+      RETENTION_DAYS_RELEASE_OVERRIDE: ${{ vars.RETENTION_DAYS_RELEASE }}
+      RETENTION_DAYS_RC_OVERRIDE: ${{ vars.RETENTION_DAYS_RC }}
+      RETENTION_DAYS_PREVIEW_OVERRIDE: ${{ vars.RETENTION_DAYS_PREVIEW }}
     steps:
+      - name: Checkout Config and Script
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/config/defaults.json
+            .github/scripts/metadata/resolve-retention-days.sh
+
+      - name: 🧰 Setup Helper Scripts
+        run: chmod +x .github/scripts/metadata/*.sh
+
       - id: set
         run: |
-          BUILD_TYPE="${{ needs.resolve_build_type.outputs.buildType }}"
-
-          # Set default retention days for buildTypes
-          DEFAULT_RELEASE_DAYS=30
-          DEFAULT_RC_DAYS=14
-          DEFAULT_PREVIEW_DAYS=7
-
-          if [[ "$BUILD_TYPE" == "release" ]]; then
-            RETENTION_DAYS="${{ vars.RETENTION_DAYS_RELEASE || '' }}"
-            RETENTION_DAYS="${RETENTION_DAYS:-$DEFAULT_RELEASE_DAYS}"
-          elif [[ "$BUILD_TYPE" == "release_candidate" ]]; then
-            RETENTION_DAYS="${{ vars.RETENTION_DAYS_RC || '' }}"
-            RETENTION_DAYS="${RETENTION_DAYS:-$DEFAULT_RC_DAYS}"
-          else
-            RETENTION_DAYS="${{ vars.RETENTION_DAYS_PREVIEW || '' }}"
-            RETENTION_DAYS="${RETENTION_DAYS:-$DEFAULT_PREVIEW_DAYS}"
-          fi
-
-          echo "✅ Retention days resolved to: $RETENTION_DAYS"
-          echo "retentionDays=$RETENTION_DAYS" >> "$GITHUB_OUTPUT"
+          bash .github/scripts/metadata/resolve-retention-days.sh "${{ needs.resolve_build_type.outputs.buildType }}"
 
   validate_deploy_targets:
     name: Validate Deploy Targets
