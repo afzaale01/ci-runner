@@ -171,6 +171,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Use Resolve Timeouts Action
+        id: set      
         uses: avalin/unity-ci-actions/.github/actions/resolve-timeouts@v1
         with:
           defaultsFileOverride: "./.github/config/defaults.json"
@@ -254,7 +255,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Resolve Retention Days Action from New Repo
+      - name: Use Resolve Retention Days Action
+        id: set
         uses: avalin/unity-ci-actions/.github/actions/resolve-retention-days@v1
         with:
           defaultsFileOverride: "./.github/config/defaults.json"
