@@ -100,14 +100,14 @@ jobs:
 
       - name: 📥 Retrieve Artifacts from Build (Per-Platform)
         if: ${{ inputs.artifactSource == 'build' && inputs.hasCombinedArtifacts == 'false' }}
+        uses: ./.github/actions/download-per-platform-artifacts-from-build
+        with:
+          artifactDir: ${{ env.ARTIFACT_DIR }}
+          projectName: ${{ inputs.projectName }}
+          version: ${{ inputs.version }}
+          requiredPlatforms: '${{ toJson(matrix.requiredPlatforms) }}'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          .github/scripts/deploy/download-per-platform-from-build.sh \
-            "${{ env.ARTIFACT_DIR }}" \
-            "${{ inputs.projectName }}" \
-            "${{ inputs.version }}" \
-            '${{ toJson(matrix.requiredPlatforms) }}'
 
       - name: 🛠️ Normalize Artifact Layout (Release Per-Platform Only)
         if: ${{ inputs.artifactSource == 'release' && inputs.hasCombinedArtifacts == 'false' }}

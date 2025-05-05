@@ -9,18 +9,26 @@ TARGET_PLATFORMS_JSON="${4:?Missing target platforms JSON}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📦 Starting Build Artifact Download"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔹 Project Name              : ${PROJECT_NAME}"
+echo "🔹 Project Name             : ${PROJECT_NAME}"
 echo "🔹 Version                  : ${VERSION}"
 echo "🔹 Destination Directory    : ${DEST_DIR}"
-echo "🔹 Target Platforms (JSON)  : ${TARGET_PLATFORMS_JSON}"
+echo "🔹 Target Platforms (JSON)  : $(echo "$TARGET_PLATFORMS_JSON" | jq -r '.[]' | tr '\n' ' ')"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
+if [ -z "${GH_TOKEN:-}" ]; then
+  echo "❌ GH_TOKEN environment variable not set. Cannot use gh CLI."
+  exit 1
+fi
+
 mkdir -p "${DEST_DIR}"
+
+# Convert the JSON string into a valid array
+PLATFORMS=$(echo "$TARGET_PLATFORMS_JSON" | jq -r '.[]')
 
 # ────────────────────────────
 # Download Per Platform
 # ────────────────────────────
-for platform in $(echo "${TARGET_PLATFORMS_JSON}" | jq -r '.[]'); do
+for platform in $PLATFORMS; do
   ARTIFACT_NAME="${PROJECT_NAME}-${VERSION}-${platform}"
   PLATFORM_DIR="${DEST_DIR}/${platform}"
 

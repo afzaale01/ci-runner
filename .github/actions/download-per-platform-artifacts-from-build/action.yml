@@ -1,0 +1,33 @@
+name: Download Per-Platform From Build
+
+description: Downloads per-platform artifacts from the build step.
+
+inputs:
+  artifactDir:
+    description: "Destination directory for artifacts"
+    required: true
+  projectName:
+    description: "Project name"
+    required: true
+  version:
+    description: "Version"
+    required: true
+  requiredPlatforms:
+    description: "JSON array of required platforms"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Make script executable
+      shell: bash
+      run: chmod +x "${{ github.action_path }}/download-per-platform-artifacts-from-build.sh"
+
+    - name: Run download-per-platform script
+      shell: bash
+      run: |
+        "${{ github.action_path }}/download-per-platform-artifacts-from-build.sh" \
+          "${{ inputs.artifactDir }}" \
+          "${{ inputs.projectName }}" \
+          "${{ inputs.version }}" \
+          '${{ inputs.requiredPlatforms }}'
