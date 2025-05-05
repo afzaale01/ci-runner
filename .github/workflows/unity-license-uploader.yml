@@ -19,26 +19,6 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
-      - name: Check Activation Result
-        run: |
-          if [ "${{ steps.activate.outcome }}" != "success" ]; then
-            echo "❌ Unity activation failed!"
-            echo "Fetching detailed editor logs..."
-
-            LOG_PATH="$HOME/.local/share/unity3d/Editor/Editor.log"
-            if [ -f "$LOG_PATH" ]; then
-              echo "================ Editor.log ================"
-              cat "$LOG_PATH"
-              echo "==========================================="
-            else
-              echo "⚠️ No Editor.log found at $LOG_PATH"
-            fi
-
-            exit 1
-          else
-            echo "✅ Unity activation succeeded."
-          fi
-
       - name: Upload Unity License File
         run: |
           echo "🔍 Searching for license file..."
