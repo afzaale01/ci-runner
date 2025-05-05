@@ -1,0 +1,26 @@
+{
+    "unity": {
+      "version": "auto",
+      "useGitLfs": false,
+      "editModePath": "Assets/Tests/Editor",
+      "playModePath": "Assets/Tests/PlayMode",
+      "quietMode": false
+    },
+    "timeouts": {
+      "testsInMinutes": 15,
+      "buildInMinutes": 30
+    },
+    "retentionDays": {
+      "preview": 7,
+      "release_candidate": 14,
+      "release": 30
+    },
+    "platforms": {
+      "defaultTargetPlatforms": ["WebGL"],
+      "defaultDeployTargets": ["gh-pages"]
+    },
+    "skip": {
+      "excludeUnityTests": false
+    }
+}
+  
