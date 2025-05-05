@@ -34,11 +34,6 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: 🧰 Setup Helper Scripts
-        run: |
-          chmod +x .github/scripts/release/*.sh
-          chmod +x .github/scripts/versioning/*.sh
-
       - name: Fetch All Tags
         run: git fetch --tags --force
 
