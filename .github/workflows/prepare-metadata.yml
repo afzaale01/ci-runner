@@ -164,14 +164,23 @@ jobs:
     outputs:
       timeoutMinutesTests: ${{ steps.set.outputs.timeoutMinutesTests }}
       timeoutMinutesBuild: ${{ steps.set.outputs.timeoutMinutesBuild }}
+    env:
+      TIMEOUT_TESTS_OVERRIDE: ${{ vars.TIMEOUT_TESTS_IN_MINUTES }}
+      TIMEOUT_BUILD_OVERRIDE: ${{ vars.TIMEOUT_BUILD_IN_MINUTES }}
     steps:
+      - name: Checkout Config and Script
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/config/defaults.json
+            .github/scripts/metadata/resolve-timeouts.sh
+
+      - name: 🧰 Setup Helper Scripts
+        run: chmod +x .github/scripts/metadata/*.sh
+
       - id: set
         run: |
-          TIMEOUT_MINUTES_TESTS="${{ vars.TIMEOUT_TESTS_IN_MINUTES || '15' }}"
-          TIMEOUT_MINUTES_BUILD="${{ vars.TIMEOUT_BUILD_IN_MINUTES || '30' }}"
-
-          echo "timeoutMinutesTests=$TIMEOUT_MINUTES_TESTS" >> "$GITHUB_OUTPUT"
-          echo "timeoutMinutesBuild=$TIMEOUT_MINUTES_BUILD" >> "$GITHUB_OUTPUT"
+          bash .github/scripts/metadata/resolve-timeouts.sh
 
   resolve_build_type:
     name: Resolve Build Type (Preview, RC, Release)
