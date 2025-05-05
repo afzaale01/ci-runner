@@ -2,9 +2,10 @@
 MESSAGE="$1"
 RUN_URL="$2"
 RELEASE_URL="$3"
+DEPLOY_RESULTS_PATH="$4"
 
 SUMMARY=""
-if ls deploy-results/*.json 1> /dev/null 2>&1; then
+if ls "${DEPLOY_RESULTS_PATH}"/*.json 1> /dev/null 2>&1; then
   SUMMARY+="\n\`\`\`\n"
   SUMMARY+="Target      | Status | Details\n"
   SUMMARY+="------------|--------|----------------------\n"
@@ -14,7 +15,7 @@ if ls deploy-results/*.json 1> /dev/null 2>&1; then
     NOTE=$(jq -r '.note' "$file")
     printf -v ROW "%-11s | %-6s | %s\n" "$TARGET" "$STATUS" "$NOTE"
     SUMMARY+="$ROW"
-  done < <(find deploy-results -type f -name "*.json" | sort)
+  done < <(find "${DEPLOY_RESULTS_PATH}" -type f -name "*.json" | sort)
   SUMMARY+="\n\`\`\`"
 fi
 

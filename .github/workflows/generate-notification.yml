@@ -52,11 +52,11 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     outputs:
-      title: ${{ steps.set-outputs.outputs.title }}
-      message: ${{ steps.set-outputs.outputs.message }}
-      slackMessage: ${{ steps.set-outputs.outputs.slackMessage }}
-      discordMessage: ${{ steps.set-outputs.outputs.discordMessage }}
-      status: ${{ steps.set-outputs.outputs.status }}
+      title: ${{ steps.format.outputs.title }}
+      message: ${{ steps.format.outputs.message }}
+      slackMessage: ${{ steps.format.outputs.slackMessage }}
+      discordMessage: ${{ steps.format.outputs.discordMessage }}
+      status: ${{ steps.format.outputs.status }}
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
@@ -151,25 +151,13 @@ jobs:
           path: deploy-results
           merge-multiple: true
 
-      - name: 💬 Format Final Notification Messages
-        id: set-outputs
-        run: |
-          chmod +x .github/scripts/notify/*.sh
-
-          SLACK_MESSAGE=$(bash .github/scripts/notify/format-slack.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
-          DISCORD_MESSAGE=$(bash .github/scripts/notify/format-discord.sh "$MESSAGE" "$RUN_URL" "$RELEASE_URL")
-
-          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
-          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
-
-          echo "message<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$MESSAGE" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-          echo "slackMessage<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$SLACK_MESSAGE" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-          echo "discordMessage<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$DISCORD_MESSAGE" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+      - name: 💬 Format Notification
+        id: format
+        uses: ./.github/actions/format-notification
+        with:
+          title: ${{ steps.determine.outputs.title }}
+          status: ${{ steps.determine.outputs.status }}
+          message: ${{ steps.determine.outputs.message }}
+          runUrl: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          releaseUrl: https://github.com/${{ github.repository }}/releases/tag/${{ inputs.version }}
+          deployResultsPath: deploy-results
