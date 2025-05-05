@@ -48,7 +48,7 @@ jobs:
 
       - name: 📝 Check if Release Version Already Exists
         id: check_release
-        uses: ./.github/actions/check-release-exists@v1
+        uses: ./.github/actions/check-release-exists
         with:
           version: ${{ steps.get_version.outputs.version }}
           repo: ${{ github.repository }}
