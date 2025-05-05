@@ -144,19 +144,14 @@ jobs:
       PLAY_MODE_PATH_OVERRIDE: ${{ vars.UNITY_TESTS_PLAYMODE_PATH }}
       QUIET_MODE_OVERRIDE: ${{ vars.UNITY_TESTS_QUIET_MODE }}
     steps:
-      - name: Checkout Config and Script
-        uses: actions/checkout@v4
+      - name: Use Resolve Test Config Action
+        uses: avalin/unity-ci-actions/.github/actions/resolve-test-config@v1
         with:
-          sparse-checkout: |
-            .github/config/defaults.json
-            .github/scripts/metadata/resolve-test-config.sh
-
-      - name: 🧰 Setup Helper Scripts
-        run: chmod +x .github/scripts/metadata/*.sh
-
-      - id: set
-        run: |
-          bash .github/scripts/metadata/resolve-test-config.sh
+          unityVersionOverride: ${{ vars.UNITY_VERSION }}
+          useGitLfsOverride: ${{ vars.USE_GIT_LFS }}
+          editModePathOverride: ${{ vars.UNITY_TESTS_EDITMODE_PATH }}
+          playModePathOverride: ${{ vars.UNITY_TESTS_PLAYMODE_PATH }}
+          quietModeOverride: ${{ vars.UNITY_TESTS_QUIET_MODE }}
 
   prepare_timeouts:
     name: Prepare Timeouts
@@ -168,19 +163,15 @@ jobs:
       TIMEOUT_TESTS_OVERRIDE: ${{ vars.TIMEOUT_TESTS_IN_MINUTES }}
       TIMEOUT_BUILD_OVERRIDE: ${{ vars.TIMEOUT_BUILD_IN_MINUTES }}
     steps:
-      - name: Checkout Config and Script
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Use Resolve Timeouts Action
+        uses: avalin/unity-ci-actions/.github/actions/resolve-timeouts@v1
         with:
-          sparse-checkout: |
-            .github/config/defaults.json
-            .github/scripts/metadata/resolve-timeouts.sh
-
-      - name: 🧰 Setup Helper Scripts
-        run: chmod +x .github/scripts/metadata/*.sh
-
-      - id: set
-        run: |
-          bash .github/scripts/metadata/resolve-timeouts.sh
+          defaultsFileOverride: "./.github/config/defaults.json"
+          timeoutTestsOverride: ${{ vars.TIMEOUT_TESTS_IN_MINUTES }}
+          timeoutBuildOverride: ${{ vars.TIMEOUT_BUILD_IN_MINUTES }}
 
   resolve_build_type:
     name: Resolve Build Type (Preview, RC, Release)
@@ -214,7 +205,7 @@ jobs:
 
   version:
     name: Create versioning
-    needs: 
+    needs:
       - resolve_build_type
       - detect_tests_only
     if: needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
@@ -270,19 +261,10 @@ jobs:
       RETENTION_DAYS_RC_OVERRIDE: ${{ vars.RETENTION_DAYS_RC }}
       RETENTION_DAYS_PREVIEW_OVERRIDE: ${{ vars.RETENTION_DAYS_PREVIEW }}
     steps:
-      - name: Checkout Config and Script
-        uses: actions/checkout@v4
+      - name: Use Resolve Retention Days Action from New Repo
+        uses: avalin/unity-ci-actions/.github/actions/resolve-retention-days@v1
         with:
-          sparse-checkout: |
-            .github/config/defaults.json
-            .github/scripts/metadata/resolve-retention-days.sh
-
-      - name: 🧰 Setup Helper Scripts
-        run: chmod +x .github/scripts/metadata/*.sh
-
-      - id: set
-        run: |
-          bash .github/scripts/metadata/resolve-retention-days.sh "${{ needs.resolve_build_type.outputs.buildType }}"
+          buildType: ${{ needs.resolve_build_type.outputs.buildType }}
 
   validate_deploy_targets:
     name: Validate Deploy Targets
