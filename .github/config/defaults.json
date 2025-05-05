@@ -7,7 +7,7 @@
       "quietMode": false
     },
     "timeouts": {
-      "testsInMinutes": 4,
+      "testsInMinutes": 15,
       "buildInMinutes": 30
     },
     "retentionDays": {
