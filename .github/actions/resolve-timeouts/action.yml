@@ -1,0 +1,39 @@
+name: Resolve Timeouts
+description: Resolves test/build timeout values from overrides or defaults.json
+author: Avalin
+
+inputs:
+  timeoutTestsOverride:
+    description: Override for test timeout (in minutes)
+    required: false
+  timeoutBuildOverride:
+    description: Override for build timeout (in minutes)
+    required: false
+  defaultsFileOverride:
+    description: 'Optional path (in your workspace) to an alternate defaults.json'
+    required: false
+
+outputs:
+  timeoutMinutesTests:
+    description: Resolved test timeout
+    value: ${{ steps.set.outputs.timeoutMinutesTests }}
+  timeoutMinutesBuild:
+    description: Resolved build timeout
+    value: ${{ steps.set.outputs.timeoutMinutesBuild }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Make script executable
+      shell: bash
+      run: chmod +x "${{ github.action_path }}/resolve-timeouts.sh"
+
+    - id: set
+      name: Determine timeouts
+      shell: bash
+      env:
+        DEFAULTS_FILE_OVERRIDE:  ${{ inputs.defaultsFileOverride }}
+        TIMEOUT_TESTS_OVERRIDE:  ${{ inputs.timeoutTestsOverride }}
+        TIMEOUT_BUILD_OVERRIDE:  ${{ inputs.timeoutBuildOverride }}
+      run: |
+        bash "${{ github.action_path }}/resolve-timeouts.sh"

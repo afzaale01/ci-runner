@@ -1,0 +1,7 @@
+{
+    "timeouts": {
+      "testsInMinutes": 15,
+      "buildInMinutes": 30
+    }
+}
+  

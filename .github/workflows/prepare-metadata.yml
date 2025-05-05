@@ -172,7 +172,7 @@ jobs:
 
       - name: Use Resolve Timeouts Action
         id: set      
-        uses: avalin/unity-ci-actions/.github/actions/resolve-timeouts@v1
+        uses: ./.github/actions//resolve-timeouts
         with:
           defaultsFileOverride: "./.github/config/defaults.json"
           timeoutTestsOverride: ${{ vars.TIMEOUT_TESTS_IN_MINUTES }}
@@ -189,7 +189,7 @@ jobs:
     steps:
       - name: Use Resolve Build Type Action
         id: set
-        uses: avalin/unity-ci-actions/.github/actions/resolve-build-type@v1
+        uses: ./.github/actions/resolve-build-type
         with:
           testsOnlyOverride: ${{ needs.detect_tests_only.outputs.testsOnly }}
           buildTypeOverride: ${{ inputs.buildType }}
@@ -257,7 +257,7 @@ jobs:
 
       - name: Use Resolve Retention Days Action
         id: set
-        uses: avalin/unity-ci-actions/.github/actions/resolve-retention-days@v1
+        uses: ./.github/actions/resolve-retention-days
         with:
           defaultsFileOverride: "./.github/config/defaults.json"
           buildType: ${{ needs.resolve_build_type.outputs.buildType }}

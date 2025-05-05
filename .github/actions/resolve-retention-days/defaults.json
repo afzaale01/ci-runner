@@ -1,0 +1,8 @@
+{
+    "retentionDays": {
+      "preview": 7,
+      "release_candidate": 14,
+      "release": 30
+    }
+}
+  

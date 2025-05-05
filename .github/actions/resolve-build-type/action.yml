@@ -1,0 +1,35 @@
+name: Resolve Build Type
+description: |
+  Determines whether this run is a preview, release_candidate, or release build.
+  Respects a tests-only flag, an explicit override, then event/ref conventions.
+author: Avalin
+
+inputs:
+  testsOnlyOverride:
+    description: "If 'true', force preview (tests-only) build."
+    required: false
+  buildTypeOverride:
+    description: "Explicit build-type override (preview|release_candidate|release)."
+    required: false
+
+outputs:
+  buildType:
+    description: "The resolved build type: preview, release_candidate, or release."
+    value: ${{ steps.set.outputs.buildType }}
+
+runs:
+  using: composite
+  steps:
+    - name: Make script executable
+      shell: bash
+      run: chmod +x "${{ github.action_path }}/resolve-build-type.sh"
+
+    - id: set
+      name: Determine build type
+      shell: bash
+      env:
+        TESTS_ONLY_OVERRIDE: ${{ inputs.testsOnlyOverride }}
+        BUILD_TYPE_OVERRIDE: ${{ inputs.buildTypeOverride }}
+        GITHUB_EVENT_NAME:    ${{ github.event_name }}
+        GITHUB_REF:           ${{ github.ref }}
+      run: bash "${{ github.action_path }}/resolve-build-type.sh"

@@ -51,59 +51,22 @@ jobs:
         with:
           path: .
 
-      - name: 🧰 Setup Helper Scripts
-        run: chmod +x .github/scripts/release/*.sh
-
       - name: 📝 Create GitHub Release
         id: create_release
-        run: |
-          VERSION="${{ inputs.version }}"
-          BUILD_TYPE="${{ inputs.buildType }}"
-
-          IS_PRERELEASE=$([[ "$VERSION" == *-* ]] && echo true || echo false)
-
-          echo "📝 Creating GitHub release for tag: $VERSION (prerelease: $IS_PRERELEASE, draft: $IS_DRAFT)"
-
-          PAYLOAD=$(jq -n \
-            --arg tag_name "$VERSION" \
-            --arg name "Release $VERSION" \
-            --argjson prerelease "$IS_PRERELEASE" \
-            --argjson draft "false" \
-            '{ tag_name: $tag_name, name: $name, draft: $draft, prerelease: $prerelease }')
-
-          RESPONSE=$(curl -s -X POST \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            -d "$PAYLOAD" \
-            "https://api.github.com/repos/${{ github.repository }}/releases")
-
-          RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id // empty')
-
-          if [[ -z "$RELEASE_ID" || "$RELEASE_ID" == "null" ]]; then
-            echo "❌ Failed to create release. Full response:"
-            echo "$RESPONSE"
-            exit 1
-          fi
-
-          echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
-          echo "✅ Created release with ID: $RELEASE_ID"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ./.github/actions/create-release
+        with:
+          version: ${{ inputs.version }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧮 Upload Per-Platform Artifacts
-        if: ${{ inputs.skipPerPlatformArtifacts != 'true' }}
-        run: |
-          VERSION="${{ inputs.version }}"
-          RELEASE_ID="${{ steps.create_release.outputs.release_id }}"
-          .github/scripts/release/upload-artifacts.sh \
-            "${{ inputs.projectName }}" \
-            "$VERSION" \
-            "$RELEASE_ID" \
-            "${{ github.repository }}" \
-            "$GITHUB_TOKEN" \
-            '${{ inputs.targetPlatforms }}'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ./.github/actions/upload-per-platform
+        with:
+          project: ${{ inputs.projectName }}
+          version: ${{ inputs.version }}
+          releaseId: ${{ steps.create_release.outputs.release_id }}
+          repository: ${{ github.repository }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          targetPlatforms: ${{ inputs.targetPlatforms }}
 
       - name: 🧮 Upload Combined Artifact
         if: ${{ inputs.combineArtifacts == 'true' }}
