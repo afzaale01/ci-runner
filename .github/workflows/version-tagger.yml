@@ -33,6 +33,12 @@ jobs:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Check if Tag Exists
+        uses: avalin/unity-ci-actions/.github/actions/check-tag-exists@v1
+        with:
+          version: ${{ inputs.version }}
+          repository: ${{ github.repository }}
+
       - name: 🧰 Setup Helper Scripts
         run: chmod +x .github/scripts/tagging/*.sh
 
