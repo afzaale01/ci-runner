@@ -11,7 +11,7 @@
       "buildInMinutes": 30
     },
     "retentionDays": {
-      "preview": 7,
+      "preview": 3,
       "release_candidate": 14,
       "release": 30
     },
