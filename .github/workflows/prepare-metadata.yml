@@ -156,7 +156,7 @@ jobs:
 
       - id: set
         run: |
-          bash .github/scripts/resolve-test-config.sh
+          bash .github/scripts/metadata/resolve-test-config.sh
 
   prepare_timeouts:
     name: Prepare Timeouts
