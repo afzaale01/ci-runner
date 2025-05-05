@@ -186,26 +186,12 @@ jobs:
     outputs:
       buildType: ${{ steps.set.outputs.buildType }}
     steps:
-      - id: set
-        run: |
-          if [ "$TESTS_ONLY" = "true" ]; then
-            BUILD_TYPE="preview"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            if [[ "${{ github.ref }}" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              BUILD_TYPE="release"
-            elif [[ "${{ github.ref }}" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
-              BUILD_TYPE="release_candidate"
-            else
-              BUILD_TYPE="preview"
-            fi
-          elif [ "${{ github.event_name }}" = "pull_request" ]; then
-            BUILD_TYPE="preview"
-          else
-            BUILD_TYPE="${{ inputs.buildType != '' && inputs.buildType || 'preview' }}"
-          fi
-
-          echo "buildType=$BUILD_TYPE" >> $GITHUB_OUTPUT
-          echo "✅ Resolved buildType: $BUILD_TYPE"
+      - name: Use Resolve Build Type Action
+        id: set
+        uses: avalin/unity-ci-actions/.github/actions/resolve-build-type@v1
+        with:
+          testsOnlyOverride: ${{ needs.detect_tests_only.outputs.testsOnly }}
+          buildTypeOverride: ${{ inputs.buildType }}
 
   version:
     name: Create versioning
