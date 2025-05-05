@@ -12,11 +12,32 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Activate Unity License
+        id: activate
         uses: game-ci/unity-activate@v2
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+      - name: Check Activation Result
+        run: |
+          if [ "${{ steps.activate.outcome }}" != "success" ]; then
+            echo "❌ Unity activation failed!"
+            echo "Fetching detailed editor logs..."
+
+            LOG_PATH="$HOME/.local/share/unity3d/Editor/Editor.log"
+            if [ -f "$LOG_PATH" ]; then
+              echo "================ Editor.log ================"
+              cat "$LOG_PATH"
+              echo "==========================================="
+            else
+              echo "⚠️ No Editor.log found at $LOG_PATH"
+            fi
+
+            exit 1
+          else
+            echo "✅ Unity activation succeeded."
+          fi
 
       - name: Upload Unity License File
         run: |
