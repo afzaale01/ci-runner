@@ -41,7 +41,7 @@ elif [[ "$BUILD_TYPE" == "release_candidate" ]]; then
     VERSION="$INPUT_VERSION"
   else
     echo "🔢 Using provided version as RC base: $INPUT_VERSION"
-    VERSION=$("${{ github.action_path }}/generate-version-for-rc.sh" "$INPUT_VERSION" 2>&1 | tee /dev/stderr | tail -n 1)
+    VERSION="$($GITHUB_ACTION_PATH/generate-version-for-rc.sh" "$INPUT_VERSION" 2>&1 | tee /dev/stderr | tail -n 1)
   fi
 
 # Manual override for non-RC builds (e.g., preview)
