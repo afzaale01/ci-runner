@@ -58,7 +58,7 @@ jobs:
   test-run-tests:
     name: 📋 Test Run Tests
     needs: prepare_metadata
-    uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
+    uses: ./.github/workflows/step-1-test.yml
     with:
       unityVersion: ${{ inputs.unityVersion != '' && inputs.unityVersion || needs.prepare_metadata.outputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLFS }}

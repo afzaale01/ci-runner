@@ -86,7 +86,7 @@ jobs:
     name: Validate Repository Inputs
     needs: skip_ci
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
-    uses: avalin/unity-ci-templates/.github/workflows/validate-repository-inputs.yml@main
+    uses: ./.github/workflows/validate-repository-inputs.yml
     with:
       requiredVariables: |
         [

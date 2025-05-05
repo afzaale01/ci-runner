@@ -132,7 +132,7 @@ jobs:
       - dry_deploy
       - dry_release
     if: always()
-    uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
+    uses: ./.github/workflows/step-5-notify.yml
     with:
       version: ${{ needs.prepare_metadata.outputs.version }}
       releaseResult: ${{ inputs.releaseResult }}

@@ -68,7 +68,7 @@ jobs:
   redeploy:
     name: Redeploy from Release
     needs: validate_release
-    uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
+    uses: -/.github/workflows/step-4-deploy.yml
     with:
       buildType: release
       version: ${{ inputs.tagVersion }}
@@ -86,7 +86,7 @@ jobs:
     name: Notify
     needs: 
       - redeploy
-    uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
+    uses: ./.github/workflows/step-5-notify.yml
     with:
       version: ${{ inputs.tagVersion }}
       releaseResult: 'success'

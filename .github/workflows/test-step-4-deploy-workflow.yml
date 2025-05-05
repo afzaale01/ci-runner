@@ -120,7 +120,7 @@ jobs:
         - prepare_metadata 
         - dry_build
     if:  ${{ needs.prepare_metadata.outputs.validDeployTargets != '[]' && inputs.artifactSource == 'build' }}
-    uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
+    uses: ./.github/workflows/step-4-deploy.yml
     with:
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
@@ -135,7 +135,7 @@ jobs:
     name: 🌍 Test Deploy From Release
     needs: validate_release
     if:  ${{ inputs.artifactSource == 'release' }}
-    uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
+    uses: ./.github/workflows/step-4-deploy.yml
     with:
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
