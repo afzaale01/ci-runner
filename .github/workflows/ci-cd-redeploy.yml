@@ -62,29 +62,19 @@ jobs:
             echo "hasCombinedArtifacts=false" >> "$GITHUB_OUTPUT"
           fi
 
-  validate_platforms_in_release:
-    name: Validate Platforms in Release
-    needs: validate_release
-    uses: ./.github/workflows/validate-platforms-in-release.yml
-    with:
-      tagVersion: ${{ inputs.tagVersion }}
-      targetPlatforms: ${{ inputs.targetPlatforms != '' && inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}
-
   # ─────────────────────────────────────────────────────────────────────────────
   # 2. Redeploy
   # ─────────────────────────────────────────────────────────────────────────────
   redeploy:
     name: Redeploy from Release
-    needs: 
-      - validate_release
-      - validate_platforms_in_release
+    needs: validate_release
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
       version: ${{ inputs.tagVersion }}
       projectName: ${{ vars.PROJECT_NAME }}
       deployTargets: ${{ inputs.deployTargets || '[]' }}
-      targetPlatforms: ${{ needs.validate_platforms_in_release.outputs.validatedTargetPlatforms }}
+      targetPlatforms: ${{ inputs.targetPlatforms != '' && inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}
       hasCombinedArtifacts: ${{ needs.validate_release.outputs.hasCombinedArtifacts }}
       artifactSource: release
     secrets: inherit

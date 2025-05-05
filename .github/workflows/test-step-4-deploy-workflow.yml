@@ -84,14 +84,6 @@ jobs:
             echo "hasCombinedArtifacts=false" >> "$GITHUB_OUTPUT"
           fi
 
-  validate_platforms_in_release:
-    name: Validate Platforms in Release
-    needs: validate_release
-    uses: ./.github/workflows/validate-platforms-in-release.yml
-    with:
-      tagVersion: ${{ inputs.version }}
-      targetPlatforms: ${{ inputs.targetPlatforms != '' && inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}
-
   # ─────────────────────────────────────────────────────────────────────────────
   # Build Deployment Preparation
   # ─────────────────────────────────────────────────────────────────────────────
@@ -141,9 +133,7 @@ jobs:
 
   test_deploy_from_release:
     name: 🌍 Test Deploy From Release
-    needs: 
-      - validate_release
-      - validate_platforms_in_release
+    needs: validate_release
     if:  ${{ inputs.artifactSource == 'release' }}
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
