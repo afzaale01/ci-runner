@@ -144,9 +144,13 @@ jobs:
       PLAY_MODE_PATH_OVERRIDE: ${{ vars.UNITY_TESTS_PLAYMODE_PATH }}
       QUIET_MODE_OVERRIDE: ${{ vars.UNITY_TESTS_QUIET_MODE }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Use Resolve Test Config Action
         uses: avalin/unity-ci-actions/.github/actions/resolve-test-config@v1
         with:
+          defaultsFileOverride: "./.github/config/defaults.json"
           unityVersionOverride: ${{ vars.UNITY_VERSION }}
           useGitLfsOverride: ${{ vars.USE_GIT_LFS }}
           editModePathOverride: ${{ vars.UNITY_TESTS_EDITMODE_PATH }}
@@ -261,9 +265,13 @@ jobs:
       RETENTION_DAYS_RC_OVERRIDE: ${{ vars.RETENTION_DAYS_RC }}
       RETENTION_DAYS_PREVIEW_OVERRIDE: ${{ vars.RETENTION_DAYS_PREVIEW }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Use Resolve Retention Days Action from New Repo
         uses: avalin/unity-ci-actions/.github/actions/resolve-retention-days@v1
         with:
+          defaultsFileOverride: "./.github/config/defaults.json"
           buildType: ${{ needs.resolve_build_type.outputs.buildType }}
 
   validate_deploy_targets:
