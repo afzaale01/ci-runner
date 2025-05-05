@@ -149,7 +149,7 @@ jobs:
         with:
           sparse-checkout: |
             .github/config/defaults.json
-            .github/scripts/resolve-test-config.sh
+            .github/scripts/metadata/resolve-test-config.sh
 
       - name: 🧰 Setup Helper Scripts
         run: chmod +x .github/scripts/metadata/*.sh
