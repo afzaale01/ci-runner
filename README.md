@@ -18,7 +18,7 @@ See a live WebGL build deployed using this CI/CD pipeline:
 
 ## 🧠 Getting Started
 
-1. Clone this repo or copy the `ci-cd-full.yml` workflow into your Unity project.
+1. Clone this repo or copy the `ci-cd-dispatcher.yml` workflow into your Unity project.
 2. Set your required secrets and repository variables.
 3. Ready-up a PR or create a Git tag to trigger the pipeline!
 
