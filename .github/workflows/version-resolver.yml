@@ -48,15 +48,11 @@ jobs:
 
       - name: 📝 Check if Release Version Already Exists
         id: check_release
-        run: |
-          if [[ "${GITHUB_REF}" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
-            echo "🏷️ Tag push detected — skipping release existence check (Git guarantees uniqueness)."
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          else
-            .github/scripts/release/check-release-exists.sh "${{ steps.get_version.outputs.version }}" "${{ github.repository }}" "$GITHUB_TOKEN"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: avalin/unity-ci-actions/.github/actions/check-release-exists@v1
+        with:
+          version: ${{ steps.get_version.outputs.version }}
+          repo: ${{ github.repository }}
+          token: ${{ github.token }}
 
       - name: 📄 Summarize Build Version Info
         if: ${{ always() && inputs.buildType != 'preview' }}
