@@ -59,7 +59,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧮 Upload Per-Platform Artifacts
-        uses: ./.github/actions/upload-per-platform
+        uses: ./.github/actions/upload-per-platform-artifacts
         with:
           project: ${{ inputs.projectName }}
           version: ${{ inputs.version }}
