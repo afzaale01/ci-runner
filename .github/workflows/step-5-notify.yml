@@ -36,39 +36,39 @@ on:
         default: "None (tests were not run)"
 
 jobs:
-  generate-notification:
-    uses: ./.github/workflows/generate-notification.yml
-    with:
-      releaseResult: ${{ inputs.releaseResult }}
-      releaseErrorMessage: ${{ inputs.releaseErrorMessage }}
-      deployResult: ${{ inputs.deployResult }}
-      version: ${{ inputs.version }}
-      testsHasFails: ${{ inputs.testsHasFails }}
-      testsTotal: ${{ inputs.testsTotal }}
-      testsPassed: ${{ inputs.testsPassed }}
-      testsFailedNames: ${{ inputs.testsFailedNames }}
-
   notify:
     if: startsWith(inputs.version, 'v') && !contains(inputs.version, '-preview')
-    needs: generate-notification
     runs-on: ubuntu-latest
     env:
       SLACK_STATUS: "⚠️ Webhook not configured"
       DISCORD_STATUS: "⚠️ Webhook not configured"
     steps:
+      - name: Generate Notification
+        id: generate_notification
+        uses: ./.github/actions/generate-notification
+        with:
+          releaseResult: ${{ inputs.releaseResult }}
+          releaseErrorMessage: ${{ inputs.releaseErrorMessage }}
+          deployResult: ${{ inputs.deployResult }}
+          version: ${{ inputs.version }}
+          testsHasFails: ${{ inputs.testsHasFails }}
+          testsTotal: ${{ inputs.testsTotal }}
+          testsPassed: ${{ inputs.testsPassed }}
+          testsFailedNames: ${{ inputs.testsFailedNames }}
+
       # ───── Slack ─────
       - name: 📢 Send Slack Notification (if configured)
         if: ${{ env.SLACK_WEBHOOK != '' }}
         continue-on-error: true
         run: |
-          case "${{ needs.generate-notification.outputs.status }}" in
+          case "${{ steps.generate_notification.outputs.status }}" in
             success) COLOR="good" ;;
             failure) COLOR="danger" ;;
             *) COLOR="#cccccc" ;;
           esac
       
           # Interpret literal newlines correctly
-          TEXT=$'*${{ needs.generate-notification.outputs.title }}* - `${{ github.repository }}`\n${{ needs.generate-notification.outputs.slackMessage }}'
+          TEXT=$'*${{ steps.generate_notification.outputs.title }}* - `${{ github.repository }}`\n${{ needs.generate-notification.outputs.slackMessage }}'
       
           PAYLOAD=$(jq -n \
             --arg text "$TEXT" \
@@ -96,7 +96,7 @@ jobs:
         continue-on-error: true
         run: |
           # Interpret literal newlines correctly
-          TEXT=$'${{ needs.generate-notification.outputs.discordMessage }}'
+          TEXT=$'${{ steps.generate_notification.outputs.discordMessage }}'
       
           PAYLOAD=$(jq -n \
             --arg content "$TEXT" \
