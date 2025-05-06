@@ -197,6 +197,11 @@ jobs:
           echo "Contents of WebGL publish directory:"
           ls -lah "${{ env.ARTIFACT_DIR }}/WebGL"
 
+      - name: 🏗 Ensure .nojekyll exists
+        if: matrix.target == 'gh-pages'
+        run: |
+          touch "${{ env.ARTIFACT_DIR }}/WebGL/.nojekyll"
+
       - name: 🌍 Deploy to GitHub Pages
         if: matrix.target == 'gh-pages'
         uses: peaceiris/actions-gh-pages@v3
