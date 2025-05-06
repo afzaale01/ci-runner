@@ -12,17 +12,19 @@ HAS_COMBINED_ARTIFACTS="${5:?Missing hasCombinedArtifacts flag (true/false)}"
 REQUIRED_PLATFORMS_JSON="${6:?Missing required platforms JSON}"
 
 PROJECT_NAME="$(echo "$PROJECT_NAME" | xargs)"
+SANITIZED_PROJECT_NAME="$(echo "$PROJECT_NAME" | sed 's/[^a-zA-Z0-9._-]/_/g')"
+
 VERSION="$(echo "$VERSION" | xargs)"
 GITHUB_REPOSITORY="$(echo "$GITHUB_REPOSITORY" | xargs)"
 GITHUB_TOKEN="$(echo "$GITHUB_TOKEN" | xargs)"
 HAS_COMBINED_ARTIFACTS="$(echo "$HAS_COMBINED_ARTIFACTS" | xargs)"
 
-DEST_DIR="deployment-artifacts/${PROJECT_NAME}-${VERSION}"
+DEST_DIR="deployment-artifacts/${SANITIZED_PROJECT_NAME}-${VERSION}"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📦 Starting Release Asset Download"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔹 Project                   : ${PROJECT_NAME}"
+echo "🔹 Project                   : ${SANITIZED_PROJECT_NAME}"
 echo "🔹 Version                   : ${VERSION}"
 echo "🔹 Repository                : ${GITHUB_REPOSITORY}"
 echo "🔹 Has Combined              : ${HAS_COMBINED_ARTIFACTS}"
@@ -82,7 +84,7 @@ else
   REQUIRED_PLATFORMS=($(echo "${REQUIRED_PLATFORMS_JSON}" | jq -r '.[]'))
 
   for PLATFORM in "${REQUIRED_PLATFORMS[@]}"; do
-    ARTIFACT_NAME="${PROJECT_NAME}-${VERSION}-${PLATFORM}.zip"
+    ARTIFACT_NAME="${SANITIZED_PROJECT_NAME}-${VERSION}-${PLATFORM}.zip"
     ARTIFACT_URL=$(echo "${ASSETS}" | awk -v name="${ARTIFACT_NAME}" '$1 == name {print $2}')
 
     if [[ -z "${ARTIFACT_URL}" ]]; then
@@ -93,9 +95,9 @@ else
     echo "⬇️ Downloading: ${ARTIFACT_NAME}"
     curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${ARTIFACT_URL}" -o "${DEST_DIR}/${ARTIFACT_NAME}"
 
-    echo "📂 Extracting ${ARTIFACT_NAME} to ${DEST_DIR}/${PROJECT_NAME}-${VERSION}-${PLATFORM}"
-    mkdir -p "${DEST_DIR}/${PROJECT_NAME}-${VERSION}-${PLATFORM}"
-    unzip -q "${DEST_DIR}/${ARTIFACT_NAME}" -d "${DEST_DIR}/${PROJECT_NAME}-${VERSION}-${PLATFORM}"
+    echo "📂 Extracting ${ARTIFACT_NAME} to ${DEST_DIR}/${SANITIZED_PROJECT_NAME}-${VERSION}-${PLATFORM}"
+    mkdir -p "${DEST_DIR}/${SANITIZED_PROJECT_NAME}-${VERSION}-${PLATFORM}"
+    unzip -q "${DEST_DIR}/${ARTIFACT_NAME}" -d "${DEST_DIR}/${SANITIZED_PROJECT_NAME}-${VERSION}-${PLATFORM}"
     rm "${DEST_DIR}/${ARTIFACT_NAME}"
   done
 fi
