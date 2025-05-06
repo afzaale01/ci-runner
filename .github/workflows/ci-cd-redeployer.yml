@@ -23,6 +23,21 @@ permissions:
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
+  # 0. Sanitize Project Name
+  # ─────────────────────────────────────────────────────────────────────────────
+  sanitize_project_name:
+    name: Sanitize Project Name
+    runs-on: ubuntu-latest
+    outputs:
+      sanitized_name: ${{ steps.sanitize.outputs.sanitized_name }}
+    steps:
+      - name: Run Project Name Sanitizer
+        id: sanitize
+        uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@v1
+        with:
+          projectName: ${{ vars.PROJECT_NAME }}
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # 1. Validate Release and Artifacts
   # ─────────────────────────────────────────────────────────────────────────────
   validate_release:
