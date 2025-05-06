@@ -353,7 +353,7 @@ jobs:
   summarize_deploy:
     if: always()
     uses: ./.github/workflows/summarize-deploys.yml
-    needs: [deploy]
+    needs: deploy
     with:
       projectName: ${{ inputs.projectName }}
       version: ${{ inputs.version }}
