@@ -43,6 +43,13 @@ jobs:
       SLACK_STATUS: "⚠️ Webhook not configured"
       DISCORD_STATUS: "⚠️ Webhook not configured"
     steps:
+      - name: Download Deployment Results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: deployment-results-*
+          path: deploy-results
+          merge-multiple: true
+
       - name: Generate Notification
         id: generate_notification
         uses: avalin/unity-ci-templates/.github/actions/generate-notification@v1
