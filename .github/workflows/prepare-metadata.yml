@@ -29,6 +29,8 @@ on:
         type: string
         required: false
     outputs:
+      projectName:
+        value: ${{ jobs.resolve_project_name.outputs.sanitized_name }}
       unityVersion:
         value: ${{ jobs.prepare_test_data.outputs.unityVersion }}
       useGitLfs:
@@ -132,10 +134,10 @@ jobs:
     runs-on: ubuntu-latest
     name: 🔧 Sanitize Project Name Job
     outputs:
-      sanitized_name: ${{ steps.sanitize.outputs.sanitized_name }}
+      sanitized_name: ${{ steps.resolve_project_name.outputs.sanitized_name }}
     steps:
       - name: Use Resolve Project Name Action
-        id: sanitize
+        id: resolve_project_name
         uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@v1
         with:
           projectName: ${{ inputs.projectName }}
