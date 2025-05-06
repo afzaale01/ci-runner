@@ -68,7 +68,7 @@ jobs:
           esac
       
           # Interpret literal newlines correctly
-          TEXT=$'*${{ steps.generate_notification.outputs.title }}* - `${{ github.repository }}`\n${{ needs.generate-notification.outputs.slackMessage }}'
+          TEXT=$'*${{ steps.generate_notification.outputs.title }}* - `${{ github.repository }}`\n${{ steps.generate_notification.outputs.slackMessage }}'
       
           PAYLOAD=$(jq -n \
             --arg text "$TEXT" \
