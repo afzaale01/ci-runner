@@ -1,4 +1,4 @@
-name: ⚙️ CI/CD Dispatcher (Test)
+name: ⚙️ CI/CD Dispatcher (Public)
 
 on:
   # Allow manual dispatch with a buildType input

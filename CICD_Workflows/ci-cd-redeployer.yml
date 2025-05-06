@@ -1,4 +1,4 @@
-name: ✈️ CI/CD Redeployer (Test)
+name: ✈️ CI/CD Redeployer (Public)
 
 on:
   workflow_dispatch:
