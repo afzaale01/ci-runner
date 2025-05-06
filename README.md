@@ -90,8 +90,9 @@ While the pipeline is production-ready and modular, some deploy integrations are
 
 | File | Purpose |
 |------|---------|
-| [`ci-cd-dispatcher.yml`](.github/workflows/ci-cd-dispatcher.yml) | Entry-point dispatcher: validates inputs, prepares metadata, and triggers the full CI/CD pipeline |
-| [`ci-cd-pipeline.yml`](.github/workflows/ci-cd-pipeline.yml) | Full pipeline: test, build, release, deploy & notify |
+| [ `ci-cd-dispatcher.yml`](.github/workflows/ci-cd-dispatcher.yml) | Entry-point dispatcher: validates inputs, prepares metadata, and triggers CI/CD |
+| [ `ci-cd-deployer.yml`  ](.github/workflows/ci-cd-deployer.yml) | Deploy from a GitHub release to selected targets |
+| [ `ci-cd-pipeline.yml`  ](.github/workflows/ci-cd-pipeline.yml) | Full pipeline: test, build, release, deploy & notify |
 
 ### 🤩 Modular Reusable Templates
 
