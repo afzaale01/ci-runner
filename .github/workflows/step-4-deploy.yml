@@ -80,15 +80,14 @@ jobs:
         run: chmod +x .github/scripts/deploy/*.sh
 
       - name: 📥 Retrieve Artifacts from Release
-        if: ${{ inputs.artifactSource == 'release' }}
-        run: |
-          .github/scripts/deploy/download-from-release.sh \
-            "${{ inputs.projectName }}" \
-            "${{ inputs.version }}" \
-            "${{ github.repository }}" \
-            "${{ secrets.GITHUB_TOKEN }}" \
-            "${{ inputs.hasCombinedArtifacts }}" \
-            '${{ toJson(matrix.requiredPlatforms) }}'
+        uses: ./.github/actions/download-from-release
+        with:
+          projectName: ${{ inputs.projectName }}
+          version: ${{ inputs.version }}
+          githubRepository: ${{ github.repository }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          hasCombinedArtifacts: ${{ inputs.hasCombinedArtifacts }}
+          requiredPlatformsJson: '${{ toJson(matrix.requiredPlatforms) }}'
 
       # Download combined artifact (single)
       - name: 📥 Retrieve Artifacts from Build (Combined)
