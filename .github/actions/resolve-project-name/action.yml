@@ -1,0 +1,26 @@
+name: Sanitize Project Name
+description: Takes a raw project name and outputs a safe, sanitized name.
+
+inputs:
+  projectName:
+    description: The raw project name to sanitize
+    required: true
+    type: string
+
+outputs:
+  sanitized_name:
+    description: The sanitized project name with only a-zA-Z0-9._- characters
+    value: ${{ steps.sanitize_name.outputs.sanitized_name }}
+
+runs:
+  using: composite
+  steps:
+    - name: Make script executable
+      shell: bash
+      run: chmod +x "${{ github.action_path }}/resolve-project-name.sh"
+
+    - name: Run sanitizer script
+      id: sanitize_name
+      shell: bash
+      run: |
+        ${{ github.action_path }}/resolve-project-name.sh "${{ inputs.projectName }}"
