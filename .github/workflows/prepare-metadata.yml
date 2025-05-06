@@ -3,6 +3,9 @@ name: ⏳ Prepare Metadata
 on:
   workflow_call:
     inputs:
+      projectName:
+        type: string
+        required: true
       deployTargets:
         type: string
         required: true
@@ -26,6 +29,8 @@ on:
         type: string
         required: false
     outputs:
+      projectName:
+        value: ${{ jobs.resolve_project_name.outputs.sanitized_name }}
       unityVersion:
         value: ${{ jobs.prepare_test_data.outputs.unityVersion }}
       useGitLfs:
@@ -124,6 +129,18 @@ jobs:
           fi
 
           echo "skipTests=$SKIP_TESTS" >> "$GITHUB_OUTPUT"
+
+  resolve_project_name:
+    runs-on: ubuntu-latest
+    name: Resolve Project Name Job
+    outputs:
+      sanitized_name: ${{ steps.resolve_project_name.outputs.sanitized_name }}
+    steps:
+      - name: Use Resolve Project Name Action
+        id: resolve_project_name
+        uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@v1
+        with:
+          projectName: ${{ inputs.projectName }}
 
   prepare_test_data:
     name: Prepare Test Data
@@ -296,6 +313,7 @@ jobs:
     needs:
       - detect_skip_tests
       - detect_tests_only
+      - resolve_project_name
       - resolve_build_type
       - resolve_retention_days
       - prepare_timeouts
@@ -307,6 +325,7 @@ jobs:
     if: always()
     uses: ./.github/workflows/summarize-metadata.yml
     with:
+      projectName: ${{ needs.resolve_project_name.outputs.sanitized_name }}
       version: ${{ needs.version.outputs.version }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
