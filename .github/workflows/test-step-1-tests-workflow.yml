@@ -49,6 +49,7 @@ jobs:
     name: ⏳ Prepare Metadata
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      projectName: ${{ vars.PROJECT_NAME }}
       skipTests: false
       testsOnly: true
       deployTargets: '[]'

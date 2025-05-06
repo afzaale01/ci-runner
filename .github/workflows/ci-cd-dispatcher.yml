@@ -108,6 +108,7 @@ jobs:
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      projectName: ${{ vars.PROJECT_NAME }}
       skipTests: ${{ inputs.skipTests }}
       deployTargets: ${{ inputs.deployTargets }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
@@ -150,7 +151,7 @@ jobs:
             --field targetPlatforms="$(printf '%s' '${{ needs.prepare_metadata.outputs.targetPlatforms }}')" \
             --field validDeployTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.validDeployTargets }}')" \
             --field metadataConfig="$(jq -c -n \
-              --arg projectName "${{ vars.PROJECT_NAME }}" \
+              --arg projectName "${{ needs.prepare_metadata.outputs.projectName }}" \
               --arg skipTests "${{ needs.prepare_metadata.outputs.skipTests }}" \
               --arg testsOnly "${{ needs.prepare_metadata.outputs.testsOnly }}" \
               --arg buildType "${{ needs.prepare_metadata.outputs.buildType }}" \

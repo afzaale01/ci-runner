@@ -39,6 +39,7 @@ jobs:
     name: ⏳ Prepare Metadata
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      projectName: ${{ inputs.projectName }}
       skipTests: true
       testsOnly: false
       targetPlatforms: ${{ inputs.targetPlatforms }}
@@ -52,7 +53,7 @@ jobs:
     uses: ./.github/workflows/dry-build.yml
     with:
       version: ${{ needs.prepare_metadata.outputs.version }}
-      projectName: ${{ inputs.projectName }}
+      projectName: ${{ needs.prepare_metadata.outputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
     secrets: inherit
@@ -67,7 +68,7 @@ jobs:
     with:
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       version: ${{ needs.prepare_metadata.outputs.version }}
-      projectName: ${{ inputs.projectName }}
+      projectName: ${{ needs.prepare_metadata.outputs.projectName }}
       targetPlatforms: ${{ inputs.targetPlatforms }}
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
       skipPerPlatformArtifacts: ${{ needs.prepare_metadata.outputs.skipPerPlatform }}  
