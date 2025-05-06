@@ -35,7 +35,7 @@ jobs:
 
       - name: Check if Tag Exists
         id: tag_exists
-        uses: ./.github/actions/check-tag-exists@v1
+        uses: ./.github/actions/check-tag-exists
         with:
           version: ${{ inputs.version }}
           repository: ${{ github.repository }}
