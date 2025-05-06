@@ -191,10 +191,11 @@ jobs:
 
           echo "✅ All .br/.gz references removed; files are now uncompressed for GH Pages."
 
-      - name: 🏗 Ensure .nojekyll exists
+      - name: 📂 Check WebGL Publish Directory
         if: matrix.target == 'gh-pages'
         run: |
-          touch "${{ env.ARTIFACT_DIR }}/WebGL/.nojekyll"
+          echo "Contents of WebGL publish directory:"
+          ls -lah "${{ env.ARTIFACT_DIR }}/WebGL"
 
       - name: 🌍 Deploy to GitHub Pages
         if: matrix.target == 'gh-pages'
