@@ -204,10 +204,10 @@ jobs:
 
       - name: 🌍 Deploy to GitHub Pages
         if: matrix.target == 'gh-pages'
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: "./${{ env.ARTIFACT_DIR }}/WebGL"
+          publish_dir: "${{ env.ARTIFACT_DIR }}/WebGL"
 
       # ───── itch.io ─────
       - name: 🕹️ Deploy to itch.io
