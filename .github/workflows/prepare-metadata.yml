@@ -172,7 +172,7 @@ jobs:
 
       - name: Use Resolve Timeouts Action
         id: set      
-        uses: ./.github/actions/resolve-timeouts
+        uses: avalin/unity-ci-templates/.github/actions/resolve-timeouts@v1
         with:
           defaultsFileOverride: "./.github/config/defaults.json"
           timeoutTestsOverride: ${{ vars.TIMEOUT_TESTS_IN_MINUTES }}
