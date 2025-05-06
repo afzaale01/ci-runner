@@ -76,9 +76,6 @@ jobs:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 🧰 Setup Helper Scripts
-        run: chmod +x .github/scripts/deploy/*.sh
-
       - name: 📥 Retrieve Artifacts from Release
         uses: ./.github/actions/download-from-release
         with:
@@ -110,8 +107,9 @@ jobs:
 
       - name: 🛠️ Normalize Artifact Layout (Release Per-Platform Only)
         if: ${{ inputs.artifactSource == 'release' && inputs.hasCombinedArtifacts == 'false' }}
-        run: |
-          .github/scripts/deploy/normalize-artifact-layout.sh "${{ env.ARTIFACT_DIR }}"
+        uses: ./.github/actions/normalize-artifact-layout
+        with:
+          artifactDir: ${{ env.ARTIFACT_DIR }}
 
       - name: 🧾 List Artifacts
         run: ls -R "$DEPLOY_DIR" || echo "No artifacts found."
