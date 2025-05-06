@@ -50,6 +50,27 @@ See a live WebGL build deployed using this CI/CD pipeline:
 - 🔗 [Steam Setup Guide](https://partner.steamgames.com/doc/sdk/uploading)
 - 🔗 [Firebase Setup Guide](https://firebase.google.com/docs/hosting)
 
+### 📣 Example Notifications
+
+The pipeline supports optional notifications to **Slack** and **Discord** using webhooks.  
+When configured, it sends detailed messages after each pipeline run.
+
+Here’s an example of a Slack notification showing:
+- ✅ Release succeeded
+- ❌ Deploy failed on a specific target
+- Commit info, release link, and pipeline link
+- A per-target deployment summary table
+
+![Slack Notification Example](https://github.com/user-attachments/assets/6adfdbd9-47e4-46ae-b6c5-ca68cbbedc27)
+
+> 💡 **Tip:** You can enable these by setting the `SLACK_WEBHOOK` or `DISCORD_WEBHOOK` secrets in your repository.
+
+The notification includes:
+- **Release status** → success, failure, or partial success (release succeeded but deploy failed)
+- **Deploy target summary** → shows each target (like `gh-pages`, `itch.io`) and its result (✅ or ❌)
+- **Commit + branch details** → the commit hash and branch/tag being released
+- **Quick links** → to the GitHub Release page and the pipeline run
+
 ## ⚠ Current Limitations
 
 While the pipeline is production-ready and modular, some deploy integrations are still marked as **experimental**:
@@ -81,9 +102,6 @@ While the pipeline is production-ready and modular, some deploy integrations are
     ├── 🌍 Deploy (gh-pages, itch.io, etc.)
     └── 🔔 Notify (Discord, Slack)
 ```
-
-
-
 ## 🗂️ Repository Structure
 
 ### 🧠 Main Workflows
