@@ -196,7 +196,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: "./${{ env.ARTIFACT_DIR }}/WebGL"
+          publish_dir: "${{ env.ARTIFACT_DIR }}/WebGL"
 
       # ───── itch.io ─────
       - name: 🕹️ Deploy to itch.io
