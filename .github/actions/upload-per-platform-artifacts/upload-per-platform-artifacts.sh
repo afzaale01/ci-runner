@@ -29,7 +29,10 @@ for PLATFORM in $PLATFORMS; do
 
     if [ "$HTTP_CODE" -ne 201 ]; then
       echo "❌ Upload failed for $ZIP_NAME (HTTP $HTTP_CODE)"
-      
+      echo ""
+      echo "🔴 Raw API response:"
+      cat /tmp/upload_response.json || echo "⚠ No response body"
+
       ERRORS=$(jq -r '.errors[]?.message // .errors[]? // empty' /tmp/upload_response.json)
       if [[ -n "$ERRORS" ]]; then
         echo ""
