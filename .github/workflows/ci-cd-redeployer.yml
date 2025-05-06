@@ -82,12 +82,14 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   redeploy:
     name: Redeploy from Release
-    needs: validate_release
+    needs: 
+      - sanitize_project_name
+      - validate_release
     uses: ./.github/workflows/step-4-deploy.yml
     with:
       buildType: release
       version: ${{ inputs.tagVersion }}
-      projectName: ${{ vars.PROJECT_NAME }}
+      projectName: ${{ needs.sanitize_project_name.outputs.sanitized_name }}
       deployTargets: ${{ inputs.deployTargets || '[]' }}
       targetPlatforms: ${{ inputs.targetPlatforms != '' && inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}
       hasCombinedArtifacts: ${{ needs.validate_release.outputs.hasCombinedArtifacts }}
