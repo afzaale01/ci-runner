@@ -39,7 +39,7 @@ jobs:
 
       - name: Determine Version
         id: get_version
-        uses: ./.github/actions/determine-version
+        uses: avalin/unity-ci-templates/.github/actions/determine-version@v1
         with:
           ref: "${GITHUB_REF}"
           event: "${GITHUB_EVENT_NAME}"
@@ -48,7 +48,7 @@ jobs:
 
       - name: 📝 Check if Release Version Already Exists
         id: check_release
-        uses: ./.github/actions/check-release-exists
+        uses: avalin/unity-ci-templates/.github/actions/check-release-exists@v1
         with:
           version: ${{ steps.get_version.outputs.version }}
           repo: ${{ github.repository }}

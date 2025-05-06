@@ -43,12 +43,9 @@ jobs:
       SLACK_STATUS: "⚠️ Webhook not configured"
       DISCORD_STATUS: "⚠️ Webhook not configured"
     steps:
-      - name: 📁 Checkout Repository
-        uses: actions/checkout@v4
-
       - name: Generate Notification
         id: generate_notification
-        uses: ./.github/actions/generate-notification
+        uses: avalin/unity-ci-templates/.github/actions/generate-notification@v1
         with:
           releaseResult: ${{ inputs.releaseResult }}
           releaseErrorMessage: ${{ inputs.releaseErrorMessage }}

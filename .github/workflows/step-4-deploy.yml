@@ -73,11 +73,8 @@ jobs:
       PROJECT_DIR: ${{ inputs.projectName }}-${{ inputs.version }}
       ARTIFACT_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}
     steps:
-      - name: 📁 Checkout Repository
-        uses: actions/checkout@v4
-
       - name: 📥 Retrieve Artifacts from Release
-        uses: ./.github/actions/download-from-release
+        uses: avalin/unity-ci-templates/.github/actions/download-from-release@v1
         with:
           projectName: ${{ inputs.projectName }}
           version: ${{ inputs.version }}
@@ -96,7 +93,7 @@ jobs:
 
       - name: 📥 Retrieve Artifacts from Build (Per-Platform)
         if: ${{ inputs.artifactSource == 'build' && inputs.hasCombinedArtifacts == 'false' }}
-        uses: ./.github/actions/download-per-platform-artifacts-from-build
+        uses: avalin/unity-ci-templates/.github/actions/download-per-platform-artifacts-from-build@v1
         with:
           artifactDir: ${{ env.ARTIFACT_DIR }}
           projectName: ${{ inputs.projectName }}
@@ -107,7 +104,7 @@ jobs:
 
       - name: 🛠️ Normalize Artifact Layout (Release Per-Platform Only)
         if: ${{ inputs.artifactSource == 'release' && inputs.hasCombinedArtifacts == 'false' }}
-        uses: ./.github/actions/normalize-artifact-layout
+        uses: avalin/unity-ci-templates/.github/actions/normalize-artifact-layout@v1
         with:
           artifactDir: ${{ env.ARTIFACT_DIR }}
 
