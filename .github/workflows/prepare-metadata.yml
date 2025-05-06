@@ -132,7 +132,7 @@ jobs:
 
   resolve_project_name:
     runs-on: ubuntu-latest
-    name: 🔧 Sanitize Project Name Job
+    name: Resolve Project Name Job
     outputs:
       sanitized_name: ${{ steps.resolve_project_name.outputs.sanitized_name }}
     steps:
