@@ -95,7 +95,7 @@ jobs:
           for TARGET in $(echo "$RAW_INPUT" | jq -r '.[]'); do
             if jq -e --arg key "$TARGET" '.[$key]' "$CONFIG_FILE" >/dev/null; then
               MIN_TYPE=$(jq -r --arg key "$TARGET" '.[$key].minimumBuildType' "$CONFIG_FILE")
-              BUILD_TARGETS=$(jq -r --arg key "$TARGET" '.[$key].compatibleBuildTargets[]' "$CONFIG_FILE")
+              COMPATIBLE_BUILD_TARGETS=$(jq -r --arg key "$TARGET" '.[$key].compatibleBuildTargets[]' "$CONFIG_FILE")
 
               case "$MIN_TYPE" in
                 preview) MIN_RANK=1 ;;
@@ -129,7 +129,7 @@ jobs:
 
           echo "✅ BUILD TYPE: ${BUILD_TYPE}"
           echo "✅ BUILD TARGETS: ${BUILD_TARGETS}"
-          
+
           echo "✅ Valid targets: ${VALID[*]}"
           echo "❌ Invalid targets: ${INVALID[*]}"
           echo "⚠️ Skipped (minimum buildType not met): ${SKIPPED_MINIMUM[*]}"
