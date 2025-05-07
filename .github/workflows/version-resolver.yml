@@ -37,9 +37,9 @@ jobs:
       - name: Fetch All Tags
         run: git fetch --tags --force
 
-      - name: Determine Version
+      - name: Resolve Build Version
         id: get_version
-        uses: avalin/unity-ci-templates/.github/actions/resolve-version@v1
+        uses: avalin/unity-ci-templates/.github/actions/resolve-build-version@v1
         with:
           ref: "${GITHUB_REF}"
           event: "${GITHUB_EVENT_NAME}"
