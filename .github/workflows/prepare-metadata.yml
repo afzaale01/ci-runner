@@ -209,7 +209,7 @@ jobs:
 
       - name: Use Resolve Build Type Action
         id: set
-        uses: avalin/unity-ci-templates/.github/actions/resolve-build-type@v1
+        uses: avalin/unity-ci-templates/.github/actions/resolve-build-type@rename-target-platforms
         with:
           testsOnlyOverride: ${{ needs.detect_tests_only.outputs.testsOnly }}
           buildTypeOverride: ${{ inputs.buildType }}
