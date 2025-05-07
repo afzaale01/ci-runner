@@ -236,11 +236,11 @@ jobs:
     steps:
       - id: set
         run: |
-          if [[ "${{ needs.resolve_build_type.outputs.buildType == 'preview'}}" ]]; then
+          if [[ "${{ needs.resolve_build_type.outputs.buildType }}" == "preview" ]]; then
             echo "✅ Preview builds ignore releases - continuing pipeline."
             echo "release_already_exists=false" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ needs.resolve_versioning.outputs.release_exists == 'true' }}" ]]; then
-            echo "❌ A release already exists for version '${{ needs.resolve_versioning.outputs.version }}'. Stopping pipeline early."
+          elif [[ "${{ needs.resolve_versioning.outputs.release_exists }}" == "true" ]]; then
+            echo "❌ A release already exists for version '${{ needs.resolve_versioning.outputs.release_exists }}'. Stopping pipeline early."
             echo "release_already_exists=true" >> "$GITHUB_OUTPUT"
             exit 1
           else
@@ -337,4 +337,4 @@ jobs:
       validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validDeployTargets || '[]' }}
       requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }}
       skipPerBuildTarget: ${{ needs.analyze_artifact_strategy.outputs.skipPerBuildTarget || false }}
-      releaseAlreadyExists: ${{ needs.check_release_blocker.outputs.release_already_existed }}
+      releaseAlreadyExists: ${{ needs.check_release_blocker.outputs.release_already_exists }}
