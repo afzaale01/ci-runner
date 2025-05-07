@@ -59,7 +59,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧮 Upload Per-Platform Artifacts
-        uses: avalin/unity-ci-templates/.github/actions/upload-per-build-target-artifacts@rename-target-platforms
+        uses: avalin/unity-ci-templates/.github/actions/upload-per-build-target-artifacts@v1
         with:
           project: ${{ inputs.projectName }}
           version: ${{ inputs.version }}
