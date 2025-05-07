@@ -18,10 +18,10 @@ inputs:
 outputs:
   release_id:
     description: "The ID of the existing release (if found)"
-    value: ${{ steps.check.outputs.release_id }}
+    value: ${{ steps.check_release.outputs.release_id }}
   release_exists:
     description: "Whether a release exists with the given version"
-    value: ${{ steps.check.outputs.exists }}
+    value: ${{ steps.check_release.outputs.exists }}
 
 runs:
   using: 'composite'
@@ -30,7 +30,7 @@ runs:
       uses: actions/checkout@v3
 
     - name: Run release check script
-      id: check
+      id: check_release
       run: |
         chmod +x "${{ github.action_path }}/check-release-exists.sh"
         "${{ github.action_path }}/check-release-exists.sh" "${{ inputs.version }}" "${{ inputs.repo }}" "${{ inputs.token }}"
