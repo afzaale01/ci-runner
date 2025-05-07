@@ -120,7 +120,7 @@ jobs:
               if [ "$MATCH_FOUND" = true ]; then
                 FINAL_VALID+=("$TARGET")
               else
-                SKIPPED_NO_BUILD_TARGETS+=("$TARGET (no compatible build targets)")
+                SKIPPED_NO_BUILD_TARGETS+=("$TARGET")
               fi
             else
               INVALID+=("$TARGET")
