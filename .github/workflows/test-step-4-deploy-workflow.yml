@@ -140,7 +140,7 @@ jobs:
     with:
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
-      projectName: ${{ needs.prepare_metadata.outputs.projectName }}
+      projectName: ${{ vars.PROJECT_NAME }}
       deployTargets: ${{ inputs.deployTargets }}
       targetPlatforms: '[]'
       hasCombinedArtifacts: ${{ needs.validate_release.outputs.hasCombinedArtifacts }}
