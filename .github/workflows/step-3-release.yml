@@ -55,14 +55,14 @@ jobs:
         id: create_release
         uses: avalin/unity-ci-templates/.github/actions/create-release@v1
         with:
-          version: ${{ inputs.version }}
+          version: ${{ inputs.buildVersion }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧮 Upload Per-Platform Artifacts
         uses: avalin/unity-ci-templates/.github/actions/upload-per-build-target-artifacts@v1
         with:
           project: ${{ inputs.projectName }}
-          version: ${{ inputs.version }}
+          version: ${{ inputs.buildVersion }}
           releaseId: ${{ steps.create_release.outputs.release_id }}
           repository: ${{ github.repository }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
@@ -73,7 +73,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ inputs.version }}"
+          VERSION="${{ inputs.buildVersion }}"
           PROJECT="${{ inputs.projectName }}"
           COMBINED_PATH="${PROJECT}-${VERSION}"
           COMBINED_ZIP="${PROJECT}-${VERSION}-all-platforms.zip"

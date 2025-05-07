@@ -12,6 +12,9 @@ on:
       deployTargets:
         type: string
         required: true
+      buildVersion:
+        type: string
+        required: false
       buildTargets:
         type: string
         required: false
@@ -28,14 +31,13 @@ on:
       testsOnly:
         type: string
         required: false
-      buildVersion:
-        type: string
-        required: false
     outputs:
       projectName:
         value: ${{ jobs.resolve_project_name.outputs.sanitized_name }}
       unityVersion:
         value: ${{ jobs.resolve_unity_version.outputs.unityVersion }}
+      buildVersion:
+        value: ${{ jobs.resolve_build_version.outputs.buildVersion }}
       useGitLfs:
         value: ${{ jobs.prepare_test_data.outputs.useGitLfs }}
       editModePath:
@@ -54,8 +56,6 @@ on:
         value: ${{ jobs.detect_tests_only.outputs.testsOnly }}
       skipTests:
         value: ${{ jobs.detect_skip_tests.outputs.skipTests }}
-      version:
-        value: ${{ jobs.resolve_build_version.outputs.buildVersion }}
       retentionDays:
         value: ${{ jobs.resolve_retention_days.outputs.retentionDays }}
       buildTargets:
