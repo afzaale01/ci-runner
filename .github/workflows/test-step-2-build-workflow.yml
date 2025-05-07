@@ -3,6 +3,11 @@ name: 🧪 Test - Step 2 Build Workflow
 on:
   workflow_dispatch:
     inputs:
+      unityVersion:
+        description: "Specific unity version to test on"
+        required: false
+        default: "auto"
+        type: string
       buildType:
         description: "preview = build only!"
         required: true
@@ -40,6 +45,7 @@ jobs:
     uses: ./.github/workflows/prepare-metadata.yml
     with:
       projectName: ${{ inputs.projectName }}
+      unityVersion: ${{ inputs.unityVersion }}
       skipTests: true
       testsOnly: false
       buildTargets: ${{ inputs.buildTargets }}

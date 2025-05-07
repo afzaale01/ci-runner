@@ -6,7 +6,7 @@ on:
       unityVersion:
         description: "Specific unity version to test on"
         required: false
-        default: ""
+        default: "auto"
         type: string
       useGitLFS:
         description: "Use GIT LFS?"
