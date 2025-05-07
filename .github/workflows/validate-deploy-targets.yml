@@ -127,7 +127,9 @@ jobs:
             fi
           done
 
+          echo "✅ BUILD TYPE: ${BUILD_TYPE}"
           echo "✅ BUILD TARGETS: ${BUILD_TARGETS}"
+          
           echo "✅ Valid targets: ${VALID[*]}"
           echo "❌ Invalid targets: ${INVALID[*]}"
           echo "⚠️ Skipped (minimum buildType not met): ${SKIPPED_MINIMUM[*]}"
