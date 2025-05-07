@@ -3,48 +3,48 @@
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": false,
     "minimumBuildType": "release",
-    "compatiblePlatforms": ["WebGL"]
+    "compatibleBuildTargets": ["WebGL"]
   },
   "itch.io": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": false,
     "minimumBuildType": "release",
-    "compatiblePlatforms": ["WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
+    "compatibleBuildTargets": ["WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
   },
   "s3": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
     "minimumBuildType": "preview",
-    "compatiblePlatforms": ["Android", "iOS", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
+    "compatibleBuildTargets": ["Android", "iOS", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
   },
   "custom-server": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
     "minimumBuildType": "preview",
-    "compatiblePlatforms": ["Android", "iOS", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
+    "compatibleBuildTargets": ["Android", "iOS", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
   },
   "steam": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
     "minimumBuildType": "release",
-    "compatiblePlatforms": ["StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
+    "compatibleBuildTargets": ["StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
   },
   "testflight": {
     "os": "macos-latest",
     "requiresCombinedArtifact": false,
     "minimumBuildType": "release_candidate",
-    "compatiblePlatforms": ["iOS"]
+    "compatibleBuildTargets": ["iOS"]
   },
   "appcenter": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
     "minimumBuildType": "preview",
-    "compatiblePlatforms": ["Android", "iOS"]
+    "compatibleBuildTargets": ["Android", "iOS"]
   },
   "firebase": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
     "minimumBuildType": "release",
-    "compatiblePlatforms": ["WebGL"]
+    "compatibleBuildTargets": ["WebGL"]
   }
 }

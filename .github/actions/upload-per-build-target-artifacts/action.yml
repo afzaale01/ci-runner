@@ -1,4 +1,4 @@
-name: Upload Per-Platform Artifacts
+name: Upload Per-Build-Target Artifacts
 
 description: |
   Zips and uploads per-platform artifacts to an existing GitHub Release.
@@ -19,8 +19,8 @@ inputs:
   githubToken:
     description: "GitHub token for API authentication"
     required: true
-  targetPlatforms:
-    description: "JSON array of platforms to upload"
+  buildTargets:
+    description: "JSON array of build targets to upload"
     required: true
 
 runs:
@@ -28,15 +28,15 @@ runs:
   steps:
     - name: Make script executable
       shell: bash
-      run: chmod +x ${{ github.action_path }}/upload-per-platform-artifacts.sh
+      run: chmod +x ${{ github.action_path }}/upload-per-build-target-artifacts.sh
 
     - name: Run Upload Artifacts Script
       shell: bash
       run: |
-        ${{ github.action_path }}/upload-per-platform-artifacts.sh \
+        ${{ github.action_path }}/upload-per-build-target-artifacts.sh \
           "${{ inputs.project }}" \
           "${{ inputs.version }}" \
           "${{ inputs.releaseId }}" \
           "${{ inputs.repository }}" \
           "${{ inputs.githubToken }}" \
-          '${{ inputs.targetPlatforms }}'
+          '${{ inputs.buildTargets }}'

@@ -21,8 +21,8 @@ on:
         description: "Project name for artifacts"
         required: true
         default: "Unity_CI_Templates"
-      targetPlatforms:
-        description: "JSON array of platforms to build"
+      buildTargets:
+        description: "JSON array of build targets to build"
         required: true
         default: '["WebGL", "StandaloneWindows64"]'
       deployTargets:
@@ -42,7 +42,7 @@ jobs:
       projectName: ${{ inputs.projectName }}
       skipTests: true
       testsOnly: false
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      buildTargets: ${{ inputs.buildTargets }}
       deployTargets: ${{ inputs.deployTargets }}
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
@@ -54,6 +54,6 @@ jobs:
     with:
       version: ${{ needs.prepare_metadata.outputs.version }}
       projectName: ${{ needs.prepare_metadata.outputs.projectName }}
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
     secrets: inherit

@@ -1,34 +1,34 @@
-name: 🧮 Resolve Target Platforms
+name: 🧮 Resolve Build Targets
 
 on:
   workflow_call:
     inputs:
-      targetPlatforms:
+      buildTargets:
         type: string
         required: false
       buildType:
         type: string
         required: true
     outputs:
-      validatedTargetPlatforms:
-        value: ${{ jobs.resolve.outputs.validatedTargetPlatforms }}
+      validatedBuildTargets:
+        value: ${{ jobs.resolve.outputs.validatedBuildTargets }}
 
 jobs:
   resolve:
-    name: Resolve Target Platforms
+    name: Resolve Build Targets
     runs-on: ubuntu-latest
     outputs:
-      validatedTargetPlatforms: ${{ steps.set.outputs.validatedTargetPlatforms }}
+      validatedBuildTargets: ${{ steps.set.outputs.validatedBuildTargets }}
     steps:
       - name: Checkout Repository (for local config)
         uses: actions/checkout@v4
 
       - id: set
         run: |
-          INPUT_PLATFORMS='${{ inputs.targetPlatforms || '[]' }}'
+          INPUT_BUILD_TARGETS='${{ inputs.buildTargets || '[]' }}'
           BUILD_TYPE='${{ inputs.buildType }}'
-          CONFIG_FILE=".github/config/target-platforms.json"
-          FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/target-platforms.json"
+          CONFIG_FILE=".github/config/build-targets.json"
+          FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/build-targets.json"
 
           echo "🔍 Checking for local config file..."
           if [ -f "$CONFIG_FILE" ]; then
@@ -52,22 +52,22 @@ jobs:
           BUILD_WEIGHT=$(type_weight "$BUILD_TYPE")
           VALIDATED="[]"
 
-          for PLATFORM in $(echo "$INPUT_PLATFORMS" | jq -r '.[]'); do
-            if jq -e --arg p "$PLATFORM" '.[$p]' "$CONFIG_FILE" >/dev/null; then
-              MIN_TYPE=$(jq -r --arg p "$PLATFORM" '.[$p].minimumBuildType' "$CONFIG_FILE")
+          for TARGET in $(echo "$INPUT_BUILD_TARGETS" | jq -r '.[]'); do
+            if jq -e --arg p "$TARGET" '.[$p]' "$CONFIG_FILE" >/dev/null; then
+              MIN_TYPE=$(jq -r --arg p "$TARGET" '.[$p].minimumBuildType' "$CONFIG_FILE")
               MIN_WEIGHT=$(type_weight "$MIN_TYPE")
 
               if [ "$BUILD_WEIGHT" -ge "$MIN_WEIGHT" ]; then
-                VALIDATED=$(echo "$VALIDATED" | jq --arg p "$PLATFORM" '. + [$p]')
+                VALIDATED=$(echo "$VALIDATED" | jq --arg p "$TARGET" '. + [$p]')
               else
-                echo "⚠️ Skipping $PLATFORM — needs $MIN_TYPE"
+                echo "⚠️ Skipping $TARGET — needs $MIN_TYPE"
               fi
             else
-              echo "⚠️ Unknown platform $PLATFORM — skipping"
+              echo "⚠️ Unknown build target $TARGET — skipping"
             fi
           done
 
-          echo "✅ Final validated platforms: $VALIDATED"
-          echo "validatedTargetPlatforms<<EOF" >> "$GITHUB_OUTPUT"
+          echo "✅ Validated build targets: $VALIDATED"
+          echo "validatedBuildTargets<<EOF" >> "$GITHUB_OUTPUT"
           echo "$VALIDATED" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"

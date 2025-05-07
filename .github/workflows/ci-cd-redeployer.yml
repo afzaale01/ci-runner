@@ -13,8 +13,8 @@ on:
         required: true
         default: '["gh-pages"]'
         type: string
-      targetPlatforms:
-        description: "JSON array of target platforms (e.g. [\"WebGL\",\"iOS\"]) - Optional (leave empty)"
+      buildTargets:
+        description: "JSON array of build targets (e.g. [\"WebGL\",\"iOS\"]) - Optional (leave empty)"
         required: false
         type: string
 
@@ -91,7 +91,7 @@ jobs:
       version: ${{ inputs.tagVersion }}
       projectName: ${{ needs.sanitize_project_name.outputs.sanitized_name }}
       deployTargets: ${{ inputs.deployTargets || '[]' }}
-      targetPlatforms: ${{ inputs.targetPlatforms != '' && inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}
+      buildTargets: ${{ inputs.buildTargets != '' && inputs.buildTargets || vars.BUILD_TARGETS || '[]' }}
       hasCombinedArtifacts: ${{ needs.validate_release.outputs.hasCombinedArtifacts }}
       artifactSource: release
     secrets: inherit

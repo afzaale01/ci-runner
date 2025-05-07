@@ -7,12 +7,12 @@ VERSION="$2"
 RELEASE_ID="$3"
 REPO="$4"
 TOKEN="$5"
-PLATFORMS_JSON="$6"
+BUILD_TARGETS_JSON="$6"
 
-# ───── Parse Platforms ─────
-PLATFORMS=$(echo "$PLATFORMS_JSON" | jq -r '.[]')
+# ───── Parse Build Targets ─────
+BUILD_TARGETS=$(echo "$BUILD_TARGETS_JSON" | jq -r '.[]')
 
-for PLATFORM in $PLATFORMS; do
+for PLATFORM in $BUILD_TARGETS; do
   ARTIFACT_PATH="${PROJECT}-${VERSION}-${PLATFORM}"
   ZIP_NAME="${ARTIFACT_PATH}.zip"
 

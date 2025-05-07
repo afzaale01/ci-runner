@@ -15,8 +15,8 @@ on:
         description: "Project name used in the artifact"
         type: string
         required: true
-      targetPlatforms:
-        description: "JSON array of platforms to expect artifacts for"
+      buildTargets:
+        description: "JSON array of buildTargets to expect artifacts for"
         type: string
         required: true
       combineArtifacts:
@@ -24,7 +24,7 @@ on:
         type: string
         default: "false"
         required: false
-      skipPerPlatformArtifacts:
+      skipPerBuildTargetArtifacts:
         description: "Whether to skip uploading per-platform artifacts"
         type: string
         default: "false"
@@ -66,7 +66,7 @@ jobs:
           releaseId: ${{ steps.create_release.outputs.release_id }}
           repository: ${{ github.repository }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          targetPlatforms: ${{ inputs.targetPlatforms }}
+          buildTargets: ${{ inputs.buildTargets }}
 
       - name: 🧮 Upload Combined Artifact
         if: ${{ inputs.combineArtifacts == 'true' }}

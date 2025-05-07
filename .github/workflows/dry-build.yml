@@ -12,8 +12,8 @@ on:
         description: "Optional version string (e.g. v1.2.3 or v1.2.3-rc.1)"
         required: true
         type: string
-      targetPlatforms:
-        description: "JSON array of platforms to simulate"
+      buildTargets:
+        description: "JSON array of build targets to simulate"
         type: string
         default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
         required: false
@@ -33,35 +33,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  filter_platforms:
-    uses: ./.github/workflows/validate-target-platforms.yml
+  filter_build_targets:
+    uses: ./.github/workflows/validate-build-targets.yml
     with:
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      buildTargets: ${{ inputs.buildTargets }}
 
   generate_matrix:
     name: 🧮 Generate Dry Build Matrix
     runs-on: ubuntu-latest
-    needs: [ filter_platforms ]
+    needs: [ filter_build_targets ]
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: 🧮 Create Dry Build Matrix
         id: set-matrix
         run: |
-          grouped='${{ needs.filter_platforms.outputs.validTargetPlatforms }}'
-          echo "📦 Grouped platforms: $grouped"
+          grouped='${{ needs.filter_build_targets.outputs.validBuildTargets }}'
+          echo "📦 Grouped targets: $grouped"
       
           matrix=$(echo "$grouped" | jq -c '
             to_entries
-            | map(.value[] as $p | { os: .key, targetPlatform: $p })
+            | map(.value[] as $p | { os: .key, buildTarget: $p })
           ')
       
           echo "matrix<<EOF" >> $GITHUB_OUTPUT
           echo "$matrix" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-  dry_build_platforms:
-    name: 🏗️ Simulate Build for ${{ matrix.targetPlatform }} on ${{ matrix.os }}
+  dry_build_targets:
+    name: 🏗️ Simulate Build for ${{ matrix.buildTarget }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: [ generate_matrix ]
     strategy:
@@ -72,23 +72,23 @@ jobs:
       - name: Create Placeholder Folder Structure
         run: |
           VERSION="${{ inputs.version }}"
-          PLATFORM="${{ matrix.targetPlatform }}"
-          DEST="${{ inputs.projectName }}-${VERSION}/${PLATFORM}"
+          TARGET="${{ matrix.buildTarget }}"
+          DEST="${{ inputs.projectName }}-${VERSION}/${TARGET}"
 
           echo "Creating dry build structure at $DEST"
           mkdir -p "$DEST"
-          echo "This is a dry build placeholder for $PLATFORM, version $VERSION" > "$DEST/README.txt"
+          echo "This is a dry build placeholder for $TARGET, version $VERSION" > "$DEST/README.txt"
 
       - name: Upload Placeholder Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.projectName }}-${{ inputs.version }}-${{ matrix.targetPlatform }}
-          path: ${{ inputs.projectName }}-${{ inputs.version }}/${{ matrix.targetPlatform }}/*
+          name: ${{ inputs.projectName }}-${{ inputs.version }}-${{ matrix.buildTarget }}
+          path: ${{ inputs.projectName }}-${{ inputs.version }}/${{ matrix.buildTarget }}/*
           retention-days: ${{ inputs.retentionDays }}
 
   combine_builds:
     if: ${{ inputs.combineArtifacts == 'true' }}
-    needs: [ dry_build_platforms ]
+    needs: [ dry_build_targets ]
     uses: ./.github/workflows/combine-builds.yml
     with:
       projectName: ${{ inputs.projectName }}
@@ -96,12 +96,12 @@ jobs:
       retentionDays: ${{ inputs.retentionDays }}
 
   summarize_builds:
-    needs: [ filter_platforms, dry_build_platforms, combine_builds ]
+    needs: [ filter_build_targets, dry_build_targets, combine_builds ]
     if: always()
     uses: ./.github/workflows/summarize-builds.yml
     with:
       projectName: ${{ inputs.projectName }}
       version: ${{ inputs.version }}
-      groupedPlatforms: ${{ needs.filter_platforms.outputs.validTargetPlatforms }}
+      groupedBuildTargets: ${{ needs.filter_build_targets.outputs.validBuildTargets }}
       combineRequested: ${{ inputs.combineArtifacts }}
       combinedCreated: ${{ (needs.combine_builds.result == 'success' && needs.combine_builds.outputs.created) || 'false' }}

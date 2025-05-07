@@ -1,23 +1,23 @@
-name: 🧮 Validate & Filter Platforms
+name: 🧮 Validate & Filter Build Targets
 
 on:
   workflow_call:
     inputs:
-      targetPlatforms:
-        description: "JSON array of platforms to validate and group by required OS"
+      buildTargets:
+        description: "JSON array of build targets to validate and group by required OS"
         required: true
         type: string
     outputs:
-      validTargetPlatforms:
-        description: "Map of OS runner label to list of platforms"
-        value: ${{ jobs.filter_platforms.outputs.validTargetPlatforms }}
+      validBuildTargets:
+        description: "Map of OS runner label to list of build targets"
+        value: ${{ jobs.filter_targets.outputs.validBuildTargets }}
 
 jobs:
-  filter_platforms:
-    name: 🧮 Filter Platforms
+  filter_targets:
+    name: 🧮 Filter Targets
     runs-on: ubuntu-latest
     outputs:
-      validTargetPlatforms: ${{ steps.group.outputs.validTargetPlatforms }}
+      validBuildTargets: ${{ steps.group.outputs.validBuildTargets }}
 
     steps:
       - name: 📁 Checkout config folder
@@ -27,14 +27,14 @@ jobs:
           sparse-checkout-cone-mode: false
           fetch-depth: 1
 
-      - name: 🔍 Validate Platforms and Load Config
+      - name: 🔍 Validate build targets and Load Config
         id: validate
         run: |
-          INPUT_JSON='${{ inputs.targetPlatforms }}'
-          CONFIG_FILE=".github/config/target-platforms.json"
-          FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/target-platforms.json"
+          INPUT_JSON='${{ inputs.buildTargets }}'
+          CONFIG_FILE=".github/config/build-targets.json"
+          FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/build-targets.json"
 
-          echo "🔍 Validating input platforms: $INPUT_JSON"
+          echo "🔍 Validating input build targets: $INPUT_JSON"
 
           if [ -f "$CONFIG_FILE" ]; then
             echo "✅ Using config: $CONFIG_FILE"
@@ -54,66 +54,66 @@ jobs:
           VALID=()
           INVALID=()
 
-          for PLATFORM in $INPUTS; do
-            if echo "$KNOWN" | grep -qx "$PLATFORM"; then
-              VALID+=("$PLATFORM")
+          for TARGET in $INPUTS; do
+            if echo "$KNOWN" | grep -qx "$TARGET"; then
+              VALID+=("$TARGET")
             else
-              INVALID+=("$PLATFORM")
+              INVALID+=("$TARGET")
             fi
           done
 
           if [ "${#INVALID[@]}" -gt 0 ]; then
-            echo "⚠️ Unrecognized platforms (ignored):"
+            echo "⚠️ Unrecognized targets (ignored):"
             for p in "${INVALID[@]}"; do echo "  - $p"; done
           fi
 
           # Export for later steps
-          echo "VALID_PLATFORMS=${VALID[*]}" >> $GITHUB_ENV
-          echo "INVALID_PLATFORMS=${INVALID[*]}" >> $GITHUB_ENV
+          echo "VALID_TARGETS=${VALID[*]}" >> $GITHUB_ENV
+          echo "INVALID_TARGETS=${INVALID[*]}" >> $GITHUB_ENV
 
-          # Output valid platforms
+          # Output valid build targets
           VALID_JSON=$(printf '%s\n' "${VALID[@]}" | jq -R . | jq -s .)
-          echo "validPlatforms<<EOF" >> $GITHUB_OUTPUT
+          echo "validBuildTargets<<EOF" >> $GITHUB_OUTPUT
           echo "$VALID_JSON" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: 🧪 Group Valid Platforms by OS
+      - name: 🧪 Group Valid Targets by OS
         id: group
         run: |
-          CONFIG_FILE=".github/config/target-platforms.json"
-          PLATFORMS='${{ steps.validate.outputs.validPlatforms }}'
+          CONFIG_FILE=".github/config/build-targets.json"
+          TARGETS='${{ steps.validate.outputs.validBuildTargets }}'
 
-          echo "📥 Grouping platforms by OS..."
+          echo "📥 Grouping targets by OS..."
 
           jq -n \
-            --argjson platforms "$PLATFORMS" \
+            --argjson targets "$TARGETS" \
             --slurpfile cfg "$CONFIG_FILE" '
-              $platforms
-              | map({ platform: ., os: ($cfg[0][.]?.os) })
+              $targets
+              | map({ target: ., os: ($cfg[0][.]?.os) })
               | group_by(.os)
-              | map({ (.[0].os): map(.platform) })
+              | map({ (.[0].os): map(.target) })
               | add
             ' > grouped.json
 
-          echo "📦 Grouped platforms:"
+          echo "📦 Grouped BuildTargets:"
           cat grouped.json
 
-          echo "validTargetPlatforms<<EOF" >> $GITHUB_OUTPUT
+          echo "validBuildTargets<<EOF" >> $GITHUB_OUTPUT
           cat grouped.json >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: 📋 Summary of Platform Validation
+      - name: 📋 Summary of Build Target Validation
         if: always()
         run: |
-          INVALID_PLATFORMS="${INVALID_PLATFORMS:-}"
+          INVALID_TARGETS="${INVALID_TARGETS:-}"
           GROUPED_FILE="grouped.json"
 
           echo ""
-          echo "📋 Target Platform Validation Summary"
+          echo "📋 Build Targets Validation Summary"
           echo "──────────────────────────────────────"
 
           if [ -f "$GROUPED_FILE" ]; then
-            echo "🧮 Grouped Platforms by OS"
+            echo "🧮 Grouped Build Targets by OS"
             echo "────────────────────────────"
 
             jq -r '
@@ -122,12 +122,12 @@ jobs:
               (.value | map("   • " + .) | join("\n"))
             ' "$GROUPED_FILE"
           else
-            echo "⚠️ No grouped platform data available."
+            echo "⚠️ No grouped Build Target data available."
           fi
 
-          if [ -n "$INVALID_PLATFORMS" ]; then
+          if [ -n "$INVALID_TARGETS" ]; then
             echo "────────────────────────────"
-            echo "⚠️ Invalid Platforms (ignored):"
-            for p in $INVALID_PLATFORMS; do echo "   • $p"; done
+            echo "⚠️ Invalid Build Targets (ignored):"
+            for p in $INVALID_TARGETS; do echo "   • $p"; done
             echo "────────────────────────────"
           fi

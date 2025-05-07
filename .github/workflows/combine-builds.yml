@@ -1,7 +1,7 @@
 name: 📆 Combine Build Artifacts
 
 description: |
-  Downloads all individual platform artifacts and combines them into a single versioned folder
+  Downloads all individual build target artifacts and combines them into a single versioned folder
   suitable for uploading or deploying. Always creates a consistent combined artifact structure.
 
 on:
@@ -24,12 +24,12 @@ on:
 
 jobs:
   combine:
-    name: 📆 Combine All Platform Builds
+    name: 📆 Combine All Build Targets Into One Folder
     runs-on: ubuntu-latest
     outputs:
       created: ${{ steps.set-created.outputs.success }}
     steps:
-      - name: 📅 Download All Platform Artifacts
+      - name: 📅 Download All Build Target Artifacts
         uses: actions/download-artifact@v4
         with:
           path: all-artifacts
@@ -45,12 +45,12 @@ jobs:
 
           for DIR in all-artifacts/*; do
             ARTIFACT_NAME=$(basename "$DIR")
-            PLATFORM=$(echo "$ARTIFACT_NAME" | sed -E 's/^.*-([^-]+)$/\1/')
-            DEST="$COMBINED_DIR/$PLATFORM"
+            TARGET=$(echo "$ARTIFACT_NAME" | sed -E 's/^.*-([^-]+)$/\1/')
+            DEST="$COMBINED_DIR/$TARGET"
 
-            echo "→ Merging platform: $PLATFORM into $DEST"
+            echo "→ Merging target: $TARGET into $DEST"
             mkdir -p "$DEST"
-            cp -r "$DIR/"* "$DEST/" || echo "⚠️ Nothing to copy for $PLATFORM"
+            cp -r "$DIR/"* "$DEST/" || echo "⚠️ Nothing to copy for $TARGET"
             rm -rf "$DEST/unity_license"
           done
 
