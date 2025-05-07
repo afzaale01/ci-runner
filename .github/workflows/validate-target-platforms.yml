@@ -20,8 +20,12 @@ jobs:
       validTargetPlatforms: ${{ steps.group.outputs.validTargetPlatforms }}
 
     steps:
-      - name: 📁 Checkout repo
+      - name: 📁 Checkout config folder
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/config
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
 
       - name: 🔍 Validate Platforms and Load Config
         id: validate

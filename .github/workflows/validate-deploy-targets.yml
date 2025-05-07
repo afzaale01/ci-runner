@@ -27,6 +27,13 @@ jobs:
       skipAnalysis: ${{ steps.early-check.outputs.skipRest }}
 
     steps:
+      - name: 📁 Checkout config folder
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/config
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+
       - name: 🔍 Inspect Input
         id: early-check
         run: |
@@ -64,6 +71,7 @@ jobs:
           TARGET_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]')
 
           echo "🔍 Checking for local config file..."
+
           if [ -f "$CONFIG_FILE" ]; then
             echo "✅ Found local config file: $CONFIG_FILE"
           else
