@@ -9,12 +9,12 @@ on:
       deployTargets:
         type: string
         required: true
-      targetPlatforms:
+      buildTargets:
         type: string
         required: true
     outputs:
-      validatedTargets:
-        value: ${{ jobs.validate.outputs.validatedTargets }}
+      validDeployTargets:
+        value: ${{ jobs.validate.outputs.validDeployTargets }}
       skipAnalysis:
         value: ${{ jobs.validate.outputs.skipAnalysis }}
 
@@ -23,10 +23,17 @@ jobs:
     name: ✅ Validate Deploy Targets
     runs-on: ubuntu-latest
     outputs:
-      validatedTargets: ${{ steps.filter.outputs.validTargets }}
+      validDeployTargets: ${{ steps.filter.outputs.validDeployTargets }}
       skipAnalysis: ${{ steps.early-check.outputs.skipRest }}
 
     steps:
+      - name: 📁 Checkout config folder
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/config
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+
       - name: 🔍 Inspect Input
         id: early-check
         run: |
@@ -37,7 +44,7 @@ jobs:
           # Validate JSON format
           if ! echo "$RAW_INPUT" | jq empty 2>/dev/null; then
             echo "❌ Invalid JSON in deployTargets input!"
-            echo "validTargets=[]" >> $GITHUB_OUTPUT
+            echo "validDeployTargets=[]" >> $GITHUB_OUTPUT
             echo "skipRest=true" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -45,7 +52,7 @@ jobs:
           # Check for empty array
           if [ "$(echo "$RAW_INPUT" | jq 'length')" -eq 0 ]; then
             echo "ℹ️ No deploy targets provided (empty array). Skipping validation."
-            echo "validTargets=[]" >> $GITHUB_OUTPUT
+            echo "validDeployTargets=[]" >> $GITHUB_OUTPUT
             echo "skipRest=true" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -61,9 +68,10 @@ jobs:
           CONFIG_FILE=".github/config/deploy-targets.json"
           FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
           BUILD_TYPE="${{ inputs.buildType }}"
-          TARGET_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]')
+          BUILD_TARGETS=$(echo '${{ inputs.buildTargets }}' | jq -r '.[]')
 
           echo "🔍 Checking for local config file..."
+
           if [ -f "$CONFIG_FILE" ]; then
             echo "✅ Found local config file: $CONFIG_FILE"
           else
@@ -82,12 +90,12 @@ jobs:
           FINAL_VALID=()
           INVALID=()
           SKIPPED_MINIMUM=()
-          SKIPPED_PLATFORM=()
+          SKIPPED_NO_BUILD_TARGETS=()
 
           for TARGET in $(echo "$RAW_INPUT" | jq -r '.[]'); do
             if jq -e --arg key "$TARGET" '.[$key]' "$CONFIG_FILE" >/dev/null; then
               MIN_TYPE=$(jq -r --arg key "$TARGET" '.[$key].minimumBuildType' "$CONFIG_FILE")
-              COMPATIBLE_PLATFORMS=$(jq -r --arg key "$TARGET" '.[$key].compatiblePlatforms[]' "$CONFIG_FILE")
+              BUILD_TARGETS=$(jq -r --arg key "$TARGET" '.[$key].compatibleBuildTargets[]' "$CONFIG_FILE")
 
               case "$MIN_TYPE" in
                 preview) MIN_RANK=1 ;;
@@ -102,8 +110,8 @@ jobs:
               fi
 
               MATCH_FOUND=false
-              for plat in $TARGET_PLATFORMS; do
-                if echo "$COMPATIBLE_PLATFORMS" | grep -q "^$plat$"; then
+              for target in $BUILD_TARGETS; do
+                if echo "$COMPATIBLE_BUILD_TARGETS" | grep -q "^$target$"; then
                   MATCH_FOUND=true
                   break
                 fi
@@ -112,7 +120,7 @@ jobs:
               if [ "$MATCH_FOUND" = true ]; then
                 FINAL_VALID+=("$TARGET")
               else
-                SKIPPED_PLATFORM+=("$TARGET (no compatible platforms)")
+                SKIPPED_NO_BUILD_TARGETS+=("$TARGET (no compatible build targets)")
               fi
             else
               INVALID+=("$TARGET")
@@ -122,7 +130,7 @@ jobs:
           echo "✅ Valid targets: ${FINAL_VALID[*]}"
           echo "❌ Invalid targets: ${INVALID[*]}"
           echo "⚠️ Skipped (minimum buildType not met): ${SKIPPED_MINIMUM[*]}"
-          echo "⚠️ Skipped (no compatible platforms): ${SKIPPED_PLATFORM[*]}"
+          echo "⚠️ Skipped (no compatible build targets): ${SKIPPED_NO_BUILD_TARGETS[*]}"
 
           if [ "${#FINAL_VALID[@]}" -eq 0 ]; then
             json='[]'
@@ -130,32 +138,32 @@ jobs:
             json=$(printf '%s\n' "${FINAL_VALID[@]}" | jq -R . | jq -s .)
           fi
 
-          echo "validTargets<<EOF" >> $GITHUB_OUTPUT
+          echo "validDeployTargets<<EOF" >> $GITHUB_OUTPUT
           echo "$json" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
           echo "FINAL_VALID_TARGETS=${FINAL_VALID[*]}" >> $GITHUB_ENV
           echo "INVALID_TARGETS=${INVALID[*]}" >> $GITHUB_ENV
           echo "SKIPPED_MINIMUM=$(IFS='|'; echo "${SKIPPED_MINIMUM[*]}")" >> $GITHUB_ENV
-          echo "SKIPPED_PLATFORM=$(IFS='|'; echo "${SKIPPED_PLATFORM[*]}")" >> $GITHUB_ENV
+          echo "SKIPPED_NO_BUILD_TARGETS=$(IFS='|'; echo "${SKIPPED_NO_BUILD_TARGETS[*]}")" >> $GITHUB_ENV
 
       - name: 📋 Summary of Target Validation
         if: always()
         run: |
-          FINAL_VALID_TARGETS="${FINAL_VALID_TARGETS:-}"
+          VALID_TARGETS="${VALID_TARGETS:-}"
           INVALID_TARGETS="${INVALID_TARGETS:-}"
           SKIPPED_MINIMUM="${SKIPPED_MINIMUM:-}"
-          SKIPPED_PLATFORM="${SKIPPED_PLATFORM:-}"
+          SKIPPED_NO_BUILD_TARGETS="${SKIPPED_NO_BUILD_TARGETS:-}"
 
           IFS='|' read -r -a SKIPPED_MINIMUM_ARRAY <<< "$SKIPPED_MINIMUM"
-          IFS='|' read -r -a SKIPPED_PLATFORM_ARRAY <<< "$SKIPPED_PLATFORM"
+          IFS='|' read -r -a SKIPPED_NO_BUILD_TARGETS_ARRAY <<< "$SKIPPED_NO_BUILD_TARGETS"
 
           echo ""
           echo "📋 Deploy Target Validation Summary"
           echo "────────────────────────────────────"
-          if [ -n "$FINAL_VALID_TARGETS" ]; then
+          if [ -n "$VALID_TARGETS" ]; then
             echo "✅ Final Valid Targets:"
-            for v in $FINAL_VALID_TARGETS; do echo "  - $v"; done
+            for v in $VALID_TARGETS; do echo "  - $v"; done
           else
             echo "ℹ️ No valid deploy targets remaining after validation."
           fi
@@ -174,10 +182,10 @@ jobs:
             done
           fi
 
-          if [ "${#SKIPPED_PLATFORM_ARRAY[@]}" -gt 0 ]; then
+          if [ "${#SKIPPED_NO_BUILD_TARGETS_ARRAY[@]}" -gt 0 ]; then
             echo ""
-            echo "⚠️ Skipped (No Compatible Platforms):"
-            for s in "${SKIPPED_PLATFORM_ARRAY[@]}"; do
+            echo "⚠️ Skipped (No Compatible Build Targets):"
+            for s in "${SKIPPED_NO_BUILD_TARGETS_ARRAY[@]}"; do
               echo "  - $s"
             done
           fi

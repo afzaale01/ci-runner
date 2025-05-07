@@ -9,7 +9,7 @@ on:
       deployTargets:
         type: string
         required: true
-      targetPlatforms:
+      buildTargets:
         type: string
         required: false
       buildType:
@@ -55,14 +55,14 @@ on:
         value: ${{ jobs.version.outputs.version }}
       retentionDays:
         value: ${{ jobs.resolve_retention_days.outputs.retentionDays }}
-      targetPlatforms:
-        value: ${{ jobs.resolve_target_platforms.outputs.validatedTargetPlatforms || '[]' }}
+      buildTargets:
+        value: ${{ jobs.resolve_build_targets.outputs.validatedBuildTargets || '[]' }}
       validDeployTargets:
-        value: ${{ jobs.validate_deploy_targets.outputs.validatedTargets || '[]' }}
+        value: ${{ jobs.validate_deploy_targets.outputs.validDeployTargets || '[]' }}
       requiresCombined:
         value: ${{ jobs.analyze_artifact_strategy.outputs.requiresCombined || false }}
-      skipPerPlatform:
-        value: ${{ jobs.analyze_artifact_strategy.outputs.skipPerPlatform || false }}
+      skipPerBuildTarget:
+        value: ${{ jobs.analyze_artifact_strategy.outputs.skipPerBuildTarget || false }}
 
 jobs:
   detect_tests_only:
@@ -209,7 +209,7 @@ jobs:
 
       - name: Use Resolve Build Type Action
         id: set
-        uses: avalin/unity-ci-templates/.github/actions/resolve-build-type@v1
+        uses: avalin/unity-ci-templates/.github/actions/resolve-build-type@rename-target-platforms
         with:
           testsOnlyOverride: ${{ needs.detect_tests_only.outputs.testsOnly }}
           buildTypeOverride: ${{ inputs.buildType }}
@@ -248,14 +248,14 @@ jobs:
             echo "release_already_existed=false" >> "$GITHUB_OUTPUT"
           fi
 
-  resolve_target_platforms:
+  resolve_build_targets:
     needs:
       - detect_tests_only
       - resolve_build_type
     if: ${{ needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false' }}
-    uses: ./.github/workflows/resolve-target-platforms.yml
+    uses: ./.github/workflows/resolve-build-targets.yml
     with:
-      targetPlatforms: ${{ inputs.targetPlatforms || vars.TARGET_PLATFORMS || '[]' }}
+      buildTargets: ${{ inputs.buildTargets || vars.BUILD_TARGETS || '[]' }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
 
   resolve_retention_days:
@@ -287,13 +287,13 @@ jobs:
     needs: 
       - check_release_blocker
       - resolve_build_type
-      - resolve_target_platforms
+      - resolve_build_targets
       - detect_tests_only
     if: ${{ needs.detect_tests_only.outputs.testsOnly == 'false' }}
     uses: ./.github/workflows/validate-deploy-targets.yml
     with:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
-      targetPlatforms: ${{ needs.resolve_target_platforms.outputs.validatedTargetPlatforms }}
+      buildTargets: ${{ needs.resolve_build_targets.outputs.validatedBuildTargets }}
       deployTargets: ${{ inputs.deployTargets || vars.DEPLOY_TARGETS || '[]'}}
 
   analyze_artifact_strategy:
@@ -306,7 +306,7 @@ jobs:
     uses: ./.github/workflows/analyze-artifact-strategy.yml
     with:
       artifactSource: build
-      deployTargets: ${{ needs.validate_deploy_targets.outputs.validatedTargets }}
+      deployTargets: ${{ needs.validate_deploy_targets.outputs.validDeployTargets }}
 
   summarize_metadata:
     name: 📄 Summarize Metadata
@@ -317,7 +317,7 @@ jobs:
       - resolve_build_type
       - resolve_retention_days
       - prepare_timeouts
-      - resolve_target_platforms
+      - resolve_build_targets
       - version
       - check_release_blocker
       - validate_deploy_targets
@@ -333,8 +333,8 @@ jobs:
       retentionDays: ${{ needs.resolve_retention_days.outputs.retentionDays }}
       timeoutMinutesTests: ${{ needs.prepare_timeouts.outputs.timeoutMinutesTests }}
       timeoutMinutesBuild: ${{ needs.prepare_timeouts.outputs.timeoutMinutesBuild }}
-      targetPlatforms: ${{ needs.resolve_target_platforms.outputs.validatedTargetPlatforms || '[]' }}
-      validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validatedTargets || '[]' }}
+      buildTargets: ${{ needs.resolve_build_targets.outputs.validatedBuildTargets || '[]' }}
+      validDeployTargets: ${{ needs.validate_deploy_targets.outputs.validDeployTargets || '[]' }}
       requiresCombined: ${{ needs.analyze_artifact_strategy.outputs.requiresCombined || false }}
-      skipPerPlatform: ${{ needs.analyze_artifact_strategy.outputs.skipPerPlatform || false }}
+      skipPerBuildTarget: ${{ needs.analyze_artifact_strategy.outputs.skipPerBuildTarget || false }}
       releaseAlreadyExists: ${{ needs.check_release_blocker.outputs.release_already_existed }}

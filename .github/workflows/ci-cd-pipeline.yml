@@ -7,7 +7,7 @@ on:
         type: string
         required: true
         default: '[]'
-      targetPlatforms:
+      buildTargets:
         type: string
         required: true
         default: '[]'
@@ -36,7 +36,7 @@ jobs:
       version: ${{ steps.unpack.outputs.version }}
       retentionDays: ${{ steps.unpack.outputs.retentionDays }}
       requiresCombined: ${{ steps.unpack.outputs.requiresCombined }}
-      skipPerPlatform: ${{ steps.unpack.outputs.skipPerPlatform }}
+      skipPerBuildTarget: ${{ steps.unpack.outputs.skipPerBuildTarget }}
       unityVersion: ${{ steps.unpack.outputs.unityVersion }}
       useGitLfs: ${{ steps.unpack.outputs.useGitLfs }}
       editModePath: ${{ steps.unpack.outputs.editModePath }}
@@ -70,7 +70,7 @@ jobs:
 
           # Artifacts Config
           echo "requiresCombined=$(echo "$artifact" | jq -r .requiresCombined)" >> "$GITHUB_OUTPUT"
-          echo "skipPerPlatform=$(echo "$artifact" | jq -r .skipPerPlatform)" >> "$GITHUB_OUTPUT"
+          echo "skipPerBuildTarget=$(echo "$artifact" | jq -r .skipPerBuildTarget)" >> "$GITHUB_OUTPUT"
 
   # ─────────────────────────────────────────────────────────────────────────────
   # 1. Run Tests
@@ -109,7 +109,7 @@ jobs:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
       version: ${{ needs.unpack_inputs.outputs.version }}
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
       timeoutMinutes: ${{ fromJson(needs.unpack_inputs.outputs.timeoutMinutesBuild) }}
       retentionDays: ${{ fromJson(needs.unpack_inputs.outputs.retentionDays) }}
@@ -139,9 +139,9 @@ jobs:
       buildType: ${{ needs.unpack_inputs.outputs.buildType }}
       version: ${{ needs.unpack_inputs.outputs.version }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
-      skipPerPlatformArtifacts: ${{ needs.unpack_inputs.outputs.skipPerPlatform }}
+      skipPerBuildTargetArtifacts: ${{ needs.unpack_inputs.outputs.skipPerBuildTarget }}
     secrets: inherit
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -164,7 +164,7 @@ jobs:
       version: ${{ needs.unpack_inputs.outputs.version }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
       deployTargets: ${{ inputs.validDeployTargets }}
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      buildTargets: ${{ inputs.buildTargets }}
       hasCombinedArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
       artifactSource: build
     secrets: inherit

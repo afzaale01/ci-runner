@@ -118,15 +118,13 @@ While the pipeline is production-ready and modular, some deploy integrations are
 |------|---------|
 | `step-0-analyze.yml`          | Runs static analysis using `dotnet format` |
 | `step-1-test.yml`             | Detects and runs Unity tests |
-| `step-2-build.yml`            | Builds for multiple platforms |
+| `step-2-build.yml`            | Builds for up to multiple targets |
 | `step-3-release.yml`          | Publishes GitHub releases |
 | `step-4-deploy.yml`           | Deploys to platforms like itch.io, S3, Steam, etc. |
 | `step-5-notify.yml`           | Sends Discord, Slack, and Teams notifications |
 | `unity-tests-detection.yml`   | Detects if EditMode / PlayMode tests exist |
 | `unity-tests-runner.yml`      | Runs Unity tests for specified mode |
 | `unity-license-uploader.yml`  | Uploads Unity `.ulf` license |
-| `target-platforms-filter.yml` | Filters platforms into macOS/Ubuntu |
-| `build-version-generator.yml` | Auto-generates timestamp or tag-based versioning |
 
 ---
 
@@ -166,7 +164,7 @@ They can be found under:
 | Variable Name               | Required | Description                                                              |
 |----------------------------|----------|--------------------------------------------------------------------------|
 | `DEPLOY_TARGETS`            | ✅        | Deployment targets (JSON array, example below)                           |
-| `TARGET_PLATFORMS`          | ✅        | Target build platforms (JSON array, example below)                       |
+| `BUILD_TARGETS`             | ✅        | Target build platforms (JSON array, example below)                       |
 | `PROJECT_NAME`              | ✅        | Name of the Unity project                                                |
 | `EXCLUDE_UNITY_TESTS`       | ❌        | Exclude tests from pipeline (`true`/`false`)                             |
 | `FORCE_COMBINE_ARTIFACTS`   | ❌        | Combine all builds into one artifact (e.g. for internal QA or archiving) |
@@ -185,7 +183,7 @@ They can be found under:
 | Variable Name               | Full JSON strings |
 |-----------------------------|-------------|
 | `DEPLOY_TARGETS`  | ["itch.io", "appcenter", "firebase", "s3", "gh-pages", "steam", "testflight", "custom-server"]  
-| `TARGET_PLATFORMS`  | ["Android", "WebGL", "StandaloneLinux64", "StandaloneWindows", "StandaloneWindows64", "StandaloneOSX", "iOS"]
+| `BUILD_TARGETS`  | ["Android", "WebGL", "StandaloneLinux64", "StandaloneWindows", "StandaloneWindows64", "StandaloneOSX", "iOS"]
 
 ---
 
@@ -206,7 +204,7 @@ Run a preview build with selected platforms:
 ```json
 {
   "buildType": "preview",
-  "targetPlatforms": "[\"Android\", \"WebGL\"]"
+  "buildTargets": "[\"Android\", \"WebGL\"]"
 }
 ```
 
@@ -217,7 +215,7 @@ Run a preview build with selected platforms:
 Artifacts are named using the following structure for easy traceability:
 
 ```
-{projectName}-{version}-{targetPlatform}
+{projectName}-{version}-{buildTarget}
 ```
 
 ### 📁 Examples

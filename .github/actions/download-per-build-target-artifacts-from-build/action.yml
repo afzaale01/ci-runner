@@ -1,6 +1,6 @@
-name: Download Per-Platform From Build
+name: Download Per-Build-Target From Build
 
-description: Downloads per-platform artifacts from the build step.
+description: Downloads per-build-target artifacts from the build step.
 
 inputs:
   artifactDir:
@@ -12,8 +12,8 @@ inputs:
   version:
     description: "Version"
     required: true
-  requiredPlatforms:
-    description: "JSON array of required platforms"
+  requiredBuildTargets:
+    description: "JSON array of required build targets"
     required: true
 
 runs:
@@ -21,13 +21,13 @@ runs:
   steps:
     - name: Make script executable
       shell: bash
-      run: chmod +x "${{ github.action_path }}/download-per-platform-artifacts-from-build.sh"
+      run: chmod +x "${{ github.action_path }}/download-per-build-target-artifacts-from-build.sh"
 
-    - name: Run download-per-platform script
+    - name: Run download-per-build-target script
       shell: bash
       run: |
-          "${{ github.action_path }}/download-per-platform-artifacts-from-build.sh" \
+          "${{ github.action_path }}/download-per-build-target-artifacts-from-build.sh" \
           "${{ inputs.artifactDir }}" \
           "${{ inputs.projectName }}" \
           "${{ inputs.version }}" \
-          '${{ inputs.requiredPlatforms }}'
+          '${{ inputs.requiredBuildTargets }}'
