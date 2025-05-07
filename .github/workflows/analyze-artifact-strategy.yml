@@ -15,9 +15,9 @@ on:
       requiresCombined:
         description: "Whether any deploy target needs a combined artifact folder"
         value: ${{ jobs.analyze.outputs.requiresCombined }}
-      skipPerPlatform:
-        description: "Whether per-platform artifacts can be skipped"
-        value: ${{ jobs.analyze.outputs.skipPerPlatform }}
+      skipPerBuildTarget:
+        description: "Whether per-build-target artifacts can be skipped"
+        value: ${{ jobs.analyze.outputs.skipPerBuildTarget }}
 
 jobs:
   analyze:
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       requiresCombined: ${{ steps.analyze.outputs.requiresCombined }}
-      skipPerPlatform: ${{ steps.analyze.outputs.skipPerPlatform }}
+      skipPerBuildTarget: ${{ steps.analyze.outputs.skipPerBuildTarget }}
     steps:
       - name: 📅 Checkout config
         uses: actions/checkout@v4
@@ -47,7 +47,7 @@ jobs:
             curl -sSL "$FALLBACK_URL" -o "$CONFIG_FILE" || {
               echo "❌ Failed to download fallback config. Skipping combine logic."
               echo "requiresCombined=false" >> $GITHUB_OUTPUT
-              echo "skipPerPlatform=false" >> $GITHUB_OUTPUT
+              echo "skipPerBuildTarget=false" >> $GITHUB_OUTPUT
               exit 0
             }
           fi
@@ -72,26 +72,26 @@ jobs:
           echo "requiresCombined=$requires_combined" >> $GITHUB_OUTPUT
 
           # ─────────────────────────────────────────────────────────────────────────
-          # 🧠 When can we skip uploading per-platform artifacts?
+          # 🧠 When can we skip uploading per-build-target artifacts?
           # We can skip if:
           # - All deploy targets require combined artifacts (true)
           # - AND we're deploying from GitHub Releases (artifactSource == 'release')
           # ─────────────────────────────────────────────────────────────────────────
           if [ "$any_target" = "true" ] && [ "$all_require_combined" = "true" ] && [ "$ARTIFACT_SOURCE" = "release" ]; then
             echo "🔹 All deploy targets use combined artifacts and pull from release."
-            echo "skipPerPlatform=true" >> $GITHUB_OUTPUT
+            echo "skipPerBuildTarget=true" >> $GITHUB_OUTPUT
           else
-            echo "skipPerPlatform=false" >> $GITHUB_OUTPUT
+            echo "skipPerBuildTarget=false" >> $GITHUB_OUTPUT
           fi
 
       - name: 📘 Write Strategy Summary
         run: |
           requires_combined='${{ steps.analyze.outputs.requiresCombined }}'
-          skip_per_platform='${{ steps.analyze.outputs.skipPerPlatform }}'
+          skip_per_build_target='${{ steps.analyze.outputs.skipPerBuildTarget }}'
 
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "⚖️ Artifact Strategy Analysis Summary"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "🔸 requiresCombined : $requires_combined"
-          echo "🔸 skipPerPlatform  : $skip_per_platform"
+          echo "🔸 skipPerBuildTarget  : $skip_per_build_target"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

@@ -21,8 +21,8 @@ on:
         description: "Project name for artifacts"
         required: true
         default: "Unity_CI_Templates"
-      targetPlatforms:
-        description: "JSON array of platforms to build"
+      buildTargets:
+        description: "JSON array of build targets"
         required: true
         default: '["Android", "WebGL", "StandaloneLinux64", "StandaloneWindows", "StandaloneWindows64", "StandaloneOSX", "iOS"]'
       deployTargets:
@@ -42,7 +42,7 @@ jobs:
       projectName: ${{ inputs.projectName }}
       skipTests: true
       testsOnly: false
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      buildTargets: ${{ inputs.buildTargets }}
       deployTargets: ${{ inputs.deployTargets }}
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
@@ -54,7 +54,7 @@ jobs:
     with:
       version: ${{ needs.prepare_metadata.outputs.version }}
       projectName: ${{ needs.prepare_metadata.outputs.projectName }}
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
     secrets: inherit
 
@@ -69,7 +69,7 @@ jobs:
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       version: ${{ needs.prepare_metadata.outputs.version }}
       projectName: ${{ needs.prepare_metadata.outputs.projectName }}
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
-      skipPerPlatformArtifacts: ${{ needs.prepare_metadata.outputs.skipPerPlatform }}  
+      skipPerBuildTargetArtifacts: ${{ needs.prepare_metadata.outputs.skipPerBuildTarget }}  
     secrets: inherit

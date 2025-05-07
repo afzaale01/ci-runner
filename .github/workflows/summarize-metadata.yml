@@ -30,7 +30,7 @@ on:
       timeoutMinutesBuild:
         required: true
         type: string
-      targetPlatforms:
+      buildTargets:
         required: true
         type: string
       validDeployTargets:
@@ -39,7 +39,7 @@ on:
       requiresCombined:
         required: true
         type: string
-      skipPerPlatform:
+      skipPerBuildTarget:
         required: true
         type: string
       releaseAlreadyExists:
@@ -53,15 +53,15 @@ jobs:
     steps:
       - name: Write Summary
         run: |
-          TARGET_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' | jq -c '.')
+          BUILD_TARGETS=$(echo '${{ inputs.buildTargets }}' | jq -c '.')
           DEPLOY_TARGETS=$(echo '${{ inputs.validDeployTargets }}' | jq -c '.')
 
           if [[ -z "$DEPLOY_TARGETS" || "$DEPLOY_TARGETS" == 'null' ]]; then
             DEPLOY_TARGETS='[]'
           fi
 
-          if [[ -z "$TARGET_PLATFORMS" || "$TARGET_PLATFORMS" == 'null' ]]; then
-            TARGET_PLATFORMS='[]'
+          if [[ -z "$BUILD_TARGETS" || "$BUILD_TARGETS" == 'null' ]]; then
+            BUILD_TARGETS='[]'
           fi
 
           echo "## ⏳ Metadata Summary" >> $GITHUB_STEP_SUMMARY
@@ -75,10 +75,10 @@ jobs:
           echo "| Retention Days               | ${{ inputs.retentionDays }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Tests Timeout (minutes)      | ${{ inputs.timeoutMinutesTests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build Timeout (minutes)      | ${{ inputs.timeoutMinutesBuild }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Target Platforms             | \`$TARGET_PLATFORMS\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Targets                | \`$BUILD_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ inputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Skip Per-Platform Artifacts  | ${{ inputs.skipPerPlatform }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Skip Per-Build-Target Artifacts  | ${{ inputs.skipPerBuildTarget }} |" >> $GITHUB_STEP_SUMMARY
 
           if [[ "${{ inputs.releaseAlreadyExists }}" == 'true' ]]; then
             echo "❌ **Pipeline was blocked because a GitHub release already exists for version \`${{ inputs.version }}\`.**" >> $GITHUB_STEP_SUMMARY

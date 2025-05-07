@@ -4,7 +4,7 @@ set -euo pipefail
 DEST_DIR="${1:?Missing artifact destination directory}"
 PROJECT_NAME="${2:?Missing project name}"
 VERSION="${3:?Missing version}"
-TARGET_PLATFORMS_JSON="${4:?Missing target platforms JSON}"
+BUILD_TARGETS_JSON="${4:?Missing build targets JSON}"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📦 Starting Build Artifact Download"
@@ -12,7 +12,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "🔹 Project Name             : ${PROJECT_NAME}"
 echo "🔹 Version                  : ${VERSION}"
 echo "🔹 Destination Directory    : ${DEST_DIR}"
-echo "🔹 Target Platforms (JSON)  : $(echo "$TARGET_PLATFORMS_JSON" | jq -r '.[]' | tr '\n' ' ')"
+echo "🔹 Build Targets (JSON)     : $(echo "$BUILD_TARGETS_JSON" | jq -r '.[]' | tr '\n' ' ')"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 if [ -z "${GH_TOKEN:-}" ]; then
@@ -23,33 +23,48 @@ fi
 mkdir -p "${DEST_DIR}"
 
 # Convert the JSON string into a valid array
-PLATFORMS=$(echo "$TARGET_PLATFORMS_JSON" | jq -r '.[]')
+BUILD_TARGETS=$(echo "$BUILD_TARGETS_JSON" | jq -r '.[]')
 
 # ────────────────────────────
 # Download Per Platform
 # ────────────────────────────
-for platform in $PLATFORMS; do
-  ARTIFACT_NAME="${PROJECT_NAME}-${VERSION}-${platform}"
-  PLATFORM_DIR="${DEST_DIR}/${platform}"
+FAILED_TARGETS=()
+
+for buildTarget in $BUILD_TARGETS; do
+  ARTIFACT_NAME="${PROJECT_NAME}-${VERSION}-${buildTarget}"
+  BUILD_TARGET_DIR="${DEST_DIR}/${buildTarget}"
 
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "⬇️  Downloading Artifact"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "🔸 Platform        : ${platform}"
+  echo "🔸 Build Target    : ${buildTarget}"
   echo "🔸 Artifact Name   : ${ARTIFACT_NAME}"
-  echo "🔸 Target Folder   : ${PLATFORM_DIR}"
+  echo "🔸 Target Folder   : ${BUILD_TARGET_DIR}"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-  mkdir -p "${PLATFORM_DIR}"
+  mkdir -p "${BUILD_TARGET_DIR}"
 
-  if gh run download --name "${ARTIFACT_NAME}" --dir "${PLATFORM_DIR}"; then
+  if gh run download \
+    --repo "${GITHUB_REPOSITORY}" \
+    --name "${ARTIFACT_NAME}" \
+    --dir "${BUILD_TARGET_DIR}"; then
     echo "✅ Successfully downloaded: ${ARTIFACT_NAME}"
   else
-    echo "⚠️ Warning: Artifact ${ARTIFACT_NAME} not found or failed to download."
+    echo "❌ ERROR: Artifact ${ARTIFACT_NAME} not found or failed to download."
+    FAILED_TARGETS+=("${buildTarget}")
   fi
 done
 
+if [ "${#FAILED_TARGETS[@]}" -gt 0 ]; then
+  echo ""
+  echo "❌ The following required build targets failed to download:"
+  for failed in "${FAILED_TARGETS[@]}"; do
+    echo "   - ${failed}"
+  done
+  exit 1
+fi
+
 echo ""
-echo "✅ All required platform artifacts downloaded into: ${DEST_DIR}"
+echo "✅ Required build targets successfully downloaded into: ${DEST_DIR}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

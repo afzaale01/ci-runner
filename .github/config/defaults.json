@@ -15,8 +15,8 @@
       "release_candidate": 14,
       "release": 30
     },
-    "platforms": {
-      "defaultTargetPlatforms": ["WebGL"],
+    "targets": {
+      "defaultBuildTargets": ["WebGL"],
       "defaultDeployTargets": ["gh-pages"]
     },
     "skip": {

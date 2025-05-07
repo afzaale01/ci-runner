@@ -23,8 +23,8 @@ on:
         required: false
         default: '[]'
         type: string
-      targetPlatforms:
-        description: "JSON array of target platforms (e.g. [\"WebGL\",\"iOS\"])"
+      buildTargets:
+        description: "JSON array of build targets (e.g. [\"WebGL\",\"iOS\"])"
         required: true
         default: '[]'
         type: string
@@ -81,7 +81,7 @@ jobs:
           githubRepository: ${{ github.repository }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           hasCombinedArtifacts: ${{ inputs.hasCombinedArtifacts }}
-          requiredPlatformsJson: '${{ toJson(matrix.requiredPlatforms) }}'
+          requiredBuildTargetsJson: '${{ toJson(matrix.requiredBuildTargets) }}'
 
       # Download combined artifact (single)
       - name: 📥 Retrieve Artifacts from Build (Combined)
@@ -91,18 +91,18 @@ jobs:
           path: ${{ env.ARTIFACT_DIR }}
           name: ${{ env.PROJECT_DIR }}
 
-      - name: 📥 Retrieve Artifacts from Build (Per-Platform)
+      - name: 📥 Retrieve Artifacts from Build (Per-Build-Target)
         if: ${{ inputs.artifactSource == 'build' && inputs.hasCombinedArtifacts == 'false' }}
-        uses: avalin/unity-ci-templates/.github/actions/download-per-platform-artifacts-from-build@v1
+        uses: avalin/unity-ci-templates/.github/actions/download-per-build-target-artifacts-from-build@v1
         with:
           artifactDir: ${{ env.ARTIFACT_DIR }}
           projectName: ${{ inputs.projectName }}
           version: ${{ inputs.version }}
-          requiredPlatforms: '${{ toJson(matrix.requiredPlatforms) }}'
+          requiredBuildTargets: '${{ toJson(matrix.requiredBuildTargets) }}'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🛠️ Normalize Artifact Layout (Release Per-Platform Only)
+      - name: 🛠️ Normalize Artifact Layout (Release Per-Build-Target Only)
         if: ${{ inputs.artifactSource == 'release' && inputs.hasCombinedArtifacts == 'false' }}
         uses: avalin/unity-ci-templates/.github/actions/normalize-artifact-layout@v1
         with:

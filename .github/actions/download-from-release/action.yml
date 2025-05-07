@@ -23,8 +23,8 @@ inputs:
     required: true
     type: string
     default: "false"
-  requiredPlatformsJson:
-    description: "JSON array of required platforms"
+  requiredBuildTargetsJson:
+    description: "JSON array of required build targets"
     required: true
     type: string
 
@@ -44,4 +44,4 @@ runs:
         "${{ inputs.githubRepository }}"
         "${{ inputs.githubToken }}"
         "${{ inputs.hasCombinedArtifacts }}"
-        '${{ inputs.requiredPlatformsJson }}'
+        '${{ inputs.requiredBuildTargetsJson }}'

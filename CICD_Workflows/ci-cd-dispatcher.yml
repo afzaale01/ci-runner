@@ -27,8 +27,8 @@ on:
         required: true
         default: '["gh-pages"]'
         type: string
-      targetPlatforms:
-        description: "JSON array of target platforms (e.g. [\"WebGL\",\"iOS\"])"
+      buildTargets:
+        description: "JSON array of build targets (e.g. [\"WebGL\",\"iOS\"])"
         required: true
         default: '["WebGL"]'
         type: string
@@ -92,7 +92,7 @@ jobs:
         [
           "PROJECT_NAME",
           "DEPLOY_TARGETS",
-          "TARGET_PLATFORMS"
+          "BUILD_TARGETS"
         ]
     secrets:
       CICD_PAT: ${{ secrets.CICD_PAT }}
@@ -111,7 +111,7 @@ jobs:
       projectName: ${{ vars.PROJECT_NAME }}
       skipTests: ${{ inputs.skipTests }}
       deployTargets: ${{ inputs.deployTargets }}
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      buildTargets: ${{ inputs.buildTargets }}
       buildType: ${{ inputs.buildType }}
       version: ${{ inputs.version }}
 
@@ -148,7 +148,7 @@ jobs:
         run: |
           gh workflow run ci-cd-pipeline.yml \
             --ref "${{ github.ref }}" \
-            --field targetPlatforms="$(printf '%s' '${{ needs.prepare_metadata.outputs.targetPlatforms }}')" \
+            --field buildTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.buildTargets }}')" \
             --field validDeployTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.validDeployTargets }}')" \
             --field metadataConfig="$(jq -c -n \
               --arg projectName "${{ needs.prepare_metadata.outputs.projectName }}" \
@@ -162,8 +162,8 @@ jobs:
               '{projectName: $projectName, skipTests: $skipTests, testsOnly: $testsOnly, buildType: $buildType, version: $version, retentionDays: $retentionDays, timeoutMinutesTests: $timeoutMinutesTests, timeoutMinutesBuild: $timeoutMinutesBuild}')" \
             --field artifactConfig="$(jq -c -n \
               --arg requiresCombined "${{ needs.prepare_metadata.outputs.requiresCombined }}" \
-              --arg skipPerPlatform "${{ needs.prepare_metadata.outputs.skipPerPlatform }}" \
-              '{requiresCombined: $requiresCombined, skipPerPlatform: $skipPerPlatform}')" \
+              --arg skipPerBuildTarget "${{ needs.prepare_metadata.outputs.skipPerBuildTarget }}" \
+              '{requiresCombined: $requiresCombined, skipPerBuildTarget: $skipPerBuildTarget}')" \
             --field testDataConfig="$(jq -c -n \
               --arg unityVersion "${{ needs.prepare_metadata.outputs.unityVersion }}" \
               --arg useGitLfs "${{ needs.prepare_metadata.outputs.useGitLfs }}" \

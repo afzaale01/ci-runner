@@ -13,8 +13,8 @@ on:
         required: true
         default: ""
         type: string
-      targetPlatforms:
-        description: "JSON array of platforms to build"
+      buildTargets:
+        description: "JSON array of build targets to build"
         type: string
         default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
         required: false
@@ -43,35 +43,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  filter_platforms:
-    uses: ./.github/workflows/validate-target-platforms.yml
+  filter_build_targets:
+    uses: ./.github/workflows/validate-build-targets.yml
     with:
-      targetPlatforms: ${{ inputs.targetPlatforms }}
+      buildTargets: ${{ inputs.buildTargets }}
 
   generate_matrix:
     name: 🧮 Generate Build Matrix
     runs-on: ubuntu-latest
-    needs: [ filter_platforms ]
+    needs: [ filter_build_targets ]
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.set_matrix.outputs.matrix }}
     steps:
-      - name: 🧮 Create Build Matrix from Grouped Platforms
-        id: set-matrix
+      - name: 🧮 Create Build Matrix from Grouped Build Targets
+        id: set_matrix
         run: |
-          grouped='${{ needs.filter_platforms.outputs.validTargetPlatforms }}'
-          echo "📦 Grouped platforms: $grouped"
+          grouped='${{ needs.filter_build_targets.outputs.validBuildTargets }}'
+          echo "📦 Grouped build targets: $grouped"
       
           matrix=$(echo "$grouped" | jq -c '
             to_entries
-            | map(.value[] as $p | { os: .key, targetPlatform: $p })
+            | map(.value[] as $p | { os: .key, buildTarget: $p })
           ')
       
           echo "matrix<<EOF" >> $GITHUB_OUTPUT
           echo "$matrix" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-  build_platforms:
-    name: Build for ${{ matrix.targetPlatform }} on ${{ matrix.os }}
+  build_targets:
+    name: Build for ${{ matrix.buildTarget }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ inputs.timeoutMinutes }}
     needs: [ generate_matrix ]
@@ -91,13 +91,13 @@ jobs:
             Library
             Library/BuildCache
             Library/Il2cppBuildCache
-          key: Library-${{ matrix.targetPlatform }}-${{ github.run_id }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-${{ matrix.buildTarget }}-${{ github.run_id }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-${{ matrix.targetPlatform }}-
+            Library-${{ matrix.buildTarget }}-
             Library-
 
       - name: Check Free Disk Space (Android only)
-        if: matrix.targetPlatform == 'Android'
+        if: matrix.buildTarget == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.1
 
       - name: Build Unity Project
@@ -107,7 +107,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          targetPlatform: ${{ matrix.targetPlatform }}
+          targetPlatform: ${{ matrix.buildTarget }}
 
       - name: Save Unity Caches (after successful build)
         uses: actions/cache/save@v4
@@ -117,7 +117,7 @@ jobs:
             Library
             Library/BuildCache
             Library/Il2cppBuildCache
-          key: Library-${{ matrix.targetPlatform }}-${{ github.run_id }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-${{ matrix.buildTarget }}-${{ github.run_id }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
 
       - name: Fix Permissions (Linux only)
         if: startsWith(matrix.os, 'ubuntu')
@@ -126,7 +126,7 @@ jobs:
       - name: Organize Build Output
         run: |
           VERSION="${{ inputs.version }}"
-          PLATFORM="${{ matrix.targetPlatform }}"
+          PLATFORM="${{ matrix.buildTarget }}"
           DEST="${{ inputs.projectName }}-${VERSION}"
           SOURCE="build/${PLATFORM}"
 
@@ -140,16 +140,16 @@ jobs:
           # ⛔ Remove Burst debug artifacts that shouldn't be shipped
           find "$DEST" -name '*BurstDebugInformation_DoNotShip*' -exec rm -rf {} +
 
-      - name: Upload ${{ matrix.targetPlatform }}-Platform Artifact
+      - name: Upload ${{ matrix.buildTarget }}-Platform Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.projectName }}-${{ inputs.version }}-${{ matrix.targetPlatform }}
+          name: ${{ inputs.projectName }}-${{ inputs.version }}-${{ matrix.buildTarget }}
           path: ${{ inputs.projectName }}-${{ inputs.version }}/* # The '/*' ensures the content is zipped to the folder, not the entire folder
           retention-days: ${{ inputs.retentionDays }}
 
   combine_builds:
     if: ${{ inputs.combineArtifacts == 'true' }}
-    needs: [ build_platforms ]
+    needs: [ build_targets ]
     uses: ./.github/workflows/combine-builds.yml
     with:
       projectName: ${{ inputs.projectName }}
@@ -157,12 +157,23 @@ jobs:
       retentionDays: ${{ inputs.retentionDays }}
 
   summarize_builds:
-    needs: [filter_platforms, build_platforms, combine_builds]
+    needs: [filter_build_targets, build_targets, combine_builds]
     if: always()
     uses: ./.github/workflows/summarize-builds.yml
     with:
       projectName: ${{ inputs.projectName }}
       version: ${{ inputs.version }}
-      groupedPlatforms: ${{ needs.filter_platforms.outputs.validTargetPlatforms }}
+      groupedBuildTargets: ${{ needs.filter_build_targets.outputs.validBuildTargets }}
       combineRequested: ${{ inputs.combineArtifacts }}
       combinedCreated: ${{ (needs.combine_builds.result == 'success' && needs.combine_builds.outputs.created) || 'false' }}
+
+  fail_if_builds_failed:
+    name: ⛔ Fail if Any Builds Failed
+    needs: [summarize_builds]
+    runs-on: ubuntu-latest
+    if: ${{ needs.summarize_builds.outputs.didAnyBuildsFail == 'true' }}
+    steps:
+      - name: ⛔ Fail the Pipeline
+        run: |
+          echo "❌ One or more builds failed. Failing the pipeline."
+          exit 1

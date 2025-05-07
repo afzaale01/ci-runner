@@ -9,7 +9,7 @@ VERSION="${2:?Missing version}"
 GITHUB_REPOSITORY="${3:?Missing repository}"
 GITHUB_TOKEN="${4:?Missing GitHub token}"
 HAS_COMBINED_ARTIFACTS="${5:?Missing hasCombinedArtifacts flag (true/false)}"
-REQUIRED_PLATFORMS_JSON="${6:?Missing required platforms JSON}"
+REQUIRED_BUILD_TARGETS_JSON="${6:?Missing required build targets JSON}"
 
 PROJECT_NAME="$(echo "$PROJECT_NAME" | xargs)"
 SANITIZED_PROJECT_NAME="$(echo "$PROJECT_NAME" | sed 's/[^a-zA-Z0-9._-]/_/g')"
@@ -78,13 +78,13 @@ if [[ "${HAS_COMBINED_ARTIFACTS}" == "true" ]]; then
   fi
 
 else
-  echo "📦 Downloading and extracting per-platform artifacts..."
+  echo "📦 Downloading and extracting per-build-target artifacts..."
 
-  # Convert REQUIRED_PLATFORMS_JSON into a bash array
-  REQUIRED_PLATFORMS=($(echo "${REQUIRED_PLATFORMS_JSON}" | jq -r '.[]'))
+  # Convert REQUIRED_BUILD_TARGETS_JSON into a bash array
+  REQUIRED_BUILD_TARGETS=($(echo "${REQUIRED_BUILD_TARGETS_JSON}" | jq -r '.[]'))
 
-  for PLATFORM in "${REQUIRED_PLATFORMS[@]}"; do
-    ARTIFACT_NAME="${SANITIZED_PROJECT_NAME}-${VERSION}-${PLATFORM}.zip"
+  for TARGET in "${REQUIRED_BUILD_TARGETS[@]}"; do
+    ARTIFACT_NAME="${SANITIZED_PROJECT_NAME}-${VERSION}-${TARGET}.zip"
     ARTIFACT_URL=$(echo "${ASSETS}" | awk -v name="${ARTIFACT_NAME}" '$1 == name {print $2}')
 
     if [[ -z "${ARTIFACT_URL}" ]]; then
@@ -95,9 +95,9 @@ else
     echo "⬇️ Downloading: ${ARTIFACT_NAME}"
     curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${ARTIFACT_URL}" -o "${DEST_DIR}/${ARTIFACT_NAME}"
 
-    echo "📂 Extracting ${ARTIFACT_NAME} to ${DEST_DIR}/${SANITIZED_PROJECT_NAME}-${VERSION}-${PLATFORM}"
-    mkdir -p "${DEST_DIR}/${SANITIZED_PROJECT_NAME}-${VERSION}-${PLATFORM}"
-    unzip -q "${DEST_DIR}/${ARTIFACT_NAME}" -d "${DEST_DIR}/${SANITIZED_PROJECT_NAME}-${VERSION}-${PLATFORM}"
+    echo "📂 Extracting ${ARTIFACT_NAME} to ${DEST_DIR}/${SANITIZED_PROJECT_NAME}-${VERSION}-${TARGET}"
+    mkdir -p "${DEST_DIR}/${SANITIZED_PROJECT_NAME}-${VERSION}-${TARGET}"
+    unzip -q "${DEST_DIR}/${ARTIFACT_NAME}" -d "${DEST_DIR}/${SANITIZED_PROJECT_NAME}-${VERSION}-${TARGET}"
     rm "${DEST_DIR}/${ARTIFACT_NAME}"
   done
 fi

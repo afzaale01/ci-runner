@@ -1,7 +1,7 @@
 name: 📄 Summarize Build Results
 
 description: |
-  Writes a summary of the Unity build results, including per-platform status
+  Writes a summary of the Unity build results, including per-build-target status
   and combined artifact status.
 
 on:
@@ -13,7 +13,7 @@ on:
       version:
         required: true
         type: string
-      groupedPlatforms:
+      groupedBuildTargets:
         required: true
         type: string
       combineRequested:
@@ -23,11 +23,17 @@ on:
         required: false
         type: string
         default: "false"
+    outputs:
+      didAnyBuildsFail:
+        description: "True if any builds failed"
+        value: ${{ jobs.summarize.outputs.didAnyBuildsFail }}
 
 jobs:
   summarize:
     name: 📄 Summarize Build Results
     runs-on: ubuntu-latest
+    outputs:
+      didAnyBuildsFail: ${{ steps.summary.outputs.didAnyBuildsFail }}
     steps:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
@@ -39,49 +45,50 @@ jobs:
           name: ${{ inputs.projectName }}-${{ inputs.version }}
           path: all-artifacts
 
-      - name: 📦 Download Per-Platform Artifacts
+      - name: 📦 Download Per-Build-Target Artifacts
         if: ${{ inputs.combineRequested == 'false' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          grouped='${{ inputs.groupedPlatforms }}'
+          grouped='${{ inputs.groupedBuildTargets }}'
           version='${{ inputs.version }}'
           project='${{ inputs.projectName }}'
 
-          echo "$grouped" | jq -r 'to_entries[].value[]' | while read -r platform; do
-            name="${project}-${version}-${platform}"
+          echo "$grouped" | jq -r 'to_entries[].value[]' | while read -r buildTarget; do
+            name="${project}-${version}-${buildTarget}"
             echo "⬇️ Downloading: $name"
             mkdir -p "all-artifacts/${name}"
             gh run download --name "$name" --dir "all-artifacts/${name}" || echo "⚠️ Failed to download $name"
           done
 
       - name: 📜 Write Build Summary
+        id: summary
         run: |
           echo "### 🧩 Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Target | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------------|--------|" >> $GITHUB_STEP_SUMMARY
 
-          GROUPED='${{ inputs.groupedPlatforms }}'
+          GROUPED='${{ inputs.groupedBuildTargets }}'
           VERSION='${{ inputs.version }}'
           PROJECT='${{ inputs.projectName }}'
           COMBINED='${{ inputs.combineRequested }}'
-          ALL_PLATFORMS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')
+          ALL_BUILD_TARGETS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')
 
-          for platform in $ALL_PLATFORMS; do
-            label="$platform"
+          for buildTarget in $ALL_BUILD_TARGETS; do
+            label="$buildTarget"
 
             if [[ "$COMBINED" == "true" ]]; then
               # Try standard combined path first, fallback to flat path
-              if [ -d "all-artifacts/${PROJECT}-${VERSION}/${platform}" ]; then
-                artifact_dir="all-artifacts/${PROJECT}-${VERSION}/${platform}"
-              elif [ -d "all-artifacts/${platform}" ]; then
-                artifact_dir="all-artifacts/${platform}"
+              if [ -d "all-artifacts/${PROJECT}-${VERSION}/${buildTarget}" ]; then
+                artifact_dir="all-artifacts/${PROJECT}-${VERSION}/${buildTarget}"
+              elif [ -d "all-artifacts/${buildTarget}" ]; then
+                artifact_dir="all-artifacts/${buildTarget}"
               else
                 artifact_dir=""
               fi
             else
-              artifact_dir="all-artifacts/${PROJECT}-${VERSION}-${platform}"
+              artifact_dir="all-artifacts/${PROJECT}-${VERSION}-${buildTarget}"
             fi
 
             echo "🔍 Checking artifact path: $artifact_dir"
@@ -105,4 +112,11 @@ jobs:
             fi
           else
             echo "- ℹ️ Combined artifact was not requested." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Export output as true or false
+          if [[ $build_failed -eq 1 ]]; then
+            echo "didAnyBuildsFail=true" >> $GITHUB_OUTPUT
+          else
+            echo "didAnyBuildsFail=false" >> $GITHUB_OUTPUT
           fi
