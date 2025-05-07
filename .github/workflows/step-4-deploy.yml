@@ -6,7 +6,7 @@ on:
       buildType:
         type: string
         required: true
-      version:
+      buildVersion:
         description: "The version/tag name (e.g., v1.2.3)"
         type: string
         required: true
@@ -70,14 +70,14 @@ jobs:
         include: ${{ fromJson(needs.resolve_deploy_matrix.outputs.matrix) }}
     env:
       DEPLOY_DIR: deployment-artifacts
-      PROJECT_DIR: ${{ inputs.projectName }}-${{ inputs.version }}
-      ARTIFACT_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}
+      PROJECT_DIR: ${{ inputs.projectName }}-${{ inputs.buildVersion }}
+      ARTIFACT_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.buildVersion }}
     steps:
       - name: 📥 Retrieve Artifacts from Release
         uses: avalin/unity-ci-templates/.github/actions/download-from-release@v1
         with:
           projectName: ${{ inputs.projectName }}
-          version: ${{ inputs.version }}
+          version: ${{ inputs.buildVersion }}
           githubRepository: ${{ github.repository }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           hasCombinedArtifacts: ${{ inputs.hasCombinedArtifacts }}
@@ -97,7 +97,7 @@ jobs:
         with:
           artifactDir: ${{ env.ARTIFACT_DIR }}
           projectName: ${{ inputs.projectName }}
-          version: ${{ inputs.version }}
+          version: ${{ inputs.buildVersion }}
           requiredBuildTargets: '${{ toJson(matrix.requiredBuildTargets) }}'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -356,5 +356,5 @@ jobs:
     needs: deploy
     with:
       projectName: ${{ inputs.projectName }}
-      version: ${{ inputs.version }}
+      version: ${{ inputs.buildVersion }}
       buildType: ${{ inputs.buildType }}

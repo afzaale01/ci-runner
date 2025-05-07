@@ -3,7 +3,7 @@ name: 📣 Step 5 - Notify
 on:
   workflow_call:
     inputs:
-      version:
+      buildVersion:
         required: true
         type: string
       releaseResult:
@@ -37,7 +37,7 @@ on:
 
 jobs:
   notify:
-    if: startsWith(inputs.version, 'v') && !contains(inputs.version, '-preview')
+    if: startsWith(inputs.buildVersion, 'v') && !contains(inputs.buildVersion, '-preview')
     runs-on: ubuntu-latest
     env:
       SLACK_STATUS: "⚠️ Webhook not configured"
@@ -57,7 +57,7 @@ jobs:
           releaseResult: ${{ inputs.releaseResult }}
           releaseErrorMessage: ${{ inputs.releaseErrorMessage }}
           deployResult: ${{ inputs.deployResult }}
-          version: ${{ inputs.version }}
+          version: ${{ inputs.buildVersion }}
           testsHasFails: ${{ inputs.testsHasFails }}
           testsTotal: ${{ inputs.testsTotal }}
           testsPassed: ${{ inputs.testsPassed }}

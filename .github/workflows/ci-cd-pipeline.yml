@@ -33,7 +33,7 @@ jobs:
       skipTests: ${{ steps.unpack.outputs.skipTests }}
       testsOnly: ${{ steps.unpack.outputs.testsOnly }}
       buildType: ${{ steps.unpack.outputs.buildType }}
-      version: ${{ steps.unpack.outputs.version }}
+      buildVersion: ${{ steps.unpack.outputs.buildVersion }}
       retentionDays: ${{ steps.unpack.outputs.retentionDays }}
       requiresCombined: ${{ steps.unpack.outputs.requiresCombined }}
       skipPerBuildTarget: ${{ steps.unpack.outputs.skipPerBuildTarget }}
@@ -63,7 +63,7 @@ jobs:
           echo "skipTests=$(echo "$meta" | jq -r .skipTests)" >> "$GITHUB_OUTPUT"
           echo "testsOnly=$(echo "$meta" | jq -r .testsOnly)" >> "$GITHUB_OUTPUT"
           echo "buildType=$(echo "$meta" | jq -r .buildType)" >> "$GITHUB_OUTPUT"
-          echo "version=$(echo "$meta" | jq -r .version)" >> "$GITHUB_OUTPUT"
+          echo "buildVersion=$(echo "$meta" | jq -r .buildVersion)" >> "$GITHUB_OUTPUT"
           echo "retentionDays=$(echo "$meta" | jq -r .retentionDays)" >> "$GITHUB_OUTPUT"
           echo "timeoutMinutesTests=$(echo "$meta" | jq -r .timeoutMinutesTests)" >> "$GITHUB_OUTPUT"
           echo "timeoutMinutesBuild=$(echo "$meta" | jq -r .timeoutMinutesBuild)" >> "$GITHUB_OUTPUT"
@@ -108,7 +108,7 @@ jobs:
     with:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
-      version: ${{ needs.unpack_inputs.outputs.version }}
+      buildVersion: ${{ needs.unpack_inputs.outputs.buildVersion }}
       buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
       timeoutMinutes: ${{ fromJson(needs.unpack_inputs.outputs.timeoutMinutesBuild) }}
@@ -137,7 +137,7 @@ jobs:
     uses: ./.github/workflows/step-3-release.yml
     with:
       buildType: ${{ needs.unpack_inputs.outputs.buildType }}
-      version: ${{ needs.unpack_inputs.outputs.version }}
+      buildVersion: ${{ needs.unpack_inputs.outputs.buildVersion }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
       buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
@@ -161,7 +161,7 @@ jobs:
     uses: ./.github/workflows/step-4-deploy.yml
     with:
       buildType: ${{ needs.unpack_inputs.outputs.buildType }}
-      version: ${{ needs.unpack_inputs.outputs.version }}
+      buildVersion: ${{ needs.unpack_inputs.outputs.buildVersion }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
       deployTargets: ${{ inputs.validDeployTargets }}
       buildTargets: ${{ inputs.buildTargets }}
@@ -189,7 +189,7 @@ jobs:
       )
     uses: ./.github/workflows/step-5-notify.yml
     with:
-      version: ${{ needs.unpack_inputs.outputs.version }}
+      buildVersion: ${{ needs.unpack_inputs.outputs.buildVersion }}
       releaseResult: ${{ needs.release.result }}
       releaseErrorMessage: ${{ needs.release.outputs.releaseErrorMessage }}
       deployResult: ${{ needs.deploy.result }}

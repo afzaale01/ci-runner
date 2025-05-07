@@ -25,7 +25,7 @@ on:
       testsOnly:
         type: string
         required: false
-      version:
+      buildVersion:
         type: string
         required: false
     outputs:
@@ -51,8 +51,8 @@ on:
         value: ${{ jobs.detect_tests_only.outputs.testsOnly }}
       skipTests:
         value: ${{ jobs.detect_skip_tests.outputs.skipTests }}
-      version:
-        value: ${{ jobs.resolve_versioning.outputs.version }}
+      buildVersion:
+        value: ${{ jobs.resolve_versioning.outputs.buildVersion }}
       retentionDays:
         value: ${{ jobs.resolve_retention_days.outputs.retentionDays }}
       buildTargets:
@@ -223,7 +223,7 @@ jobs:
     uses: ./.github/workflows/version-resolver.yml
     with:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
-      version: ${{ inputs.version }}
+      buildVersion: ${{ inputs.buildVersion }}
 
   check_release_blocker:
     name: Check for Existing Release Blocker
@@ -326,7 +326,7 @@ jobs:
     uses: ./.github/workflows/summarize-metadata.yml
     with:
       projectName: ${{ needs.resolve_project_name.outputs.sanitized_name }}
-      version: ${{ needs.resolve_versioning.outputs.version }}
+      buildVersion: ${{ needs.resolve_versioning.outputs.buildVersion }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
       testsOnly: ${{ needs.detect_tests_only.outputs.testsOnly }}
