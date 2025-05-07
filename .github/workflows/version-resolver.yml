@@ -15,9 +15,9 @@ on:
       version:
         description: "The resolved build version string"
         value: ${{ jobs.version_resolver.outputs.version }}
-      release_existed:
+      release_exists:
         description: "Whether a GitHub release already exists for this version"
-        value: ${{ jobs.version_resolver.outputs.release_existed }}
+        value: ${{ jobs.version_resolver.outputs.release_exists }}
 
 jobs:
   version_resolver:
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get_version.outputs.version }}
-      release_existed: ${{ steps.check_release.outputs.exists }}
+      release_exists: ${{ steps.check_release.outputs.exists }}
 
     steps:
       - name: Checkout Repository

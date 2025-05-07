@@ -214,7 +214,7 @@ jobs:
           testsOnlyOverride: ${{ needs.detect_tests_only.outputs.testsOnly }}
           buildTypeOverride: ${{ inputs.buildType }}
 
-  version:
+  resolve_versioning:
     name: Create versioning
     needs:
       - resolve_build_type
@@ -228,7 +228,7 @@ jobs:
   check_release_blocker:
     name: Check for Existing Release Blocker
     needs: 
-      - version
+      - resolve_versioning
       - resolve_build_type
     runs-on: ubuntu-latest
     outputs:
@@ -239,8 +239,8 @@ jobs:
           if [[ "${{ needs.resolve_build_type.outputs.buildType }}" == "preview" ]]; then
             echo "✅ Preview builds ignore releases - continuing pipeline."
             echo "release_already_existed=false" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ needs.version.outputs.release_existed }}" == "true" ]]; then
-            echo "❌ A release already exists for version '${{ needs.version.outputs.version }}'. Stopping pipeline early."
+          elif [[ "${{ needs.resolve_versioning.outputs.release_existed }}" == "true" ]]; then
+            echo "❌ A release already exists for version '${{ needs.resolve_versioning.outputs.version }}'. Stopping pipeline early."
             echo "release_already_existed=true" >> "$GITHUB_OUTPUT"
             exit 1
           else
@@ -301,7 +301,7 @@ jobs:
     needs: 
       - check_release_blocker
       - validate_deploy_targets
-      - version
+      - resolve_versioning
     if: ${{ needs.validate_deploy_targets.outputs.skipAnalysis != 'true' }}
     uses: ./.github/workflows/analyze-artifact-strategy.yml
     with:
@@ -318,7 +318,7 @@ jobs:
       - resolve_retention_days
       - prepare_timeouts
       - resolve_build_targets
-      - version
+      - resolve_versioning
       - check_release_blocker
       - validate_deploy_targets
       - analyze_artifact_strategy
@@ -326,7 +326,7 @@ jobs:
     uses: ./.github/workflows/summarize-metadata.yml
     with:
       projectName: ${{ needs.resolve_project_name.outputs.sanitized_name }}
-      version: ${{ needs.version.outputs.version }}
+      version: ${{ needs.resolve_versioning.outputs.version }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
       testsOnly: ${{ needs.detect_tests_only.outputs.testsOnly }}
