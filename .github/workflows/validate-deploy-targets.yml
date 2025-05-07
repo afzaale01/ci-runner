@@ -87,7 +87,7 @@ jobs:
             *) echo "❌ Unknown build type: $BUILD_TYPE"; exit 1 ;;
           esac
 
-          FINAL_VALID=()
+          VALID=()
           INVALID=()
           SKIPPED_MINIMUM=()
           SKIPPED_NO_BUILD_TARGETS=()
@@ -118,7 +118,7 @@ jobs:
               done
 
               if [ "$MATCH_FOUND" = true ]; then
-                FINAL_VALID+=("$TARGET")
+                VALID+=("$TARGET")
               else
                 SKIPPED_NO_BUILD_TARGETS+=("$TARGET")
               fi
@@ -127,22 +127,23 @@ jobs:
             fi
           done
 
-          echo "✅ Valid targets: ${FINAL_VALID[*]}"
+          echo "✅ BUILD TARGETS: ${BUILD_TARGETS}"
+          echo "✅ Valid targets: ${VALID[*]}"
           echo "❌ Invalid targets: ${INVALID[*]}"
           echo "⚠️ Skipped (minimum buildType not met): ${SKIPPED_MINIMUM[*]}"
           echo "⚠️ Skipped (no compatible build targets): ${SKIPPED_NO_BUILD_TARGETS[*]}"
 
-          if [ "${#FINAL_VALID[@]}" -eq 0 ]; then
+          if [ "${#VALID[@]}" -eq 0 ]; then
             json='[]'
           else
-            json=$(printf '%s\n' "${FINAL_VALID[@]}" | jq -R . | jq -s .)
+            json=$(printf '%s\n' "${VALID[@]}" | jq -R . | jq -s .)
           fi
 
           echo "validDeployTargets<<EOF" >> $GITHUB_OUTPUT
           echo "$json" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-          echo "FINAL_VALID_TARGETS=${FINAL_VALID[*]}" >> $GITHUB_ENV
+          echo "FINAL_VALID_TARGETS=${VALID[*]}" >> $GITHUB_ENV
           echo "INVALID_TARGETS=${INVALID[*]}" >> $GITHUB_ENV
           echo "SKIPPED_MINIMUM=$(IFS='|'; echo "${SKIPPED_MINIMUM[*]}")" >> $GITHUB_ENV
           echo "SKIPPED_NO_BUILD_TARGETS=$(IFS='|'; echo "${SKIPPED_NO_BUILD_TARGETS[*]}")" >> $GITHUB_ENV
