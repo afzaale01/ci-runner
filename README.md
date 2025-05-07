@@ -215,7 +215,7 @@ Run a preview build with selected platforms:
 Artifacts are named using the following structure for easy traceability:
 
 ```
-{projectName}-{version}-{targetPlatform}
+{projectName}-{version}-{buildTarget}
 ```
 
 ### 📁 Examples
