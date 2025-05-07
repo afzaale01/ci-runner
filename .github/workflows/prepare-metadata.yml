@@ -9,12 +9,12 @@ on:
       unityVersion:
         type: string
         required: true
-      deployTargets:
-        type: string
-        required: true
       buildVersion:
         type: string
         required: false
+      deployTargets:
+        type: string
+        required: true
       buildTargets:
         type: string
         required: false

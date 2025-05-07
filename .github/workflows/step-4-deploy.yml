@@ -356,5 +356,5 @@ jobs:
     needs: deploy
     with:
       projectName: ${{ inputs.projectName }}
-      version: ${{ inputs.buildVersion }}
+      buildVersion: ${{ inputs.buildVersion }}
       buildType: ${{ inputs.buildType }}
