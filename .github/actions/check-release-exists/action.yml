@@ -21,7 +21,7 @@ outputs:
     value: ${{ steps.check_release.outputs.release_id }}
   release_exists:
     description: "Whether a release exists with the given version"
-    value: ${{ steps.check_release.outputs.exists }}
+    value: ${{ steps.check_release.outputs.already_exists }}
 
 runs:
   using: 'composite'
