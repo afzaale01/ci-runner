@@ -4,14 +4,6 @@ description: |
   tests-only flags, manual override, and GitHub event/ref patterns.
 
 inputs:
-  ref:
-    description: 'Git reference (e.g., refs/tags/v1.2.3)'
-    required: true
-    type: string
-  event:
-    description: 'GitHub event name (e.g., push, pull_request)'
-    required: true
-    type: string
   testsOnlyOverride:
     description: "If 'true', force preview (tests-only) build."
     required: false
@@ -35,7 +27,7 @@ runs:
       run: |
         chmod +x "${{ github.action_path }}/resolve-build-type.sh"
         "${{ github.action_path }}/resolve-build-type.sh" \
-          "${{ inputs.ref }}" \
-          "${{ inputs.event }}" \
+          "${{ github.ref }}" \
+          "${{ github.event_name }}" \
           "${{ inputs.testsOnlyOverride }}" \
           "${{ inputs.buildTypeOverride }}"
