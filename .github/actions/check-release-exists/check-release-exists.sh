@@ -16,15 +16,15 @@ if [ "$STATUS" -eq 200 ]; then
   RELEASE_ID=$(jq -e -r '.id // empty' "$TMPFILE" || echo "")
   if [[ -n "$RELEASE_ID" ]]; then
     echo "ℹ️  Release found for tag '$VERSION' (ID: $RELEASE_ID)"
-    echo "exists=true" >> "$GITHUB_OUTPUT"
+    echo "already_exists=true" >> "$GITHUB_OUTPUT"
     echo "release_id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
   else
     echo "ℹ️  Tag '$VERSION' found, but no release ID could be extracted"
-    echo "exists=false" >> "$GITHUB_OUTPUT"
+    echo "already_exists=false" >> "$GITHUB_OUTPUT"
   fi
 else
   echo "ℹ️  No release found for tag '$VERSION' (HTTP status: $STATUS)"
-  echo "exists=false" >> "$GITHUB_OUTPUT"
+  echo "already_exists=false" >> "$GITHUB_OUTPUT"
 fi
 
 rm -f "$TMPFILE"
