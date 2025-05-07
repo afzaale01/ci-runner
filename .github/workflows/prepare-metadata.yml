@@ -220,7 +220,7 @@ jobs:
       - resolve_build_type
       - detect_tests_only
     if: needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
-    uses: ./.github/workflows/version-resolver.yml
+    uses: ./.github/workflows/build-version-resolver.yml
     with:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       buildVersion: ${{ inputs.buildVersion }}
@@ -239,8 +239,8 @@ jobs:
           if [[ "${{ needs.resolve_build_type.outputs.buildType }}" == "preview" ]]; then
             echo "✅ Preview builds ignore releases - continuing pipeline."
             echo "release_already_exists=false" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ needs.resolve_versioning.outputs.release_exists }}" == "true" ]]; then
-            echo "❌ A release already exists for version '${{ needs.resolve_versioning.outputs.release_exists }}'. Stopping pipeline early."
+          elif [[ "${{ needs.resolve_versioning.outputs.releaseExists }}" == "true" ]]; then
+            echo "❌ A release already exists for version '${{ needs.resolve_versioning.outputs.releaseExists }}'. Stopping pipeline early."
             echo "release_already_exists=true" >> "$GITHUB_OUTPUT"
             exit 1
           else
