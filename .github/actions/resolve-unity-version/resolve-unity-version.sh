@@ -24,6 +24,15 @@ DEFAULT_UNITY_VERSION=$(echo "$DEFAULTS" | jq -r '.unity.version')
 UNITY_VERSION="${UNITY_VERSION_OVERRIDE:-$DEFAULT_UNITY_VERSION}"
 
 # ─────────────────────────────────────────────────────────────
+# Set default 'auto'
+# ─────────────────────────────────────────────────────────────
+if [[ "$UNITY_VERSION" == "auto" ]]; then
+  echo "✅ Using auto-detected unity version mode: $UNITY_VERSION"
+  echo "unityVersion=$UNITY_VERSION" >> "$GITHUB_OUTPUT"
+  exit 0
+fi
+
+# ─────────────────────────────────────────────────────────────
 # Validate Unity version format with regex
 # ─────────────────────────────────────────────────────────────
 if [[ ! "$UNITY_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(f[0-9]+|p[0-9]+|b[0-9]+|a[0-9]+)?$ ]]; then
