@@ -55,7 +55,7 @@ jobs:
       testsOnly: true
       deployTargets: '[]'
       buildType: 'preview'
-      version: 'TESTING_TESTS_WORKFLOW'
+      buildVersion: 'TESTING_TESTS_WORKFLOW'
 
   test-run-tests:
     name: 📋 Test Run Tests

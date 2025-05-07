@@ -28,7 +28,7 @@ on:
       testsOnly:
         type: string
         required: false
-      version:
+      buildVersion:
         type: string
         required: false
     outputs:
@@ -55,7 +55,7 @@ on:
       skipTests:
         value: ${{ jobs.detect_skip_tests.outputs.skipTests }}
       version:
-        value: ${{ jobs.resolve_build_version.outputs.version }}
+        value: ${{ jobs.resolve_build_version.outputs.buildVersion }}
       retentionDays:
         value: ${{ jobs.resolve_retention_days.outputs.retentionDays }}
       buildTargets:
@@ -239,10 +239,10 @@ jobs:
       - resolve_build_type
       - detect_tests_only
     if: needs.detect_tests_only.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
-    uses: ./.github/workflows/version-resolver.yml
+    uses: ./.github/workflows/build-version-resolver.yml
     with:
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
-      version: ${{ inputs.version }}
+      buildVersion: ${{ inputs.buildVersion }}
 
   check_release_blocker:
     name: Check for Existing Release Blocker
@@ -258,8 +258,8 @@ jobs:
           if [[ "${{ needs.resolve_build_type.outputs.buildType }}" == "preview" ]]; then
             echo "✅ Preview builds ignore releases - continuing pipeline."
             echo "release_already_exists=false" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ needs.resolve_build_version.outputs.release_exists }}" == "true" ]]; then
-            echo "❌ A release already exists for version '${{ needs.resolve_build_version.outputs.release_exists }}'. Stopping pipeline early."
+          elif [[ "${{ needs.resolve_build_version.outputs.releaseExists }}" == "true" ]]; then
+            echo "❌ A release already exists for version '${{ needs.resolve_build_version.outputs.releaseExists }}'. Stopping pipeline early."
             echo "release_already_exists=true" >> "$GITHUB_OUTPUT"
             exit 1
           else
@@ -347,7 +347,7 @@ jobs:
     with:
       unityVersion: ${{ needs.resolve_unity_version.outputs.unityVersion }}
       projectName: ${{ needs.resolve_project_name.outputs.sanitized_name }}
-      version: ${{ needs.resolve_build_version.outputs.version }}
+      buildVersion: ${{ needs.resolve_build_version.outputs.buildVersion }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
       testsOnly: ${{ needs.detect_tests_only.outputs.testsOnly }}

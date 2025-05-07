@@ -10,7 +10,7 @@ on:
       projectName:
         required: true
         type: string
-      version:
+      buildVersion:
         required: true
         type: string
       groupedBuildTargets:
@@ -42,7 +42,7 @@ jobs:
         if: ${{ inputs.combineRequested == 'true' }}
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.projectName }}-${{ inputs.version }}
+          name: ${{ inputs.projectName }}-${{ inputs.buildVersion }}
           path: all-artifacts
 
       - name: 📦 Download Per-Build-Target Artifacts
@@ -51,7 +51,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           grouped='${{ inputs.groupedBuildTargets }}'
-          version='${{ inputs.version }}'
+          version='${{ inputs.buildVersion }}'
           project='${{ inputs.projectName }}'
 
           echo "$grouped" | jq -r 'to_entries[].value[]' | while read -r buildTarget; do
@@ -70,7 +70,7 @@ jobs:
           echo "|--------------|--------|" >> $GITHUB_STEP_SUMMARY
 
           GROUPED='${{ inputs.groupedBuildTargets }}'
-          VERSION='${{ inputs.version }}'
+          VERSION='${{ inputs.buildVersion }}'
           PROJECT='${{ inputs.projectName }}'
           COMBINED='${{ inputs.combineRequested }}'
           ALL_BUILD_TARGETS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')

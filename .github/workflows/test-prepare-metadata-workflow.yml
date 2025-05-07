@@ -8,7 +8,7 @@ on:
         required: false
         default: "auto"
         type: string      
-      version:
+      buildVersion:
         description: "Optional base version (e.g., v1.2.3) for release candidate"
         required: false
       buildType:
@@ -47,4 +47,4 @@ jobs:
       skipTests: ${{ inputs.skipTests }}
       deployTargets: ${{ inputs.deployTargets }}
       buildType: ${{ inputs.buildType }}
-      version: ${{ inputs.version }}
+      buildVersion: ${{ inputs.buildVersion }}
