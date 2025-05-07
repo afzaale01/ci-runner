@@ -197,19 +197,6 @@ They can be found under:
 
 ---
 
-## 🧪 Dispatch Example
-
-Run a preview build with selected platforms:
-
-```json
-{
-  "buildType": "preview",
-  "buildTargets": "[\"Android\", \"WebGL\"]"
-}
-```
-
----
-
 ## 📦 Artifact Naming Convention
 
 Artifacts are named using the following structure for easy traceability:
