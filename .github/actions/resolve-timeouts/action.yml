@@ -1,6 +1,5 @@
 name: Resolve Timeouts
 description: Resolves test/build timeout values from overrides or defaults.json
-author: Avalin
 
 inputs:
   timeoutTestsOverride:

@@ -1,6 +1,5 @@
-name: 'Determine Version'
+name: 'Resolve Version'
 description: 'Determines the build version based on inputs like Git reference, event, and build type.'
-author: Avalin
 
 inputs:
   ref:
@@ -35,6 +34,6 @@ runs:
       id: get_version
       shell: bash
       run: |
-        chmod +x "${{ github.action_path }}/determine-version.sh"
+        chmod +x "${{ github.action_path }}/resolve-version.sh"
         chmod +x "${{ github.action_path }}/generate-version-for-rc.sh"
-        "${{ github.action_path }}/determine-version.sh" "${{ inputs.ref }}" "${{ inputs.event }}" "${{ inputs.input_version }}" "${{ inputs.build_type }}"
+        "${{ github.action_path }}/resolve-version.sh" "${{ inputs.ref }}" "${{ inputs.event }}" "${{ inputs.input_version }}" "${{ inputs.build_type }}"
