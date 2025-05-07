@@ -40,6 +40,7 @@ jobs:
     uses: ./.github/workflows/prepare-metadata.yml
     with:
       projectName: ${{ inputs.projectName }}
+      unityVersion: ${{ vars.UNITY_VERSION }}
       skipTests: true
       testsOnly: false
       buildTargets: ${{ inputs.buildTargets }}

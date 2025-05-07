@@ -92,6 +92,7 @@ jobs:
     if:  ${{ inputs.artifactSource == 'build' }}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      unityVersion: ${{ vars.UNITY_VERSION }}
       projectName: ${{ inputs.projectName }}
       skipTests: true
       testsOnly: false

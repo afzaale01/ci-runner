@@ -14,13 +14,10 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Make script executable
-      shell: bash
-      run: chmod +x "${{ github.action_path }}/resolve-Unity-version.sh"
-
     - id: set
       shell: bash
       env:
         UNITY_VERSION_OVERRIDE: ${{ inputs.unityVersionOverride }}
       run: |
-        bash "${{ github.action_path }}/resolve-Unity-version.sh"
+        chmod +x "${{ github.action_path }}/resolve-unity-version.sh"
+        bash "${{ github.action_path }}/resolve-unity-version.sh"

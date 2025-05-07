@@ -108,6 +108,7 @@ jobs:
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      unityVersion: ${{ vars.UNITY_VERSION }}
       projectName: ${{ vars.PROJECT_NAME }}
       skipTests: ${{ inputs.skipTests }}
       deployTargets: ${{ inputs.deployTargets }}

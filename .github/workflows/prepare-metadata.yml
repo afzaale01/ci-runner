@@ -35,7 +35,7 @@ on:
       projectName:
         value: ${{ jobs.resolve_project_name.outputs.sanitized_name }}
       unityVersion:
-        value: ${{ jobs.prepare_test_data.outputs.unityVersion }}
+        value: ${{ jobs.resolve_unity_version.outputs.unityVersion }}
       useGitLfs:
         value: ${{ jobs.prepare_test_data.outputs.useGitLfs }}
       editModePath:
@@ -55,7 +55,7 @@ on:
       skipTests:
         value: ${{ jobs.detect_skip_tests.outputs.skipTests }}
       version:
-        value: ${{ jobs.resolve_versioning.outputs.version }}
+        value: ${{ jobs.resolve_build_version.outputs.version }}
       retentionDays:
         value: ${{ jobs.resolve_retention_days.outputs.retentionDays }}
       buildTargets:
@@ -135,7 +135,7 @@ jobs:
 
   resolve_project_name:
     runs-on: ubuntu-latest
-    name: Resolve Project Name Job
+    name: Resolve Project Name
     outputs:
       sanitized_name: ${{ steps.resolve_project_name.outputs.sanitized_name }}
     steps:
@@ -147,15 +147,22 @@ jobs:
 
   resolve_unity_version:
     runs-on: ubuntu-latest
-    name: Resolve Project Name Job
+    name: Resolve Unity Version
     outputs:
       unityVersion: ${{ steps.resolve_unity_version.outputs.unityVersion }}
     steps:
-      - name: Use Resolve Project Name Action
+      - name: 📁 Checkout actions folder
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/actions
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+
+      - name: Use Resolve Unity Version Action
         id: resolve_unity_version
         uses: avalin/unity-ci-templates/.github/actions/resolve-unity-version@unity-6-build-profiles-test
         with:
-          unityVersionOverride: ${{ inputs.unityVersion }}
+          unityVersionOverride: ${{ inputs.unityVersion || vars.UNITY_VERSION }}
 
   prepare_test_data:
     name: Prepare Test Data
@@ -178,10 +185,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Use Resolve Test Config Action
-        uses: avalin/unity-ci-templates/.github/actions/resolve-test-config@v1
+        uses: avalin/unity-ci-templates/.github/actions/resolve-test-config@unity-6-build-profiles-test
         with:
           defaultsFileOverride: "./.github/config/defaults.json"
-          unityVersionOverride: ${{ vars.UNITY_VERSION }}
           useGitLfsOverride: ${{ vars.USE_GIT_LFS }}
           editModePathOverride: ${{ vars.UNITY_TESTS_EDITMODE_PATH }}
           playModePathOverride: ${{ vars.UNITY_TESTS_PLAYMODE_PATH }}
@@ -227,8 +233,8 @@ jobs:
           testsOnlyOverride: ${{ needs.detect_tests_only.outputs.testsOnly }}
           buildTypeOverride: ${{ inputs.buildType }}
 
-  resolve_versioning:
-    name: Create versioning
+  resolve_build_version:
+    name: Create build versioning
     needs:
       - resolve_build_type
       - detect_tests_only
@@ -241,7 +247,7 @@ jobs:
   check_release_blocker:
     name: Check for Existing Release Blocker
     needs: 
-      - resolve_versioning
+      - resolve_build_version
       - resolve_build_type
     runs-on: ubuntu-latest
     outputs:
@@ -252,8 +258,8 @@ jobs:
           if [[ "${{ needs.resolve_build_type.outputs.buildType }}" == "preview" ]]; then
             echo "✅ Preview builds ignore releases - continuing pipeline."
             echo "release_already_exists=false" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ needs.resolve_versioning.outputs.release_exists }}" == "true" ]]; then
-            echo "❌ A release already exists for version '${{ needs.resolve_versioning.outputs.release_exists }}'. Stopping pipeline early."
+          elif [[ "${{ needs.resolve_build_version.outputs.release_exists }}" == "true" ]]; then
+            echo "❌ A release already exists for version '${{ needs.resolve_build_version.outputs.release_exists }}'. Stopping pipeline early."
             echo "release_already_exists=true" >> "$GITHUB_OUTPUT"
             exit 1
           else
@@ -314,7 +320,7 @@ jobs:
     needs: 
       - check_release_blocker
       - validate_deploy_targets
-      - resolve_versioning
+      - resolve_build_version
     if: ${{ needs.validate_deploy_targets.outputs.skipAnalysis != 'true' }}
     uses: ./.github/workflows/analyze-artifact-strategy.yml
     with:
@@ -332,7 +338,7 @@ jobs:
       - resolve_retention_days
       - prepare_timeouts
       - resolve_build_targets
-      - resolve_versioning
+      - resolve_build_version
       - check_release_blocker
       - validate_deploy_targets
       - analyze_artifact_strategy
@@ -341,7 +347,7 @@ jobs:
     with:
       unityVersion: ${{ needs.resolve_unity_version.outputs.unityVersion }}
       projectName: ${{ needs.resolve_project_name.outputs.sanitized_name }}
-      version: ${{ needs.resolve_versioning.outputs.version }}
+      version: ${{ needs.resolve_build_version.outputs.version }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
       skipTests: ${{ needs.detect_skip_tests.outputs.skipTests }}
       testsOnly: ${{ needs.detect_tests_only.outputs.testsOnly }}

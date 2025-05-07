@@ -37,6 +37,7 @@ jobs:
     name: ⏳ Prepare Metadata
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      unityVersion: ${{ vars.UNITY_VERSION }}
       projectName: ${{ vars.PROJECT_NAME }}
       skipTests: ${{ inputs.skipTests }}
       deployTargets: ${{ inputs.deployTargets }}

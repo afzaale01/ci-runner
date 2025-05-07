@@ -35,10 +35,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Make script executable
-      shell: bash
-      run: chmod +x "${{ github.action_path }}/resolve-test-config.sh"
-
     - id: set
       shell: bash
       env:
@@ -48,4 +44,5 @@ runs:
         PLAY_MODE_PATH_OVERRIDE: ${{ inputs.playModePathOverride }}
         QUIET_MODE_OVERRIDE: ${{ inputs.quietModeOverride }}
       run: |
+        chmod +x "${{ github.action_path }}/resolve-test-config.sh"
         bash "${{ github.action_path }}/resolve-test-config.sh"
