@@ -32,7 +32,7 @@ on:
         required: true
         default: '["WebGL"]'
         type: string
-      version:
+      buildVersion:
         description: Optional version override
         type: string
         required: false
@@ -113,7 +113,7 @@ jobs:
       deployTargets: ${{ inputs.deployTargets }}
       buildTargets: ${{ inputs.buildTargets }}
       buildType: ${{ inputs.buildType }}
-      version: ${{ inputs.version }}
+      buildVersion: ${{ inputs.buildVersion }}
 
   tagging:
     name: Create or Verify Tag
@@ -124,7 +124,7 @@ jobs:
     uses: ./.github/workflows/version-tagger.yml
     with:
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
-      version: ${{ needs.prepare_metadata.outputs.version }}
+      buildVersion: ${{ needs.prepare_metadata.outputs.version }}
     secrets: inherit
   
   trigger_ci:
@@ -155,11 +155,11 @@ jobs:
               --arg skipTests "${{ needs.prepare_metadata.outputs.skipTests }}" \
               --arg testsOnly "${{ needs.prepare_metadata.outputs.testsOnly }}" \
               --arg buildType "${{ needs.prepare_metadata.outputs.buildType }}" \
-              --arg version "${{ needs.prepare_metadata.outputs.version }}" \
+              --arg buildVersion "${{ needs.prepare_metadata.outputs.buildVersion }}" \
               --arg retentionDays "${{ needs.prepare_metadata.outputs.retentionDays }}" \
               --arg timeoutMinutesTests "${{ needs.prepare_metadata.outputs.timeoutMinutesTests }}" \
               --arg timeoutMinutesBuild "${{ needs.prepare_metadata.outputs.timeoutMinutesBuild }}" \
-              '{projectName: $projectName, skipTests: $skipTests, testsOnly: $testsOnly, buildType: $buildType, version: $version, retentionDays: $retentionDays, timeoutMinutesTests: $timeoutMinutesTests, timeoutMinutesBuild: $timeoutMinutesBuild}')" \
+              '{projectName: $projectName, skipTests: $skipTests, testsOnly: $testsOnly, buildType: $buildType, buildVersion: $buildVersion, retentionDays: $retentionDays, timeoutMinutesTests: $timeoutMinutesTests, timeoutMinutesBuild: $timeoutMinutesBuild}')" \
             --field artifactConfig="$(jq -c -n \
               --arg requiresCombined "${{ needs.prepare_metadata.outputs.requiresCombined }}" \
               --arg skipPerBuildTarget "${{ needs.prepare_metadata.outputs.skipPerBuildTarget }}" \

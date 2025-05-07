@@ -8,7 +8,7 @@ on:
         default: "My_Project"
         type: string
         required: false
-      version:
+      buildVersion:
         description: "Optional version string (e.g. v1.2.3 or v1.2.3-rc.1)"
         required: true
         type: string
@@ -71,19 +71,19 @@ jobs:
     steps:
       - name: Create Placeholder Folder Structure
         run: |
-          VERSION="${{ inputs.version }}"
+          BUILD_VERSION="${{ inputs.buildVersion }}"
           TARGET="${{ matrix.buildTarget }}"
-          DEST="${{ inputs.projectName }}-${VERSION}/${TARGET}"
+          DEST="${{ inputs.projectName }}-${BUILD_VERSION}/${TARGET}"
 
           echo "Creating dry build structure at $DEST"
           mkdir -p "$DEST"
-          echo "This is a dry build placeholder for $TARGET, version $VERSION" > "$DEST/README.txt"
+          echo "This is a dry build placeholder for $TARGET, version $BUILD_VERSION" > "$DEST/README.txt"
 
       - name: Upload Placeholder Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.projectName }}-${{ inputs.version }}-${{ matrix.buildTarget }}
-          path: ${{ inputs.projectName }}-${{ inputs.version }}/${{ matrix.buildTarget }}/*
+          name: ${{ inputs.projectName }}-${{ inputs.buildVersion }}-${{ matrix.buildTarget }}
+          path: ${{ inputs.projectName }}-${{ inputs.buildVersion }}/${{ matrix.buildTarget }}/*
           retention-days: ${{ inputs.retentionDays }}
 
   combine_builds:
@@ -92,7 +92,7 @@ jobs:
     uses: ./.github/workflows/combine-builds.yml
     with:
       projectName: ${{ inputs.projectName }}
-      version: ${{ inputs.version }}
+      buildVersion: ${{ inputs.buildVersion }}
       retentionDays: ${{ inputs.retentionDays }}
 
   summarize_builds:
@@ -101,7 +101,7 @@ jobs:
     uses: ./.github/workflows/summarize-builds.yml
     with:
       projectName: ${{ inputs.projectName }}
-      version: ${{ inputs.version }}
+      buildVersion: ${{ inputs.buildVersion }}
       groupedBuildTargets: ${{ needs.filter_build_targets.outputs.validBuildTargets }}
       combineRequested: ${{ inputs.combineArtifacts }}
       combinedCreated: ${{ (needs.combine_builds.result == 'success' && needs.combine_builds.outputs.created) || 'false' }}

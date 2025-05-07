@@ -10,7 +10,7 @@ on:
       projectName:
         required: true
         type: string
-      version:
+      buildVersion:
         required: true
         type: string
       retentionDays:
@@ -36,7 +36,7 @@ jobs:
 
       - name: 🗂️ Combine Into Single Versioned Folder
         run: |
-          VERSION="${{ inputs.version }}"
+          VERSION="${{ inputs.buildVersion }}"
           PROJECT="${{ inputs.projectName }}"
           COMBINED_DIR="${PROJECT}-${VERSION}"
           mkdir -p "$COMBINED_DIR"
@@ -58,14 +58,14 @@ jobs:
         id: upload
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.projectName }}-${{ inputs.version }}
-          path: ${{ inputs.projectName }}-${{ inputs.version }}
+          name: ${{ inputs.projectName }}-${{ inputs.buildVersion }}
+          path: ${{ inputs.projectName }}-${{ inputs.buildVersion }}
           retention-days: ${{ inputs.retentionDays }}
 
       - name: 📤 Set Output if Combined Artifact Exists and Uploaded
         id: set-created
         run: |
-          COMBINED_DIR="${{ inputs.projectName }}-${{ inputs.version }}"
+          COMBINED_DIR="${{ inputs.projectName }}-${{ inputs.buildVersion }}"
 
           if [ -d "$COMBINED_DIR" ] && [ "$(ls -A "$COMBINED_DIR")" ]; then
             echo "✅ Combined folder exists and was uploaded successfully"

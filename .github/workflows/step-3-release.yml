@@ -7,7 +7,7 @@ on:
         description: "Build type: 'preview' | 'release_candidate' | 'release'"
         type: string
         required: true
-      version:
+      buildVersion:
         description: "The version/tag name (e.g., v1.2.3)"
         type: string
         required: true

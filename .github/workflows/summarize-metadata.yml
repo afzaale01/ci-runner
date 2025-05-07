@@ -9,7 +9,7 @@ on:
       projectName:
         required: true
         type: string
-      version:
+      buildVersion:
         required: true
         type: string
       buildType:
@@ -68,18 +68,18 @@ jobs:
           echo "| Key                          | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|------------------------------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Project Name                 | ${{ inputs.projectName }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Version                      | ${{ inputs.version }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Type                   | ${{ inputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Tests                   | ${{ inputs.skipTests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Tests Only                   | ${{ inputs.testsOnly }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Retention Days               | ${{ inputs.retentionDays }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Tests Timeout (minutes)      | ${{ inputs.timeoutMinutesTests }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build Timeout (minutes)      | ${{ inputs.timeoutMinutesBuild }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Version                | ${{ inputs.buildVersion }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Type                   | ${{ inputs.buildType }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build Targets                | \`$BUILD_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy Targets               | \`$DEPLOY_TARGETS\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Retention Days               | ${{ inputs.retentionDays }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ inputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Per-Build-Target Artifacts  | ${{ inputs.skipPerBuildTarget }} |" >> $GITHUB_STEP_SUMMARY
 
           if [[ "${{ inputs.releaseAlreadyExists }}" == 'true' ]]; then
-            echo "❌ **Pipeline was blocked because a GitHub release already exists for version \`${{ inputs.version }}\`.**" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **Pipeline was blocked because a GitHub release already exists for version \`${{ inputs.buildVersion }}\`.**" >> $GITHUB_STEP_SUMMARY
           fi
