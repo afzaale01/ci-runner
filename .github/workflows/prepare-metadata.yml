@@ -6,6 +6,9 @@ on:
       projectName:
         type: string
         required: true
+      unityVersion:
+        type: string
+        required: true
       deployTargets:
         type: string
         required: true
