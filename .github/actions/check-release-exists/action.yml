@@ -1,6 +1,5 @@
 name: 'Check Release Exists'
 description: 'Checks if a release exists for a given version'
-author: Avalin
 
 inputs:
   version:

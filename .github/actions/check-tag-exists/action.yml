@@ -1,6 +1,5 @@
 name: Check Git Tag Exists
 description: Checks if a Git tag exists in the specified GitHub repository.
-author: Avalin
 
 inputs:
   version:
