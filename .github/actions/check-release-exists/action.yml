@@ -30,6 +30,7 @@ runs:
       uses: actions/checkout@v3
 
     - name: Run release check script
+      id: check
       run: |
         chmod +x "${{ github.action_path }}/check-release-exists.sh"
         "${{ github.action_path }}/check-release-exists.sh" "${{ inputs.version }}" "${{ inputs.repo }}" "${{ inputs.token }}"
