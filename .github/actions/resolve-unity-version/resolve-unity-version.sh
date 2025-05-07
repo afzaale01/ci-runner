@@ -24,10 +24,10 @@ DEFAULT_UNITY_VERSION=$(echo "$DEFAULTS" | jq -r '.unity.version')
 UNITY_VERSION="${UNITY_VERSION_OVERRIDE:-$DEFAULT_UNITY_VERSION}"
 
 # ─────────────────────────────────────────────────────────────
-# Set default 'auto'
+# Allow 'auto' to pass through (no regex check)
 # ─────────────────────────────────────────────────────────────
 if [[ "$UNITY_VERSION" == "auto" ]]; then
-  echo "✅ Using auto-detected unity version mode: $UNITY_VERSION"
+  echo "✅ Using Unity auto-detect mode."
   echo "unityVersion=$UNITY_VERSION" >> "$GITHUB_OUTPUT"
   exit 0
 fi
