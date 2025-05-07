@@ -52,7 +52,7 @@ on:
       skipTests:
         value: ${{ jobs.detect_skip_tests.outputs.skipTests }}
       version:
-        value: ${{ jobs.version.outputs.version }}
+        value: ${{ jobs.resolve_versioning.outputs.version }}
       retentionDays:
         value: ${{ jobs.resolve_retention_days.outputs.retentionDays }}
       buildTargets:
@@ -239,7 +239,7 @@ jobs:
           if [[ "${{ needs.resolve_build_type.outputs.buildType }}" == "preview" ]]; then
             echo "✅ Preview builds ignore releases - continuing pipeline."
             echo "release_already_existed=false" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ needs.resolve_versioning.outputs.release_existed }}" == "true" ]]; then
+          elif [[ "${{ needs.resolve_versioning.outputs.release_exists }}" == "true" ]]; then
             echo "❌ A release already exists for version '${{ needs.resolve_versioning.outputs.version }}'. Stopping pipeline early."
             echo "release_already_existed=true" >> "$GITHUB_OUTPUT"
             exit 1
