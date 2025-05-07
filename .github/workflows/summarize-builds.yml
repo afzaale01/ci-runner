@@ -23,11 +23,17 @@ on:
         required: false
         type: string
         default: "false"
+    outputs:
+      didAnyBuildsFail:
+        description: "True if any builds failed"
+        value: ${{ jobs.summarize.outputs.didAnyBuildsFail }}
 
 jobs:
   summarize:
     name: 📄 Summarize Build Results
     runs-on: ubuntu-latest
+    outputs:
+      didAnyBuildsFail: ${{ steps.summary.outputs.didAnyBuildsFail }}
     steps:
       - name: 📁 Checkout Repository
         uses: actions/checkout@v4
@@ -56,6 +62,7 @@ jobs:
           done
 
       - name: 📜 Write Build Summary
+        id: summary
         run: |
           echo "### 🧩 Unity Build Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -105,4 +112,11 @@ jobs:
             fi
           else
             echo "- ℹ️ Combined artifact was not requested." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Export output as true or false
+          if [[ $build_failed -eq 1 ]]; then
+            echo "didAnyBuildsFail=true" >> $GITHUB_OUTPUT
+          else
+            echo "didAnyBuildsFail=false" >> $GITHUB_OUTPUT
           fi

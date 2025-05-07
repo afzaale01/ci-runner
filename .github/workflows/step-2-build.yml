@@ -166,3 +166,14 @@ jobs:
       groupedBuildTargets: ${{ needs.filter_build_targets.outputs.validBuildTargets }}
       combineRequested: ${{ inputs.combineArtifacts }}
       combinedCreated: ${{ (needs.combine_builds.result == 'success' && needs.combine_builds.outputs.created) || 'false' }}
+
+  fail_if_builds_failed:
+    name: ⛔ Fail if Any Builds Failed
+    needs: [summarize_builds]
+    runs-on: ubuntu-latest
+    if: ${{ needs.summarize_builds.outputs.didAnyBuildsFail == 'true' }}
+    steps:
+      - name: ⛔ Fail the Pipeline
+        run: |
+          echo "❌ One or more builds failed. Failing the pipeline."
+          exit 1
