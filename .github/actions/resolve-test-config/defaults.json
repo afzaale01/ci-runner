@@ -1,6 +1,5 @@
 {
     "unity": {
-      "version": "auto",
       "useGitLfs": false,
       "editModePath": "Assets/Tests/Editor",
       "playModePath": "Assets/Tests/PlayMode",

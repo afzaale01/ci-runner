@@ -2,9 +2,6 @@ name: Resolve Test Config
 description: Resolves Unity test config values from overrides or defaults.json
 
 inputs:
-  unityVersionOverride:
-    description: Override for Unity version
-    required: false
   useGitLfsOverride:
     description: Override for Git LFS usage
     required: false
@@ -22,9 +19,6 @@ inputs:
     required: false
 
 outputs:
-  unityVersion:
-    description: Resolved Unity version
-    value: ${{ steps.set.outputs.unityVersion }}
   useGitLfs:
     description: Resolved Git LFS usage
     value: ${{ steps.set.outputs.useGitLfs }}
@@ -49,7 +43,6 @@ runs:
       shell: bash
       env:
         DEFAULTS_FILE_OVERRIDE: ${{ inputs.defaultsFileOverride }}
-        UNITY_VERSION_OVERRIDE: ${{ inputs.unityVersionOverride }}
         USE_GIT_LFS_OVERRIDE: ${{ inputs.useGitLfsOverride }}
         EDIT_MODE_PATH_OVERRIDE: ${{ inputs.editModePathOverride }}
         PLAY_MODE_PATH_OVERRIDE: ${{ inputs.playModePathOverride }}

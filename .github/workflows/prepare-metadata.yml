@@ -142,6 +142,18 @@ jobs:
         with:
           projectName: ${{ inputs.projectName }}
 
+  resolve_unity_version:
+    runs-on: ubuntu-latest
+    name: Resolve Project Name Job
+    outputs:
+      unityVersion: ${{ steps.resolve_unity_version.outputs.unityVersion }}
+    steps:
+      - name: Use Resolve Project Name Action
+        id: resolve_unity_version
+        uses: avalin/unity-ci-templates/.github/actions/resolve-unity-version@unity-6-build-profiles-test
+        with:
+          unityVersionOverride: ${{ inputs.unityVersion }}
+
   prepare_test_data:
     name: Prepare Test Data
     runs-on: ubuntu-latest
@@ -149,13 +161,11 @@ jobs:
       - detect_skip_tests
     if: ${{ needs.detect_skip_tests.outputs.skipTests != 'true' }}
     outputs:
-      unityVersion: ${{ steps.set.outputs.unityVersion }}
       useGitLfs: ${{ steps.set.outputs.useGitLfs }}
       editModePath: ${{ steps.set.outputs.editModePath }}
       playModePath: ${{ steps.set.outputs.playModePath }}
       quietMode: ${{ steps.set.outputs.quietMode }}
     env:
-      UNITY_VERSION_OVERRIDE: ${{ vars.UNITY_VERSION }}
       USE_GIT_LFS_OVERRIDE: ${{ vars.USE_GIT_LFS }}
       EDIT_MODE_PATH_OVERRIDE: ${{ vars.UNITY_TESTS_EDITMODE_PATH }}
       PLAY_MODE_PATH_OVERRIDE: ${{ vars.UNITY_TESTS_PLAYMODE_PATH }}
@@ -313,6 +323,7 @@ jobs:
     needs:
       - detect_skip_tests
       - detect_tests_only
+      - resolve_unity_version
       - resolve_project_name
       - resolve_build_type
       - resolve_retention_days
@@ -325,6 +336,7 @@ jobs:
     if: always()
     uses: ./.github/workflows/summarize-metadata.yml
     with:
+      unityVersion: ${{ needs.resolve_unity_version.outputs.unityVersion }}
       projectName: ${{ needs.resolve_project_name.outputs.sanitized_name }}
       version: ${{ needs.resolve_versioning.outputs.version }}
       buildType: ${{ needs.resolve_build_type.outputs.buildType }}
