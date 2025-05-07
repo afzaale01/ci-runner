@@ -1,6 +1,5 @@
 name: Resolve Retention Days
 description: Resolves artifact retention days based on build type and defaults.json
-author: Avalin
 
 inputs:
   buildType:

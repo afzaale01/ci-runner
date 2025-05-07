@@ -39,7 +39,7 @@ jobs:
 
       - name: Determine Version
         id: get_version
-        uses: avalin/unity-ci-templates/.github/actions/determine-version@v1
+        uses: avalin/unity-ci-templates/.github/actions/resolve-version@v1
         with:
           ref: "${GITHUB_REF}"
           event: "${GITHUB_EVENT_NAME}"

@@ -1,6 +1,5 @@
 name: Resolve Test Config
 description: Resolves Unity test config values from overrides or defaults.json
-author: Avalin
 
 inputs:
   unityVersionOverride:

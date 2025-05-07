@@ -1,6 +1,5 @@
 name: Create Git Tag
 description: Creates a Git tag in the repository pointing to the specified commit.
-author: Your Name
 
 inputs:
   version:

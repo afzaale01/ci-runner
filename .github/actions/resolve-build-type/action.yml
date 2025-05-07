@@ -2,7 +2,6 @@ name: Resolve Build Type
 description: |
   Determines whether this run is a preview, release_candidate, or release build.
   Respects a tests-only flag, an explicit override, then event/ref conventions.
-author: Avalin
 
 inputs:
   testsOnlyOverride:
