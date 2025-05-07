@@ -74,7 +74,7 @@ jobs:
       ARTIFACT_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.version }}
     steps:
       - name: 📥 Retrieve Artifacts from Release
-        uses: avalin/unity-ci-templates/.github/actions/download-from-release@v1
+        uses: avalin/unity-ci-templates/.github/actions/download-from-release@rename-target-platforms
         with:
           projectName: ${{ inputs.projectName }}
           version: ${{ inputs.version }}
@@ -93,7 +93,7 @@ jobs:
 
       - name: 📥 Retrieve Artifacts from Build (Per-Build-Target)
         if: ${{ inputs.artifactSource == 'build' && inputs.hasCombinedArtifacts == 'false' }}
-        uses: avalin/unity-ci-templates/.github/actions/download-per-build-target-artifacts-from-build@v1
+        uses: avalin/unity-ci-templates/.github/actions/download-per-build-target-artifacts-from-build@rename-target-platforms
         with:
           artifactDir: ${{ env.ARTIFACT_DIR }}
           projectName: ${{ inputs.projectName }}
