@@ -134,8 +134,12 @@ jobs:
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Workflows Only
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/workflows
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
 
       - name: Install GitHub CLI
         run: sudo apt-get install gh -y
