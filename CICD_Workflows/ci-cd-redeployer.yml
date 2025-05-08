@@ -3,7 +3,7 @@ name: ✈️ CI/CD Redeployer (Public)
 on:
   workflow_dispatch:
     inputs:
-      tagVersion:
+      buildVersion:
         description: "The release tag version to deploy from (e.g., v1.2.3)"
         required: true
         default: 'v0.0.0'
@@ -54,15 +54,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "🔍 Checking if release '${{ inputs.tagVersion }}' exists..." | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "🔍 Checking if release '${{ inputs.buildVersion }}' exists..." | tee -a "$GITHUB_STEP_SUMMARY"
 
           # Attempt to fetch release data and save to file
-          if ! gh api repos/${{ github.repository }}/releases/tags/${{ inputs.tagVersion }} --jq '.' > release.json; then
-            echo "❌ Release '${{ inputs.tagVersion }}' not found or API call failed." | tee -a "$GITHUB_STEP_SUMMARY"
+          if ! gh api repos/${{ github.repository }}/releases/tags/${{ inputs.buildVersion }} --jq '.' > release.json; then
+            echo "❌ Release '${{ inputs.buildVersion }}' not found or API call failed." | tee -a "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 
-          echo "✅ Release found. Redeploying: '${{ inputs.tagVersion }}'..." | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "✅ Release found. Redeploying: '${{ inputs.buildVersion }}'..." | tee -a "$GITHUB_STEP_SUMMARY"
 
           # Load release data
           RELEASE_DATA=$(cat release.json)
@@ -88,10 +88,10 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@v1
     with:
       buildType: release
-      version: ${{ inputs.tagVersion }}
+      buildVersion: ${{ inputs.buildVersion }}
       projectName: ${{ needs.sanitize_project_name.outputs.sanitized_name }}
       deployTargets: ${{ inputs.deployTargets || '[]' }}
-      targetPlatforms: ${{ inputs.buildTargets != '' && inputs.buildTargets || vars.BUILD_TARGETS || '[]' }}
+      buildTargets: ${{ inputs.buildTargets != '' && inputs.buildTargets || vars.BUILD_TARGETS || '[]' }}
       hasCombinedArtifacts: ${{ needs.validate_release.outputs.hasCombinedArtifacts }}
       artifactSource: release
     secrets: inherit
@@ -105,7 +105,7 @@ jobs:
       - redeploy
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@v1
     with:
-      version: ${{ inputs.tagVersion }}
+      buildVersion: ${{ inputs.buildVersion }}
       releaseResult: 'success'
       releaseErrorMessage: ''
       deployResult: ${{ needs.redeploy.result }}
