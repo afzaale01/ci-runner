@@ -7,7 +7,7 @@
     "quietMode": false
   },
   "project": {
-    "name": "Unity_CI_Templates"
+    "name": "My_Project"
   },
   "timeouts": {
     "testsInMinutes": 15,
