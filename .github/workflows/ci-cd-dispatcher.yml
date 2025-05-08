@@ -122,10 +122,10 @@ jobs:
       - skip_ci
       - prepare_metadata
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
-    uses: ./.github/workflows/version-tagger.yml
+    uses: ./.github/workflows/build-version-tagger.yml
     with:
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
-      buildVersion: ${{ needs.prepare_metadata.outputs.version }}
+      buildVersion: ${{ needs.prepare_metadata.outputs.buildVersion }}
     secrets: inherit
   
   trigger_ci:

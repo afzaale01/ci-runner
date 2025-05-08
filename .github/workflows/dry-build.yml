@@ -4,28 +4,25 @@ on:
   workflow_call:
     inputs:
       projectName:
-        description: "The name of the built project (placeholder only)"
-        default: "My_Project"
         type: string
         required: false
+      unityVersion:
+        required: true
+        type: string
       buildVersion:
-        description: "Optional version string (e.g. v1.2.3 or v1.2.3-rc.1)"
+        required: true
+        type: string
+      buildType:
         required: true
         type: string
       buildTargets:
-        description: "JSON array of build targets to simulate"
         type: string
-        default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
         required: false
       retentionDays:
-        description: "How many days to keep the uploaded placeholder artifacts"
         type: number
-        default: 7
         required: false
       combineArtifacts:
-        description: "Whether to combine all simulated builds into a versioned folder"
         type: string
-        default: "false"
         required: false
 
 concurrency:

@@ -107,7 +107,9 @@ jobs:
     if:  ${{ inputs.artifactSource == 'build' }}
     uses: ./.github/workflows/dry-build.yml
     with:
+      unityVersion: ${{ needs.prepare_metadata.outputs.unityVersion }}
       buildVersion: ${{ needs.prepare_metadata.outputs.buildVersion }}
+      buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       projectName: ${{ needs.prepare_metadata.outputs.projectName }}
       buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}

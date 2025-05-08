@@ -1,5 +1,6 @@
 name: Resolve Build Profile
 description: Resolve the correct Unity Build Profile based on platform, build type, and Unity version.
+
 inputs:
   platform:
     description: The Unity target platform (e.g., StandaloneWindows, Android)
@@ -11,12 +12,14 @@ inputs:
     description: The Unity Editor version (e.g., 6000.0.48f1)
     required: true
   configPath:
-    description: Path to the build profiles JSON file
+    description: Optional: path to override the build profiles JSON file
     required: false
-    default: .github/config/buildprofiles.json
+    default: ".github/config/buildprofiles.json"
+
 outputs:
   profile:
     description: The resolved Build Profile name (empty if none)
+
 runs:
   using: composite
   steps:
@@ -29,8 +32,20 @@ runs:
         UNITY_VERSION="${{ inputs.unityVersion }}"
         CONFIG_PATH="${{ inputs.configPath }}"
 
+        if [ -n "$CONFIG_PATH" ]; then
+          if [ -f "$CONFIG_PATH" ]; then
+            echo "ℹ️ Using provided config path: $CONFIG_PATH"
+          else
+            echo "⚠️ Provided config path $CONFIG_PATH not found! Falling back to internal default."
+            CONFIG_PATH="${GITHUB_ACTION_PATH}/buildprofiles.json"
+          fi
+        else
+          CONFIG_PATH="${GITHUB_ACTION_PATH}/buildprofiles.json"
+          echo "ℹ️ No config path provided. Using internal default: $CONFIG_PATH"
+        fi
+
         if [ ! -f "$CONFIG_PATH" ]; then
-          echo "❌ Config file $CONFIG_PATH not found!"
+          echo "❌ No config file found at fallback path $CONFIG_PATH!"
           echo "profile=" >> $GITHUB_OUTPUT
           exit 0
         fi

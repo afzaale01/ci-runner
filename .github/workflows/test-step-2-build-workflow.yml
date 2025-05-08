@@ -58,7 +58,9 @@ jobs:
     needs: prepare_metadata
     uses: ./.github/workflows/step-2-build.yml
     with:
+      unityVersion: ${{ needs.prepare_metadata.outputs.unityVersion }}
       buildVersion: ${{ needs.prepare_metadata.outputs.buildVersion }}
+      buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       projectName: ${{ needs.prepare_metadata.outputs.projectName }}
       buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}

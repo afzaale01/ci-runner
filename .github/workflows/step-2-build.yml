@@ -6,7 +6,13 @@ on:
       projectName:
         type: string
         required: false
+      unityVersion:
+        required: true
+        type: string
       buildVersion:
+        required: true
+        type: string
+      buildType:
         required: true
         type: string
       buildTargets:
@@ -87,6 +93,14 @@ jobs:
       - name: Check Free Disk Space (Android only)
         if: matrix.buildTarget == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.1
+
+      - name: Resolve Build Profile
+        id: resolve-profile
+        uses: ./.github/actions/resolve-build-profile
+        with:
+          platform: ${{ matrix.buildTarget }}
+          buildType: ${{ inputs.buildType }}
+          unityVersion: ${{ inputs.unityVersion }}
 
       - name: Build Unity Project
         uses: game-ci/unity-builder@v4

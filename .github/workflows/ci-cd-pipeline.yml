@@ -108,7 +108,9 @@ jobs:
     with:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
+      unityVersion: ${{ needs.unpack_inputs.outputs.unityVersion }}
       buildVersion: ${{ needs.unpack_inputs.outputs.buildVersion }}
+      buildType: ${{ needs.unpack_inputs.outputs.buildType }}
       buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
       timeoutMinutes: ${{ fromJson(needs.unpack_inputs.outputs.timeoutMinutesBuild) }}
