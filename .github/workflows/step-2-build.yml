@@ -4,34 +4,22 @@ on:
   workflow_call:
     inputs:
       projectName:
-        description: "The name of the built project i.e. 'My_Project' (avoid spaces)"
-        default: "My_Project"
         type: string
         required: false
       buildVersion:
-        description: "Optional version string (e.g. v1.2.3 or v1.2.3-rc.1). Leave blank to auto-generate (e.g. PR-0001, manual-main)"
         required: true
-        default: ""
         type: string
       buildTargets:
-        description: "JSON array of build targets to build"
         type: string
-        default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
         required: false
       timeoutMinutes:
-        description: "Timeout for each build job in minutes"
         type: number
-        default: 30
         required: false
       retentionDays:
-        description: "How many days to keep the uploaded build artifacts (e.g. 7 for preview, 30 for release)"
         type: number
-        default: 7
         required: false
       combineArtifacts:
-        description: "Whether to combine all platform builds into a versioned folder"
         type: string
-        default: "false"
         required: false
     secrets:
       UNITY_EMAIL: { required: true }
