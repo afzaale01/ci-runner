@@ -1,9 +1,9 @@
 name: Resolve Build Profile
-description: Resolve the correct Unity Build Profile based on platform, build type, and Unity version.
+description: Resolve the correct Unity Build Profile based on build target, build type, and Unity version.
 
 inputs:
-  platform:
-    description: The Unity target platform (e.g., StandaloneWindows, Android)
+  buildTarget:
+    description: The Unity build target (e.g., StandaloneWindows, Android)
     required: true
   buildType:
     description: The build type (e.g., preview, release_candidate, release)
@@ -28,7 +28,7 @@ runs:
       id: resolve
       shell: bash
       run: |
-        PLATFORM="${{ inputs.platform }}"
+        BUILD_TARGET="${{ inputs.buildTarget }}"
         BUILD_TYPE="${{ inputs.buildType }}"
         UNITY_VERSION="${{ inputs.unityVersion }}"
         INPUT_CONFIG_PATH="${{ inputs.configPath }}"
@@ -60,13 +60,13 @@ runs:
           exit 0
         fi
 
-        PROFILE=$(jq -r --arg platform "$PLATFORM" --arg type "$BUILD_TYPE" \
-          '.[$platform][$type] // empty' "$CONFIG_PATH")
+        PROFILE=$(jq -r --arg buildTarget "$BUILD_TARGET" --arg type "$BUILD_TYPE" \
+          '.[$buildTarget][$type] // empty' "$CONFIG_PATH")
 
         if [ -z "$PROFILE" ]; then
-          echo "⚠️ No Build Profile configured for $PLATFORM / $BUILD_TYPE in $CONFIG_PATH. Building with default Unity settings."
+          echo "⚠️ No Build Profile configured for $BUILD_TARGET / $BUILD_TYPE in $CONFIG_PATH. Building with default Unity settings."
         else
-          echo "✅ Resolved Build Profile for $PLATFORM / $BUILD_TYPE → $PROFILE"
+          echo "✅ Resolved Build Profile for $BUILD_TARGET / $BUILD_TYPE → $PROFILE"
         fi
 
         echo "profile=$PROFILE" >> $GITHUB_OUTPUT

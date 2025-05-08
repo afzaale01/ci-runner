@@ -98,7 +98,7 @@ jobs:
         id: resolve_build_profile
         uses: avalin/unity-ci-templates/.github/actions/resolve-build-profile@main
         with:
-          platform: ${{ matrix.buildTarget }}
+          buildTarget: ${{ matrix.buildTarget }}
           buildType: ${{ inputs.buildType }}
           unityVersion: ${{ inputs.unityVersion }}
 
