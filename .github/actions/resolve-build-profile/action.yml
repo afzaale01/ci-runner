@@ -1,0 +1,50 @@
+name: Resolve Build Profile
+description: Resolve the correct Unity Build Profile based on platform, build type, and Unity version.
+inputs:
+  platform:
+    description: The Unity target platform (e.g., StandaloneWindows, Android)
+    required: true
+  buildType:
+    description: The build type (e.g., preview, release_candidate, release)
+    required: true
+  unityVersion:
+    description: The Unity Editor version (e.g., 6000.0.48f1)
+    required: true
+  configPath:
+    description: Path to the build profiles JSON file
+    required: false
+    default: .github/config/buildprofiles.json
+outputs:
+  profile:
+    description: The resolved Build Profile name (empty if none)
+runs:
+  using: composite
+  steps:
+    - name: Read and resolve Build Profile
+      id: resolve
+      shell: bash
+      run: |
+        PLATFORM="${{ inputs.platform }}"
+        BUILD_TYPE="${{ inputs.buildType }}"
+        UNITY_VERSION="${{ inputs.unityVersion }}"
+        CONFIG_PATH="${{ inputs.configPath }}"
+
+        if [ ! -f "$CONFIG_PATH" ]; then
+          echo "❌ Config file $CONFIG_PATH not found!"
+          echo "profile=" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        PROFILE=$(jq -r --arg platform "$PLATFORM" --arg type "$BUILD_TYPE" \
+          '.[$platform][$type] // empty' "$CONFIG_PATH")
+
+        # Only apply profile if on Unity 6 or newer
+        if [[ "$UNITY_VERSION" =~ ^6 || "$UNITY_VERSION" =~ ^6000 ]]; then
+          echo "✅ Unity version $UNITY_VERSION supports Build Profiles."
+          echo "Resolved Build Profile for $PLATFORM / $BUILD_TYPE → $PROFILE"
+        else
+          echo "⚠️ Unity version $UNITY_VERSION does not support Build Profiles; skipping."
+          PROFILE=""
+        fi
+
+        echo "profile=$PROFILE" >> $GITHUB_OUTPUT
