@@ -95,8 +95,8 @@ jobs:
         uses: jlumbroso/free-disk-space@v1.3.1
 
       - name: Resolve Build Profile
-        id: resolve-profile
-        uses: ./.github/actions/resolve-build-profile
+        id: resolve_build_profile
+        uses: avalin/unity-ci-templates/.github/actions/resolve-build-profile@main
         with:
           platform: ${{ matrix.buildTarget }}
           buildType: ${{ inputs.buildType }}
@@ -109,7 +109,9 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
+          unityVersion: ${{ inputs.unityVersion }}
           targetPlatform: ${{ matrix.buildTarget }}
+          customParameters: ${{ (steps.resolve_build_profile.outputs.profile != '') && format('-buildProfile {0}', steps.resolve_build_profile.outputs.profile) || '' }}
 
       - name: Save Unity Caches (after successful build)
         uses: actions/cache/save@v4
