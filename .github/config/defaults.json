@@ -1,8 +1,7 @@
 {
   "unity": {
     "version": "auto",
-    "useGitLfs": false,
-    "quietMode": false
+    "useGitLfs": false
   },
   "unityTests": {
     "editModePath": "Assets/Tests/Editor",
@@ -49,6 +48,7 @@
   },
   "pipeline": {
     "forceCombineArtifacts": false,
-    "excludeUnityTests": false
+    "excludeUnityTests": false,
+    "quietMode": false
   }
 }
