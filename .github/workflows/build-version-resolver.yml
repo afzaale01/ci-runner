@@ -36,7 +36,7 @@ jobs:
           git fetch origin $(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
           git checkout $(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
 
-      - name: 🔖 Resolve Build Version
+      - name: Resolve Build Version
         id: get_version
         uses: avalin/unity-ci-templates/.github/actions/resolve-build-version@v1
         with:
@@ -45,7 +45,7 @@ jobs:
           input_version: "${{ inputs.buildVersion }}"
           build_type: "${{ inputs.buildType }}"
 
-      - name: 🔍 Check if Release Exists
+      - name: 📝 Check if Release Version Already Exists
         id: check_release
         uses: avalin/unity-ci-templates/.github/actions/check-release-exists@v1
         with:
@@ -54,19 +54,21 @@ jobs:
           token: ${{ github.token }}
 
       - name: 📄 Summarize Build Version Info
-        if: ${{ always() }}
+        if: ${{ always() && inputs.buildType != 'preview' }}
         run: |
           echo "### 🔖 Version Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Build Type:** \`${{ inputs.buildType }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Trigger:** \`${{ github.event_name }}\` → \`${{ github.ref }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Type:** \`${{ inputs.buildType }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Resolved Version:** \`${{ steps.get_version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
 
           if [[ -z "${{ steps.get_version.outputs.version }}" ]]; then
-            echo "- ⚠️ No version was determined - check the 'Resolve Build Version' step logs for details." >> $GITHUB_STEP_SUMMARY
+            echo "- ⚠️ No version was determined - check the 'Determine Version' step logs for details." >> $GITHUB_STEP_SUMMARY
+          elif [[ "${GITHUB_REF}" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
+            echo "- 🏷️ This was a **tag push** - tag already exists by design."
           else
             if [[ "${{ steps.check_release.outputs.release_exists }}" == "true" ]]; then
-              echo "- ⚠️ GitHub Release with tag \`${{ steps.get_version.outputs.version }}\` **already exists**." >> $GITHUB_STEP_SUMMARY
+              echo "- ⚠️ GitHub Release with tag \`${{ steps.get_version.outputs.version }}\` **already exists** - run will fail on purpose to avoid overwrite." >> $GITHUB_STEP_SUMMARY
             else
               echo "- ✅ Tag \`${{ steps.get_version.outputs.version }}\` **does not exist yet** - good to go!" >> $GITHUB_STEP_SUMMARY
             fi
