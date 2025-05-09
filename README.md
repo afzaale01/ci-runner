@@ -18,7 +18,7 @@ See a live WebGL build deployed using this CI/CD pipeline:
 
 ## 🧠 Getting Started
 
-1. Clone this repo or copy the `CICD_Workflows` workflows into your Unity project's .github/workflows folder.
+1. Clone this repo (safest) or copy the `CICD_Workflows` workflows into your Unity project's .github/workflows folder.
 2. Set your required secrets.
 3. Dispatch the `ci-cd-dispatcher.yml` workflow or create a Git tag using semver to trigger the pipeline!<br/>
 1️⃣ Make sure your Unity project is in a GitHub repository<br/>
