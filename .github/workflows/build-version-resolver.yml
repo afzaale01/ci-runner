@@ -28,11 +28,13 @@ jobs:
       releaseExists: ${{ steps.check_release.outputs.release_exists }}
 
     steps:
-      - name: 📡 Setup Git
+      - name: 📡 Setup Git (fetch tags + default branch)
         run: |
           git init
           git remote add origin https://github.com/${{ github.repository }}
-          git fetch --tags --force
+          git fetch origin --tags --force
+          git fetch origin $(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
+          git checkout $(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
 
       - name: 🔖 Resolve Build Version
         id: get_version
