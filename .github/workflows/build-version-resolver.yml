@@ -15,9 +15,6 @@ on:
       buildVersion:
         description: "The resolved build version string"
         value: ${{ jobs.version_resolver.outputs.buildVersion }}
-      releaseExists:
-        description: "Whether a GitHub release already exists for this version"
-        value: ${{ jobs.version_resolver.outputs.releaseExists }}
 
 jobs:
   version_resolver:
@@ -25,7 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       buildVersion: ${{ steps.get_version.outputs.version }}
-      releaseExists: ${{ steps.check_release.outputs.release_exists }}
 
     steps:
       - name: 📡 Setup Git (fetch tags + default branch)
@@ -73,3 +69,13 @@ jobs:
               echo "- ✅ Tag '${{ steps.get_version.outputs.version }}' does not exist yet — good to go!"
             fi
           fi
+
+      - name: 🚫 Block if Release Already Exists
+        if: ${{ inputs.buildType != 'preview' }}
+        run: |
+          if [[ "${{ steps.check_release.outputs.release_exists }}" == "true" ]]; then
+            echo "❌ A release already exists for version '${{ steps.get_version.outputs.version }}'. Stopping pipeline early."
+            exit 1
+          fi
+
+          echo "✅ No existing release detected — continuing pipeline."

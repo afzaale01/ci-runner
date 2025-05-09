@@ -144,35 +144,11 @@ jobs:
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       buildVersion: ${{ inputs.buildVersion }}
 
-  check_release_blocker:
-    name: Check for Existing Release Blocker
-    needs: 
-      - resolve_build_version
-      - prepare_metadata
-    runs-on: ubuntu-latest
-    outputs:
-      release_already_exists: ${{ steps.set.outputs.should_continue }}
-    steps:
-      - id: set
-        run: |
-          if [[ "${{ needs.prepare_metadata.outputs.buildType }}" == "preview" ]]; then
-            echo "✅ Preview builds ignore releases - continuing pipeline."
-            echo "release_already_exists=false" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ needs.resolve_build_version.outputs.releaseExists }}" == "true" ]]; then
-            echo "❌ A release already exists for version '${{ needs.resolve_build_version.outputs.releaseExists }}'. Stopping pipeline early."
-            echo "release_already_exists=true" >> "$GITHUB_OUTPUT"
-            exit 1
-          else
-            echo "✅ No existing release detected - continuing pipeline."
-            echo "release_already_exists=false" >> "$GITHUB_OUTPUT"
-          fi
-
   summarize_metadata:
     name: 📄 Summarize Metadata
     needs:
       - prepare_metadata
       - resolve_build_version
-      - check_release_blocker
     if: always()
     uses: ./.github/workflows/summarize-metadata.yml
     with:
@@ -189,4 +165,3 @@ jobs:
       validDeployTargets: ${{ needs.prepare_metadata.outputs.deployTargets || '[]' }}
       requiresCombined: ${{ needs.prepare_metadata.outputs.requiresCombined || false }}
       skipPerBuildTarget: ${{ needs.prepare_metadata.outputs.skipPerBuildTarget || false }}
-      releaseAlreadyExists: ${{ needs.check_release_blocker.outputs.release_already_exists }}

@@ -45,9 +45,6 @@ on:
       skipPerBuildTarget:
         required: true
         type: string
-      releaseAlreadyExists:
-        required: true
-        type: string
 
 jobs:
   summarize:
@@ -83,7 +80,3 @@ jobs:
           echo "| Retention Days               | ${{ inputs.retentionDays }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Requires Combined Artifacts  | ${{ inputs.requiresCombined }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Skip Per-Build-Target Artifacts  | ${{ inputs.skipPerBuildTarget }} |" >> $GITHUB_STEP_SUMMARY
-
-          if [[ "${{ inputs.releaseAlreadyExists }}" == 'true' ]]; then
-            echo "❌ **Pipeline was blocked because a GitHub release already exists for version \`${{ inputs.buildVersion }}\`.**" >> $GITHUB_STEP_SUMMARY
-          fi
