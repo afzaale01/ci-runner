@@ -88,6 +88,8 @@ jobs:
       quietMode: ${{ steps.metadata.outputs.quietMode }}
       testsOnly: ${{ steps.tests_only.outputs.testsOnly }}
       skipTests: ${{ steps.skip_tests.outputs.skipTests }}
+      excludeUnityTests: ${{ steps.metadata.outputs.excludeUnityTests }}
+      forceCombineArtifacts: ${{ steps.metadata.outputs.forceCombineArtifacts  }}
     steps:
       - name: 📁 Checkout .github only
         uses: actions/checkout@v4
@@ -119,6 +121,7 @@ jobs:
           editModePathRepoVar: ${{ vars.UNITY_TESTS_EDITMODE_PATH }}
           playModePathRepoVar: ${{ vars.UNITY_TESTS_PLAYMODE_PATH }}
           quietModeRepoVar: ${{ vars.UNITY_TESTS_QUIET_MODE }}
+          excludeUnityTestsRepoVar: ${{ vars.EXCLUDE_UNITY_TESTS }}
 
       - name: 🔍 Resolve Tests-Only Mode
         id: tests_only
@@ -131,7 +134,7 @@ jobs:
         uses: avalin/unity-ci-templates/.github/actions/detect-skip-tests@main
         with:
           skipTestsInput: ${{ inputs.skipTests }}
-          skipTestsRepoVar: ${{ vars.EXCLUDE_UNITY_TESTS }}
+          skipTestsRepoVar: ${{ steps.metadata.outputs.excludeUnityTests }}
           testsOnly: ${{ steps.tests_only.outputs.testsOnly }}
 
   resolve_build_version:
@@ -152,8 +155,14 @@ jobs:
     if: always()
     uses: ./.github/workflows/summarize-metadata.yml
     with:
+      useGitLfs: ${{ needs.prepare_metadata.outputs.useGitLfs }}
+      excludeUnityTests: ${{ needs.prepare_metadata.outputs.excludeUnityTests }}
+      forceCombineArtifacts: ${{ needs.prepare_metadata.outputs.forceCombineArtifacts  }}
+      quietMode: ${{ needs.prepare_metadata.outputs.quietMode }}
       unityVersion: ${{ needs.prepare_metadata.outputs.unityVersion }}
       projectName: ${{ needs.prepare_metadata.outputs.projectName }}
+      editModePath: ${{ needs.prepare_metadata.outputs.editModePath }}
+      playModePath: ${{ needs.prepare_metadata.outputs.playModePath }}
       buildVersion: ${{ needs.resolve_build_version.outputs.buildVersion }}
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       skipTests: ${{ needs.prepare_metadata.outputs.skipTests }}
