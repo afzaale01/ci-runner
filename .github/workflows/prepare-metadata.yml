@@ -39,9 +39,9 @@ on:
       buildVersion:
         value: ${{ jobs.resolve_build_version.outputs.buildVersion }}
       testsOnly:
-        value: ${{ jobs.resolve_tests_status.outputs.testsOnly }}
+        value: ${{ jobs.prepare_metadata.outputs.testsOnly }}
       skipTests:
-        value: ${{ jobs.resolve_tests_status.outputs.skipTests }}
+        value: ${{ jobs.prepare_metadata.outputs.skipTests }}
       useGitLfs:
         value: ${{ jobs.prepare_metadata.outputs.useGitLfs }}
       editModePath:
@@ -86,6 +86,8 @@ jobs:
       editModePath: ${{ steps.metadata.outputs.editModePath }}
       playModePath: ${{ steps.metadata.outputs.playModePath }}
       quietMode: ${{ steps.metadata.outputs.quietMode }}
+      testsOnly: ${{ steps.tests_only.outputs.testsOnly }}
+      skipTests: ${{ steps.skip_tests.outputs.skipTests }}
     steps:
       - name: 📁 Checkout .github only
         uses: actions/checkout@v4
@@ -118,20 +120,6 @@ jobs:
           playModePathRepoVar: ${{ vars.UNITY_TESTS_PLAYMODE_PATH }}
           quietModeRepoVar: ${{ vars.UNITY_TESTS_QUIET_MODE }}
 
-  resolve_tests_status:
-    name: Resolve Tests Status
-    runs-on: ubuntu-latest
-    outputs:
-      testsOnly: ${{ steps.tests_only.outputs.testsOnly }}
-      skipTests: ${{ steps.skip_tests.outputs.skipTests }}
-    steps:
-      - name: 📁 Checkout .github only
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: .github/*
-          sparse-checkout-cone-mode: false
-          fetch-depth: 1
-
       - name: 🔍 Resolve Tests-Only Mode
         id: tests_only
         uses: avalin/unity-ci-templates/.github/actions/detect-tests-only@main
@@ -150,8 +138,7 @@ jobs:
     name: Create build versioning
     needs:
       - prepare_metadata
-      - resolve_tests_status
-    if: needs.resolve_tests_status.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
+    if: needs.prepare_metadata.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
     uses: ./.github/workflows/build-version-resolver.yml
     with:
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
@@ -184,7 +171,6 @@ jobs:
     name: 📄 Summarize Metadata
     needs:
       - prepare_metadata
-      - resolve_tests_status
       - resolve_build_version
       - check_release_blocker
     if: always()
@@ -194,8 +180,8 @@ jobs:
       projectName: ${{ needs.prepare_metadata.outputs.projectName }}
       buildVersion: ${{ needs.resolve_build_version.outputs.buildVersion }}
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
-      skipTests: ${{ needs.resolve_tests_status.outputs.skipTests }}
-      testsOnly: ${{ needs.resolve_tests_status.outputs.testsOnly }}
+      skipTests: ${{ needs.prepare_metadata.outputs.skipTests }}
+      testsOnly: ${{ needs.prepare_metadata.outputs.testsOnly }}
       retentionDays: ${{ needs.prepare_metadata.outputs.retentionDays }}
       timeoutMinutesTests: ${{ needs.prepare_metadata.outputs.timeoutMinutesTests }}
       timeoutMinutesBuild: ${{ needs.prepare_metadata.outputs.timeoutMinutesBuild }}
