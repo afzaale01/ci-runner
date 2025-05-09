@@ -54,7 +54,7 @@ jobs:
           token: ${{ github.token }}
 
       - name: 📝 Log Build Version Info
-        if: ${{ always() && inputs.buildType != 'preview' }}
+        if: ${{ always() }}
         run: |
           echo "🔖 Version Summary"
           echo ""
