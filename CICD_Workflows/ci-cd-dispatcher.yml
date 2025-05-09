@@ -83,7 +83,7 @@ jobs:
     name: Validate Repository Inputs
     needs: skip_ci
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
-    uses: avalin/unity-ci-templates/.github/workflows/validate-repository-inputs.yml@move-repo-vars-to-config
+    uses: avalin/unity-ci-templates/.github/workflows/validate-repository-inputs.yml@main
     with:
       requiredVariables: |
         [
@@ -103,7 +103,7 @@ jobs:
       - skip_ci
       - validate_repository_inputs
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
-    uses: avalin/unity-ci-templates/.github/workflows/prepare-metadata.yml@move-repo-vars-to-config
+    uses: avalin/unity-ci-templates/.github/workflows/prepare-metadata.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
       projectName: ${{ vars.PROJECT_NAME }}
@@ -119,7 +119,7 @@ jobs:
       - skip_ci
       - prepare_metadata
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
-    uses: avalin/unity-ci-templates/.github/workflows/build-version-tagger.yml@move-repo-vars-to-config
+    uses: avalin/unity-ci-templates/.github/workflows/build-version-tagger.yml@main
     with:
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       buildVersion: ${{ needs.prepare_metadata.outputs.buildVersion }}

@@ -88,21 +88,21 @@ runs:
   steps:
     - name: 📦 Resolve Project Name
       id: project_name
-      uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@move-repo-vars-to-config
+      uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@main
       with:
         projectNameInput: ${{ inputs.projectNameInput }}
         projectNameRepoVar: ${{ inputs.projectNameRepoVar }}
 
     - name: 📦 Resolve Unity Version
       id: unity_version
-      uses: avalin/unity-ci-templates/.github/actions/resolve-unity-version@move-repo-vars-to-config
+      uses: avalin/unity-ci-templates/.github/actions/resolve-unity-version@main
       with:
         unityVersionInput: ${{ inputs.unityVersionInput }}
         unityVersionRepoVar: ${{ inputs.unityVersionRepoVar }}
 
     - name: 📦 Resolve Test Config
       id: test_config
-      uses: avalin/unity-ci-templates/.github/actions/resolve-test-config@move-repo-vars-to-config
+      uses: avalin/unity-ci-templates/.github/actions/resolve-test-config@main
       with:
         useGitLfsInput: ${{ inputs.useGitLfsInput }}
         useGitLfsRepoVar: ${{ inputs.useGitLfsRepoVar }}
@@ -115,13 +115,13 @@ runs:
 
     - name: 📦 Resolve Build Type
       id: build_type
-      uses: avalin/unity-ci-templates/.github/actions/resolve-build-type@move-repo-vars-to-config
+      uses: avalin/unity-ci-templates/.github/actions/resolve-build-type@main
       with:
         buildTypeOverride: ${{ inputs.buildTypeInput }}
 
     - name: 📦 Resolve Timeouts
       id: timeouts
-      uses: avalin/unity-ci-templates/.github/actions/resolve-timeouts@move-repo-vars-to-config
+      uses: avalin/unity-ci-templates/.github/actions/resolve-timeouts@main
       with:
         timeoutTestsInput: ${{ inputs.timeoutTestsInput }}
         timeoutTestsRepoVar: ${{ inputs.timeoutTestsRepoVar }}
@@ -130,7 +130,7 @@ runs:
 
     - name: 📦 Resolve Retention Days
       id: retention
-      uses: avalin/unity-ci-templates/.github/actions/resolve-retention-days@move-repo-vars-to-config
+      uses: avalin/unity-ci-templates/.github/actions/resolve-retention-days@main
       with:
         buildType: ${{ steps.build_type.outputs.buildType }}
         retentionDaysReleaseRepoVar: ${{ inputs.retentionDaysReleaseRepoVar }}
@@ -139,7 +139,7 @@ runs:
 
     - name: 📦 Resolve Build Targets
       id: build_targets
-      uses: avalin/unity-ci-templates/.github/actions/resolve-build-targets@move-repo-vars-to-config
+      uses: avalin/unity-ci-templates/.github/actions/resolve-build-targets@main
       with:
         buildType: ${{ steps.build_type.outputs.buildType }}
         buildTargetsInput: ${{ inputs.buildTargetsInput }}
@@ -147,7 +147,7 @@ runs:
 
     - name: 📦 Resolve Deploy Targets
       id: deploy_targets
-      uses: avalin/unity-ci-templates/.github/actions/validate-deploy-targets@move-repo-vars-to-config
+      uses: avalin/unity-ci-templates/.github/actions/validate-deploy-targets@main
       with:
         buildType: ${{ steps.build_type.outputs.buildType }}
         buildTargets: ${{ steps.build_targets.outputs.buildTargets }}
@@ -155,7 +155,7 @@ runs:
 
     - name: 📦 Analyze Artifact Strategy
       id: artifact_strategy
-      uses: avalin/unity-ci-templates/.github/actions/analyze-artifact-strategy@move-repo-vars-to-config
+      uses: avalin/unity-ci-templates/.github/actions/analyze-artifact-strategy@main
       with:
         deployTargets: ${{ steps.deploy_targets.outputs.deployTargets }}
         artifactSource: ${{ inputs.artifactSource }}

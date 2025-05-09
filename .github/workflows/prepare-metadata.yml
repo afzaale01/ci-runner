@@ -96,7 +96,7 @@ jobs:
 
       - name: ⏳ Prepare Metadata
         id: metadata
-        uses: avalin/unity-ci-templates/.github/actions/prepare-metadata@move-repo-vars-to-config
+        uses: avalin/unity-ci-templates/.github/actions/prepare-metadata@main
         with:
           artifactSource: build
           projectNameInput: ${{ inputs.projectName }}
@@ -134,13 +134,13 @@ jobs:
 
       - name: 🔍 Resolve Tests-Only Mode
         id: tests_only
-        uses: avalin/unity-ci-templates/.github/actions/detect-tests-only@move-repo-vars-to-config
+        uses: avalin/unity-ci-templates/.github/actions/detect-tests-only@main
         with:
           testsOnlyInput: ${{ inputs.testsOnly }}
 
       - name: 🔍 Resolve Skip Tests Flag
         id: skip_tests
-        uses: avalin/unity-ci-templates/.github/actions/detect-skip-tests@move-repo-vars-to-config
+        uses: avalin/unity-ci-templates/.github/actions/detect-skip-tests@main
         with:
           skipTestsInput: ${{ inputs.skipTests }}
           skipTestsRepoVar: ${{ vars.EXCLUDE_UNITY_TESTS }}
