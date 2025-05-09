@@ -4,6 +4,8 @@ description: Bundles all key resolvers into one unified action, reducing repeate
 inputs:
   artifactSource:
     required: true
+
+  # Project & Unity
   projectNameInput:
     required: true
   projectNameRepoVar:
@@ -12,17 +14,37 @@ inputs:
     required: false
   unityVersionRepoVar:
     required: false
+
+  # Pipeline-wide flags
+  useGitLfsInput:
+    required: false
+  useGitLfsRepoVar:
+    required: false
+  quietModeInput:
+    required: false
+  quietModeRepoVar:
+    required: false
+  excludeUnityTestsInput:
+    required: false
+  excludeUnityTestsRepoVar:
+    required: false
+  forceCombineArtifactsInput:
+    required: false
+  forceCombineArtifactsRepoVar:
+    required: false
+
+  # Test-specific
+  editModePathInput:
+    required: false
+  editModePathRepoVar:
+    required: false
+  playModePathInput:
+    required: false
+  playModePathRepoVar:
+    required: false
+
+  # Build & timeouts
   buildTypeInput:
-    required: false
-  buildTargetsInput:
-    required: false
-  buildTargetsRepoVar:
-    required: false
-  retentionDaysReleaseRepoVar:
-    required: false
-  retentionDaysRcRepoVar:
-    required: false
-  retentionDaysPreviewRepoVar:
     required: false
   timeoutTestsInput:
     required: false
@@ -32,25 +54,21 @@ inputs:
     required: false
   timeoutBuildRepoVar:
     required: false
+
+  # Retention & targets
+  retentionDaysReleaseRepoVar:
+    required: false
+  retentionDaysRcRepoVar:
+    required: false
+  retentionDaysPreviewRepoVar:
+    required: false
+  buildTargetsInput:
+    required: false
+  buildTargetsRepoVar:
+    required: false
   deployTargetsInput:
     required: false
   deployTargetsRepoVar:
-    required: false
-  useGitLfsInput:
-    required: false
-  useGitLfsRepoVar:
-    required: false
-  editModePathInput:
-    required: false
-  editModePathRepoVar:
-    required: false
-  playModePathInput:
-    required: false
-  playModePathRepoVar:
-    required: false
-  quietModeInput:
-    required: false
-  quietModeRepoVar:
     required: false
 
 outputs:
