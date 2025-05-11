@@ -9,25 +9,25 @@
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": false,
     "minimumBuildType": "release",
-    "compatibleBuildTargets": ["WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
+    "compatibleBuildTargets": ["WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64-Client", "StandaloneOSX"]
   },
   "s3": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
     "minimumBuildType": "preview",
-    "compatibleBuildTargets": ["Android", "iOS", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
+    "compatibleBuildTargets": ["Android", "iOS", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64-Server", "StandaloneOSX"]
   },
   "custom-server": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
     "minimumBuildType": "preview",
-    "compatibleBuildTargets": ["Android", "iOS", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
+    "compatibleBuildTargets": ["Android", "iOS", "WebGL", "StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64-Server", "StandaloneOSX"]
   },
   "steam": {
     "os": "ubuntu-latest",
     "requiresCombinedArtifact": true,
     "minimumBuildType": "release",
-    "compatibleBuildTargets": ["StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64", "StandaloneOSX"]
+    "compatibleBuildTargets": ["StandaloneWindows", "StandaloneWindows64", "StandaloneLinux64-Client", "StandaloneOSX"]
   },
   "testflight": {
     "os": "macos-latest",

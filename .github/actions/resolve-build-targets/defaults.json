@@ -6,7 +6,8 @@
     "availableTargets": [
       "Android",
       "WebGL",
-      "StandaloneLinux64",
+      "StandaloneLinux64-Client",
+      "StandaloneLinux64-Server",
       "StandaloneWindows",
       "StandaloneWindows64",
       "StandaloneOSX",

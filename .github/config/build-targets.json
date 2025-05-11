@@ -7,7 +7,11 @@
     "os": "ubuntu-latest",
     "minimumBuildType": "preview"
   },
-  "StandaloneLinux64": {
+  "StandaloneLinux64-Client": {
+    "os": "ubuntu-latest",
+    "minimumBuildType": "preview"
+  },
+  "StandaloneLinux64-Server": {
     "os": "ubuntu-latest",
     "minimumBuildType": "preview"
   },
