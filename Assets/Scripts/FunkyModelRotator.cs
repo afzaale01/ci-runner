@@ -40,7 +40,7 @@ public class FunkyModelRotator : MonoBehaviour
             );
         }
 
-        // Rotate object based on velocity
+        // Rotate the object based on velocity
         transform.Rotate(rotationVelocity, Space.World);
     }
 }
