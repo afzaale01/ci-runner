@@ -16,8 +16,7 @@ See a live WebGL build deployed using this CI/CD pipeline:
 > Deployed via GitHub Pages using the `gh-pages` deploy target.
 
 
-## 🧠 Getting Started
-### 🚀 Getting Started
+## 🚀 Getting Started
 
 1️⃣ Ensure your Unity project is in a GitHub repository  
 2️⃣ Copy the required GitHub Actions workflows from the [CICD_Workflows folder](https://github.com/Avalin/Unity-CI-Templates/tree/main/CICD_Workflows)  
