@@ -23,7 +23,7 @@ See a live WebGL build deployed using this CI/CD pipeline:
 3️⃣ Add them to your repository at path: **.github → workflows** _(create folders if missing)_<br/>
 4️⃣ Configure the [required secrets](https://github.com/Avalin/Unity-CI-Templates/wiki/Required-Secrets) in your repository<br/>
 5️⃣ Read and optionally setup [repository variables](https://github.com/Avalin/Unity-CI-Templates/wiki/Repository-Variables), they're important to understand the inputs for the workflow dispatch<br/>
-6️⃣ Try dispatching the `ci-cd-dispatcher.yml` workflow or push a Git tag using semver to see the pipeline in action! <br/>
+6️⃣ Try dispatching the `ci-cd-dispatcher.yml` workflow or push a Git tag using [SemVer](https://github.com/Avalin/Unity-CI-Templates/wiki/Versioning-&-Tagging) to see the pipeline in action! <br/>
 
 > ⚠️ Currently tested deploy targets: `gh-pages` (WebGL only). Others are implemented but not yet fully verified. Contributions welcome!
 
