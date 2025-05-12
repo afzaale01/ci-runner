@@ -60,7 +60,7 @@ While the pipeline is production-ready and modular, some deploy integrations are
   Some targets (like itch.io, Firebase, S3) require correctly configured secrets and accounts - be sure to test deploy flows in a safe sandbox environment before pushing to production.
 
 - 🧪 **Unity version compatibility**  
-  Currently optimized for Unity 2022.3+, tested with Unity 6 too, but older versions may work with minor adjustments.
+  Currently optimized for Unity 2022.3+, tested with Unity 6 too, but older versions may work as well.
 
 > **Contributions and testing feedback are welcome!**  
 > If you successfully validate additional targets or add new ones, please consider opening a PR to improve support for the community.
