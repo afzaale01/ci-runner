@@ -45,6 +45,7 @@ jobs:
     steps:
       - name: 🧮 Create Dry Build Matrix
         id: set-matrix
+        shell: bash
         run: |
           grouped='${{ needs.group_build_targets.outputs.validBuildTargets }}'
           echo "📦 Grouped targets: $grouped"
@@ -68,6 +69,7 @@ jobs:
         include: ${{ fromJson(needs.generate_matrix.outputs.matrix) }}
     steps:
       - name: Create Placeholder Folder Structure
+        shell: bash
         run: |
           BUILD_VERSION="${{ inputs.buildVersion }}"
           TARGET="${{ matrix.buildTarget }}"
