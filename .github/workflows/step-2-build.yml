@@ -102,7 +102,7 @@ jobs:
           buildType: ${{ inputs.buildType }}
           unityVersion: ${{ inputs.unityVersion }}
 
-      - name: Resolve Unity Run Params
+      - name: Resolve Unity Run Parameters
         id: resolve_run_parameters
         uses: avalin/unity-ci-templates/.github/actions/resolve-unity-run-parameters@main
         with:
